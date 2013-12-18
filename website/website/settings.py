@@ -56,10 +56,21 @@ WSGI_APPLICATION = 'website.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'museum',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -68,11 +79,11 @@ SITE_ID = 1
 INSTALLED_APPS += (
     'django.contrib.admin', # This must be configured
     'django.contrib.comments', # This must be configured
-    'django.contrib.markup', # to render markdown
-    'rest_framework', # django rest framework 2
-    'taggit', # django-taggit
-    'blogger.themes.default', # the base theme
-    'blogger', # the app
+    # 'django.contrib.markup', # to render markdown
+    # 'rest_framework', # django rest framework 2
+    # 'taggit', # django-taggit
+    # 'blogger.themes.default', # the base theme
+    # 'blogger', # the app
     'museum',
     'easy_thumbnails',
     'djgeojson',
@@ -96,7 +107,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 # this will attach BLOG_SETTINGS['info'] to HttpResponses
 TEMPLATE_CONTEXT_PROCESSORS += (
     "django.contrib.auth.context_processors.auth",
-    "blogger.context_processors.blog_info",
+    # "blogger.context_processors.blog_info",
 
 )
 

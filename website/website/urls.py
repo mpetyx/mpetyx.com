@@ -1,15 +1,15 @@
 from django.conf.urls import patterns, include, url
 
-from .feeds import *
+# from .feeds import *
 
 from django.contrib import admin
 admin.autodiscover()
 
-feeds = {
-# 'articles': ArticlesFeed,
-'blog': BlogFeed,
-# 'podcasts': PodcastFeed,
-}
+# feeds = {
+# # 'articles': ArticlesFeed,
+# 'blog': BlogFeed,
+# # 'podcasts': PodcastFeed,
+# }
 
 
 urlpatterns = patterns('',
@@ -19,8 +19,8 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     # (r'^feeds/(?P.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
-    (r'^feed/$', BlogFeed()),
-    (r'^', include('blogger.urls')),
+    # (r'^feed/$', BlogFeed()),
+    # (r'^', include('blogger.urls')),
 
 )
 
