@@ -1,0 +1,5 @@
+-e git://github.com/makinacorpus/django-paperclip#egg=paperclip
+-e git+https://github.com/makinacorpus/django-mapentity.git@develop#egg=django-mapentity
+Django-Compressor
+django-leaflet
+django-geojson
