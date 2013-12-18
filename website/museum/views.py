@@ -14,7 +14,7 @@ class MuseumList(MapEntityList):
 
     model = Museum
     filterform = MuseumFilter
-    columns = ['id', 'name', 'atmosphere']
+    columns = ['id', 'name']#, 'atmosphere']
 
 
 class MuseumLayer(MapEntityLayer):

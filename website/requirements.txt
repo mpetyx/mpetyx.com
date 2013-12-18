@@ -5,3 +5,4 @@ django-leaflet
 django-geojson
 django_filter
 gxpy
+gdal

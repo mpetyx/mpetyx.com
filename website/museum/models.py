@@ -11,3 +11,6 @@ class Museum(MapEntityMixin, models.Model):
     name = models.CharField(max_length=80)
 
     objects = models.GeoManager()
+
+    class Meta:
+         app_label = 'museum'

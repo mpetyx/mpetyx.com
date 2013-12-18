@@ -88,7 +88,7 @@ INSTALLED_APPS += (
     'easy_thumbnails',
     'djgeojson',
     'leaflet',
-    # 'mapentity',
+    'mapentity',
     'paperclip',
     'compressor',
 )
@@ -106,7 +106,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 # this will attach BLOG_SETTINGS['info'] to HttpResponses
 TEMPLATE_CONTEXT_PROCESSORS += (
-    "django.contrib.auth.context_processors.auth",
     # "blogger.context_processors.blog_info",
 
 )
@@ -121,16 +120,16 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 #     }
 # }
 
-BLOG_SETTINGS = {
-    'defaults': { # change the defaults of models and some constats for views
-        'auto_publish': False,
-        'auto_promote': False,
-    },
-    'info': { # attached to all responses so the information is available to the templates.
-        'BLOG_TITLE': 'My Blog Name',
-        'BLOG_SUBTITLE': 'Blog subname',
-    }
-}
+# BLOG_SETTINGS = {
+#     'defaults': { # change the defaults of models and some constats for views
+#         'auto_publish': False,
+#         'auto_promote': False,
+#     },
+#     'info': { # attached to all responses so the information is available to the templates.
+#         'BLOG_TITLE': 'My Blog Name',
+#         'BLOG_SUBTITLE': 'Blog subname',
+#     }
+# }
 
 MEDIA_URL = 'media/'
 
