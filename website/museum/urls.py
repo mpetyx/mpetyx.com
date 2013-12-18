@@ -1,7 +1,7 @@
 __author__ = 'mpetyx'
 
 
-from main.models import Museum
+from .models import Museum
 from mapentity import registry
 
 

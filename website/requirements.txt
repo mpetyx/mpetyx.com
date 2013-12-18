@@ -3,3 +3,5 @@
 Django-Compressor
 django-leaflet
 django-geojson
+django_filter
+gxpy

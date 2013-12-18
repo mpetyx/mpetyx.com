@@ -8,4 +8,4 @@ class MuseumFilter(MapEntityFilterSet):
 
     class Meta:
         model = Museum
-        fields = ('name', 'atmosphere')
+        fields = ['name']#, 'atmosphere')

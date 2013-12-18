@@ -29,6 +29,6 @@ urlpatterns += patterns(
     url(r'', include('mapentity.urls', namespace='mapentity',
                      app_name='mapentity')),
     url(r'^paperclip/', include('paperclip.urls')),
-    url(r'', include('main.urls', namespace='main',
-                     app_name='main')),
+    url(r'', include('museum.urls', namespace='main',
+                     app_name='museum')),
 )
