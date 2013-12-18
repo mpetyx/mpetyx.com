@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from django.contrib.messages import ERROR
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
@@ -100,7 +101,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.core.context_processors.static",
     "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
+    # "django.contrib.messages.context_processors.messages",
     'mapentity.context_processors.settings',
 )
 
@@ -151,3 +152,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+MESSAGE_LEVEL = ERROR

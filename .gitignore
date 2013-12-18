@@ -2,3 +2,5 @@
 website/src/paperclip/
 
 website/src/django-mapentity/
+
+.idea/workspace.xml
