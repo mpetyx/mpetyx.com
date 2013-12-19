@@ -1,11 +1,15 @@
-import os, re, unittest
+import os
+import re
+import unittest
+
 from django.contrib.gis.db.models import Union, Extent3D
 from django.contrib.gis.geos import GEOSGeometry, Point, Polygon
 from django.contrib.gis.utils import LayerMapping, LayerMapError
 
 from models import City3D, Interstate2D, Interstate3D, \
     InterstateProj2D, InterstateProj3D, \
-    Point2D, Point3D, MultiPoint3D, Polygon2D, Polygon3D
+    MultiPoint3D, Polygon2D, Polygon3D
+
 
 data_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data'))
 city_file = os.path.join(data_path, 'cities', 'cities.shp')
@@ -30,24 +34,27 @@ city_dict = dict((name, coords) for name, coords in city_data)
 # 3D freeway data derived from the National Elevation Dataset: 
 #  http://seamless.usgs.gov/products/9arc.php
 interstate_data = (
-    ('I-45', 
+    ('I-45',
      'LINESTRING(-95.3708481 29.7765870 11.339,-95.3694580 29.7787980 4.536,-95.3690305 29.7797359 9.762,-95.3691886 29.7812450 12.448,-95.3696447 29.7850144 10.457,-95.3702511 29.7868518 9.418,-95.3706724 29.7881286 14.858,-95.3711632 29.7896157 15.386,-95.3714525 29.7936267 13.168,-95.3717848 29.7955007 15.104,-95.3717719 29.7969804 16.516,-95.3717305 29.7982117 13.923,-95.3717254 29.8000778 14.385,-95.3719875 29.8013539 15.160,-95.3720575 29.8026785 15.544,-95.3721321 29.8040912 14.975,-95.3722074 29.8050998 15.688,-95.3722779 29.8060430 16.099,-95.3733818 29.8076750 15.197,-95.3741563 29.8103686 17.268,-95.3749458 29.8129927 19.857,-95.3763564 29.8144557 15.435)',
-     ( 11.339,   4.536,   9.762,  12.448,  10.457,   9.418,  14.858,
-       15.386,  13.168,  15.104,  16.516,  13.923,  14.385,  15.16 ,
-       15.544,  14.975,  15.688,  16.099,  15.197,  17.268,  19.857,
+     ( 11.339, 4.536, 9.762, 12.448, 10.457, 9.418, 14.858,
+       15.386, 13.168, 15.104, 16.516, 13.923, 14.385, 15.16,
+       15.544, 14.975, 15.688, 16.099, 15.197, 17.268, 19.857,
        15.435),
-     ),
-    )
+    ),
+)
 
 # Bounding box polygon for inner-loop of Houston (in projected coordinate
 # system 32140), with elevation values from the National Elevation Dataset
 # (see above).
 bbox_wkt = 'POLYGON((941527.97 4225693.20,962596.48 4226349.75,963152.57 4209023.95,942051.75 4208366.38,941527.97 4225693.20))'
 bbox_z = (21.71, 13.21, 9.12, 16.40, 21.71)
+
+
 def gen_bbox():
     bbox_2d = GEOSGeometry(bbox_wkt, srid=32140)
-    bbox_3d = Polygon(tuple((x, y, z) for (x, y), z in zip(bbox_2d[0].coords, bbox_z)), srid=32140)    
+    bbox_3d = Polygon(tuple((x, y, z) for (x, y), z in zip(bbox_2d[0].coords, bbox_z)), srid=32140)
     return bbox_2d, bbox_3d
+
 
 class Geo3DTest(unittest.TestCase):
     """
@@ -106,8 +113,8 @@ class Geo3DTest(unittest.TestCase):
         "Testing LayerMapping on 3D models."
         from models import Point2D, Point3D
 
-        point_mapping = {'point' : 'POINT'}
-        mpoint_mapping = {'mpoint' : 'MULTIPOINT'}
+        point_mapping = {'point': 'POINT'}
+        mpoint_mapping = {'mpoint': 'MULTIPOINT'}
 
         # The VRT is 3D, but should still be able to map sans the Z.
         lm = LayerMapping(Point2D, vrt_file, point_mapping, transform=False)
@@ -118,7 +125,7 @@ class Geo3DTest(unittest.TestCase):
         # in the 3D model -- thus, a LayerMapError is raised.
         self.assertRaises(LayerMapError, LayerMapping,
                           Point3D, city_file, point_mapping, transform=False)
-        
+
         # 3D model should take 3D data just fine.
         lm = LayerMapping(Point3D, vrt_file, point_mapping, transform=False)
         lm.save()
@@ -159,7 +166,7 @@ class Geo3DTest(unittest.TestCase):
     def test03b_extent(self):
         "Testing the Extent3D aggregate for 3D models."
         # `SELECT ST_Extent3D(point) FROM geo3d_city3d;`
-        ref_extent3d = (-123.305196, -41.315268, 14,174.783117, 48.462611, 1433)
+        ref_extent3d = (-123.305196, -41.315268, 14, 174.783117, 48.462611, 1433)
         extent1 = City3D.objects.aggregate(Extent3D('point'))['point__extent3d']
         extent2 = City3D.objects.extent3d()
 
@@ -212,7 +219,7 @@ class Geo3DTest(unittest.TestCase):
         self.assertAlmostEqual(ref_length_3d,
                                InterstateProj3D.objects.length().get(name='I-45').length.m,
                                tol)
-        
+
     def test06_scale(self):
         "Testing GeoQuerySet.scale() on Z values."
         # Mapping of City name to reference Z values.
@@ -227,6 +234,7 @@ class Geo3DTest(unittest.TestCase):
         for ztrans in ztranslations:
             for city in City3D.objects.translate(0, 0, ztrans):
                 self.assertEqual(city_dict[city.name][2] + ztrans, city.translate.z)
+
 
 def suite():
     s = unittest.TestSuite()

@@ -28,6 +28,7 @@ import urlparse
 from django.utils.xmlutils import SimplerXMLGenerator
 from django.utils.encoding import force_unicode, iri_to_uri
 
+
 def rfc2822_date(date):
     # We do this ourselves to be timezone aware, email.Utils is not tz aware.
     if date.tzinfo:
@@ -39,6 +40,7 @@ def rfc2822_date(date):
     else:
         return date.strftime('%a, %d %b %Y %H:%M:%S -0000')
 
+
 def rfc3339_date(date):
     if date.tzinfo:
         time_str = date.strftime('%Y-%m-%dT%H:%M:%S')
@@ -48,6 +50,7 @@ def rfc3339_date(date):
         return time_str + "%+03d:%02d" % (hour, minute)
     else:
         return date.strftime('%Y-%m-%dT%H:%M:%SZ')
+
 
 def get_tag_uri(url, date):
     """
@@ -67,11 +70,13 @@ def get_tag_uri(url, date):
         d = ',%s' % date.strftime('%Y-%m-%d')
     return u'tag:%s%s:%s/%s' % (hostname, d, path, fragment)
 
+
 class SyndicationFeed(object):
     "Base class for all syndication feeds. Subclasses should provide write()"
+
     def __init__(self, title, link, description, language=None, author_email=None,
-            author_name=None, author_link=None, subtitle=None, categories=None,
-            feed_url=None, feed_copyright=None, feed_guid=None, ttl=None, **kwargs):
+                 author_name=None, author_link=None, subtitle=None, categories=None,
+                 feed_url=None, feed_copyright=None, feed_guid=None, ttl=None, **kwargs):
         to_unicode = lambda s: force_unicode(s, strings_only=True)
         if categories:
             categories = [force_unicode(c) for c in categories]
@@ -97,9 +102,9 @@ class SyndicationFeed(object):
         self.items = []
 
     def add_item(self, title, link, description, author_email=None,
-        author_name=None, author_link=None, pubdate=None, comments=None,
-        unique_id=None, enclosure=None, categories=(), item_copyright=None,
-        ttl=None, **kwargs):
+                 author_name=None, author_link=None, pubdate=None, comments=None,
+                 unique_id=None, enclosure=None, categories=(), item_copyright=None,
+                 ttl=None, **kwargs):
         """
         Adds an item to the feed. All args are expected to be Python Unicode
         objects except pubdate, which is a datetime.datetime object, and
@@ -170,6 +175,7 @@ class SyndicationFeed(object):
         Returns the feed in the given encoding as a string.
         """
         from StringIO import StringIO
+
         s = StringIO()
         self.write(s, encoding)
         return s.getvalue()
@@ -186,15 +192,19 @@ class SyndicationFeed(object):
         else:
             return datetime.datetime.now()
 
+
 class Enclosure(object):
     "Represents an RSS enclosure"
+
     def __init__(self, url, length, mime_type):
         "All args are expected to be Python Unicode objects"
         self.length, self.mime_type = length, mime_type
         self.url = iri_to_uri(url)
 
+
 class RssFeed(SyndicationFeed):
     mime_type = 'application/rss+xml'
+
     def write(self, outfile, encoding):
         handler = SimplerXMLGenerator(outfile, encoding)
         handler.startDocument()
@@ -233,17 +243,21 @@ class RssFeed(SyndicationFeed):
     def endChannelElement(self, handler):
         handler.endElement(u"channel")
 
+
 class RssUserland091Feed(RssFeed):
     _version = u"0.91"
+
     def add_item_elements(self, handler, item):
         handler.addQuickElement(u"title", item['title'])
         handler.addQuickElement(u"link", item['link'])
         if item['description'] is not None:
             handler.addQuickElement(u"description", item['description'])
 
+
 class Rss201rev2Feed(RssFeed):
     # Spec: http://blogs.law.harvard.edu/tech/rss
     _version = u"2.0"
+
     def add_item_elements(self, handler, item):
         handler.addQuickElement(u"title", item['title'])
         handler.addQuickElement(u"link", item['link'])
@@ -253,11 +267,12 @@ class Rss201rev2Feed(RssFeed):
         # Author information.
         if item["author_name"] and item["author_email"]:
             handler.addQuickElement(u"author", "%s (%s)" % \
-                (item['author_email'], item['author_name']))
+                                               (item['author_email'], item['author_name']))
         elif item["author_email"]:
             handler.addQuickElement(u"author", item["author_email"])
         elif item["author_name"]:
-            handler.addQuickElement(u"dc:creator", item["author_name"], {u"xmlns:dc": u"http://purl.org/dc/elements/1.1/"})
+            handler.addQuickElement(u"dc:creator", item["author_name"],
+                                    {u"xmlns:dc": u"http://purl.org/dc/elements/1.1/"})
 
         if item['pubdate'] is not None:
             handler.addQuickElement(u"pubDate", rfc2822_date(item['pubdate']).decode('utf-8'))
@@ -271,12 +286,13 @@ class Rss201rev2Feed(RssFeed):
         # Enclosure.
         if item['enclosure'] is not None:
             handler.addQuickElement(u"enclosure", '',
-                {u"url": item['enclosure'].url, u"length": item['enclosure'].length,
-                    u"type": item['enclosure'].mime_type})
+                                    {u"url": item['enclosure'].url, u"length": item['enclosure'].length,
+                                     u"type": item['enclosure'].mime_type})
 
         # Categories.
         for cat in item['categories']:
             handler.addQuickElement(u"category", cat)
+
 
 class Atom1Feed(SyndicationFeed):
     # Spec: http://atompub.org/2005/07/11/draft-ietf-atompub-format-10.html
@@ -355,10 +371,10 @@ class Atom1Feed(SyndicationFeed):
         # Enclosure.
         if item['enclosure'] is not None:
             handler.addQuickElement(u"link", '',
-                {u"rel": u"enclosure",
-                 u"href": item['enclosure'].url,
-                 u"length": item['enclosure'].length,
-                 u"type": item['enclosure'].mime_type})
+                                    {u"rel": u"enclosure",
+                                     u"href": item['enclosure'].url,
+                                     u"length": item['enclosure'].length,
+                                     u"type": item['enclosure'].mime_type})
 
         # Categories.
         for cat in item['categories']:

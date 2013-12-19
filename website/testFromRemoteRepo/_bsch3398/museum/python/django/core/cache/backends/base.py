@@ -2,8 +2,10 @@
 
 from django.core.exceptions import ImproperlyConfigured
 
+
 class InvalidCacheBackendError(ImproperlyConfigured):
     pass
+
 
 class BaseCache(object):
     def __init__(self, params):

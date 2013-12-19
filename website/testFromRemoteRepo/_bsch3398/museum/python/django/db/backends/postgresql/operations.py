@@ -1,5 +1,3 @@
-import re
-
 from django.db.backends import BaseDatabaseOperations
 
 # This DatabaseOperations class lives in here instead of base.py because it's
@@ -14,9 +12,11 @@ class DatabaseOperations(BaseDatabaseOperations):
     def _get_postgres_version(self):
         if self._postgres_version is None:
             from django.db.backends.postgresql.version import get_version
+
             cursor = self.connection.cursor()
             self._postgres_version = get_version(cursor)
         return self._postgres_version
+
     postgres_version = property(_get_postgres_version)
 
     def date_extract_sql(self, lookup_type, field_name):
@@ -67,23 +67,23 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def sql_flush(self, style, tables, sequences):
         if tables:
-            if self.postgres_version[0:2] >= (8,1):
+            if self.postgres_version[0:2] >= (8, 1):
                 # Postgres 8.1+ can do 'TRUNCATE x, y, z...;'. In fact, it *has to*
                 # in order to be able to truncate tables referenced by a foreign
                 # key in any other table. The result is a single SQL TRUNCATE
                 # statement.
                 sql = ['%s %s;' % \
-                    (style.SQL_KEYWORD('TRUNCATE'),
-                     style.SQL_FIELD(', '.join([self.quote_name(table) for table in tables]))
-                )]
+                       (style.SQL_KEYWORD('TRUNCATE'),
+                        style.SQL_FIELD(', '.join([self.quote_name(table) for table in tables]))
+                       )]
             else:
                 # Older versions of Postgres can't do TRUNCATE in a single call, so
                 # they must use a simple delete.
                 sql = ['%s %s %s;' % \
-                        (style.SQL_KEYWORD('DELETE'),
-                         style.SQL_KEYWORD('FROM'),
-                         style.SQL_FIELD(self.quote_name(table))
-                         ) for table in tables]
+                       (style.SQL_KEYWORD('DELETE'),
+                        style.SQL_KEYWORD('FROM'),
+                        style.SQL_FIELD(self.quote_name(table))
+                       ) for table in tables]
 
             # 'ALTER SEQUENCE sequence_name RESTART WITH 1;'... style SQL statements
             # to reset sequence indices
@@ -95,8 +95,8 @@ class DatabaseOperations(BaseDatabaseOperations):
                 else:
                     sequence_name = '%s_id_seq' % table_name
                 sql.append("%s setval('%s', 1, false);" % \
-                    (style.SQL_KEYWORD('SELECT'),
-                    style.SQL_FIELD(self.quote_name(sequence_name)))
+                           (style.SQL_KEYWORD('SELECT'),
+                            style.SQL_FIELD(self.quote_name(sequence_name)))
                 )
             return sql
         else:
@@ -104,6 +104,7 @@ class DatabaseOperations(BaseDatabaseOperations):
 
     def sequence_reset_sql(self, style, model_list):
         from django.db import models
+
         output = []
         qn = self.quote_name
         for model in model_list:
@@ -113,24 +114,24 @@ class DatabaseOperations(BaseDatabaseOperations):
             for f in model._meta.local_fields:
                 if isinstance(f, models.AutoField):
                     output.append("%s setval('%s', coalesce(max(%s), 1), max(%s) %s null) %s %s;" % \
-                        (style.SQL_KEYWORD('SELECT'),
-                        style.SQL_FIELD(qn('%s_%s_seq' % (model._meta.db_table, f.column))),
-                        style.SQL_FIELD(qn(f.column)),
-                        style.SQL_FIELD(qn(f.column)),
-                        style.SQL_KEYWORD('IS NOT'),
-                        style.SQL_KEYWORD('FROM'),
-                        style.SQL_TABLE(qn(model._meta.db_table))))
+                                  (style.SQL_KEYWORD('SELECT'),
+                                   style.SQL_FIELD(qn('%s_%s_seq' % (model._meta.db_table, f.column))),
+                                   style.SQL_FIELD(qn(f.column)),
+                                   style.SQL_FIELD(qn(f.column)),
+                                   style.SQL_KEYWORD('IS NOT'),
+                                   style.SQL_KEYWORD('FROM'),
+                                   style.SQL_TABLE(qn(model._meta.db_table))))
                     break # Only one AutoField is allowed per model, so don't bother continuing.
             for f in model._meta.many_to_many:
                 if not f.rel.through:
                     output.append("%s setval('%s', coalesce(max(%s), 1), max(%s) %s null) %s %s;" % \
-                        (style.SQL_KEYWORD('SELECT'),
-                        style.SQL_FIELD(qn('%s_id_seq' % f.m2m_db_table())),
-                        style.SQL_FIELD(qn('id')),
-                        style.SQL_FIELD(qn('id')),
-                        style.SQL_KEYWORD('IS NOT'),
-                        style.SQL_KEYWORD('FROM'),
-                        style.SQL_TABLE(qn(f.m2m_db_table()))))
+                                  (style.SQL_KEYWORD('SELECT'),
+                                   style.SQL_FIELD(qn('%s_id_seq' % f.m2m_db_table())),
+                                   style.SQL_FIELD(qn('id')),
+                                   style.SQL_FIELD(qn('id')),
+                                   style.SQL_KEYWORD('IS NOT'),
+                                   style.SQL_KEYWORD('FROM'),
+                                   style.SQL_TABLE(qn(f.m2m_db_table()))))
         return output
 
     def savepoint_create_sql(self, sid):
@@ -156,13 +157,15 @@ class DatabaseOperations(BaseDatabaseOperations):
         NotImplementedError if this is the database in use.
         """
         if aggregate.sql_function in ('STDDEV_POP', 'STDDEV_SAMP', 'VAR_POP', 'VAR_SAMP'):
-            if self.postgres_version[0:2] < (8,2):
-                raise NotImplementedError('PostgreSQL does not support %s prior to version 8.2. Please upgrade your version of PostgreSQL.' % aggregate.sql_function)
+            if self.postgres_version[0:2] < (8, 2):
+                raise NotImplementedError(
+                    'PostgreSQL does not support %s prior to version 8.2. Please upgrade your version of PostgreSQL.' % aggregate.sql_function)
 
         if aggregate.sql_function in ('STDDEV_POP', 'VAR_POP'):
-            if self.postgres_version[0:2] == (8,2):
+            if self.postgres_version[0:2] == (8, 2):
                 if self.postgres_version[2] is None or self.postgres_version[2] <= 4:
-                    raise NotImplementedError('PostgreSQL 8.2 to 8.2.4 is known to have a faulty implementation of %s. Please upgrade your version of PostgreSQL.' % aggregate.sql_function)
+                    raise NotImplementedError(
+                        'PostgreSQL 8.2 to 8.2.4 is known to have a faulty implementation of %s. Please upgrade your version of PostgreSQL.' % aggregate.sql_function)
 
     def max_name_length(self):
         """

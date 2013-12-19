@@ -2,15 +2,18 @@
 Canada-specific Form helpers
 """
 
+import re
+
 from django.core.validators import EMPTY_VALUES
 from django.forms import ValidationError
 from django.forms.fields import Field, RegexField, Select
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
-import re
+
 
 phone_digits_re = re.compile(r'^(?:1-?)?(\d{3})[-\.]?(\d{3})[-\.]?(\d{4})$')
 sin_re = re.compile(r"^(\d{3})-(\d{3})-(\d{3})$")
+
 
 class CAPostalCodeField(RegexField):
     """
@@ -26,8 +29,10 @@ class CAPostalCodeField(RegexField):
     }
 
     def __init__(self, *args, **kwargs):
-        super(CAPostalCodeField, self).__init__(r'^[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ] \d[ABCEGHJKLMNPRSTVWXYZ]\d$',
+        super(CAPostalCodeField, self).__init__(
+            r'^[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ] \d[ABCEGHJKLMNPRSTVWXYZ]\d$',
             max_length=None, min_length=None, *args, **kwargs)
+
 
 class CAPhoneNumberField(Field):
     """Canadian phone number field."""
@@ -47,6 +52,7 @@ class CAPhoneNumberField(Field):
             return u'%s-%s-%s' % (m.group(1), m.group(2), m.group(3))
         raise ValidationError(self.error_messages['invalid'])
 
+
 class CAProvinceField(Field):
     """
     A form field that validates its input is a Canadian province name or abbreviation.
@@ -59,6 +65,7 @@ class CAProvinceField(Field):
 
     def clean(self, value):
         from ca_provinces import PROVINCES_NORMALIZED
+
         super(CAProvinceField, self).clean(value)
         if value in EMPTY_VALUES:
             return u''
@@ -73,14 +80,18 @@ class CAProvinceField(Field):
                 pass
         raise ValidationError(self.error_messages['invalid'])
 
+
 class CAProvinceSelect(Select):
     """
     A Select widget that uses a list of Canadian provinces and
     territories as its choices.
     """
+
     def __init__(self, attrs=None):
         from ca_provinces import PROVINCE_CHOICES # relative import
+
         super(CAProvinceSelect, self).__init__(attrs, choices=PROVINCE_CHOICES)
+
 
 class CASocialInsuranceNumberField(Field):
     """

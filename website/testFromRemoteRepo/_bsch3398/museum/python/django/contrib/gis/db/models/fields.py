@@ -10,6 +10,7 @@ from django.contrib.gis.geometry.backend import Geometry, GeometryException
 # for SRID info each time a distance query is constructed.
 _srid_cache = {}
 
+
 def get_srid_info(srid, connection):
     """
     Returns the units, unit name, and spheroid WKT associated with the
@@ -37,6 +38,7 @@ def get_srid_info(srid, connection):
         _srid_cache[connection.alias][srid] = (units, units_name, spheroid)
 
     return _srid_cache[connection.alias][srid]
+
 
 class GeometryField(Field):
     "The base GIS field -- maps to the OpenGIS Specification Geometry type."
@@ -200,11 +202,11 @@ class GeometryField(Field):
         return connection.ops.geo_db_type(self)
 
     def formfield(self, **kwargs):
-        defaults = {'form_class' : forms.GeometryField,
-                    'null' : self.null,
-                    'geom_type' : self.geom_type,
-                    'srid' : self.srid,
-                    }
+        defaults = {'form_class': forms.GeometryField,
+                    'null': self.null,
+                    'geom_type': self.geom_type,
+                    'srid': self.srid,
+        }
         defaults.update(kwargs)
         return super(GeometryField, self).formfield(**defaults)
 
@@ -269,25 +271,31 @@ class PointField(GeometryField):
     geom_type = 'POINT'
     description = _("Point")
 
+
 class LineStringField(GeometryField):
     geom_type = 'LINESTRING'
     description = _("Line string")
+
 
 class PolygonField(GeometryField):
     geom_type = 'POLYGON'
     description = _("Polygon")
 
+
 class MultiPointField(GeometryField):
     geom_type = 'MULTIPOINT'
     description = _("Multi-point")
+
 
 class MultiLineStringField(GeometryField):
     geom_type = 'MULTILINESTRING'
     description = _("Multi-line string")
 
+
 class MultiPolygonField(GeometryField):
     geom_type = 'MULTIPOLYGON'
     description = _("Multi polygon")
+
 
 class GeometryCollectionField(GeometryField):
     geom_type = 'GEOMETRYCOLLECTION'

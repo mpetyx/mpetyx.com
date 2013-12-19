@@ -1,9 +1,7 @@
-import os, unittest
-from decimal import Decimal
+import unittest
 
 from django.db import connection
 from django.db.models import Q
-from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.geos import GEOSGeometry, Point, LineString
 from django.contrib.gis.measure import D # alias for Distance
 from django.contrib.gis.tests.utils import oracle, postgis, spatialite, no_oracle, no_spatialite
@@ -12,8 +10,8 @@ from models import AustraliaCity, Interstate, SouthTexasInterstate, \
     SouthTexasCity, SouthTexasCityFt, CensusZipcode, SouthTexasZipcode
 from data import au_cities, interstates, stx_interstates, stx_cities, stx_zips
 
-class DistanceTest(unittest.TestCase):
 
+class DistanceTest(unittest.TestCase):
     # A point we are testing distances with -- using a WGS84
     # coordinate that'll be implicitly transormed to that to
     # the coordinate system of the field, EPSG:32140 (Texas South Central
@@ -78,8 +76,10 @@ class DistanceTest(unittest.TestCase):
         # Performing distance queries on two projected coordinate systems one
         # with units in meters and the other in units of U.S. survey feet.
         for dist in tx_dists:
-            if isinstance(dist, tuple): dist1, dist2 = dist
-            else: dist1 = dist2 = dist
+            if isinstance(dist, tuple):
+                dist1, dist2 = dist
+            else:
+                dist1 = dist2 = dist
             qs1 = SouthTexasCity.objects.filter(point__dwithin=(self.stx_pnt, dist1))
             qs2 = SouthTexasCityFt.objects.filter(point__dwithin=(self.stx_pnt, dist2))
             for qs in qs1, qs2:
@@ -87,12 +87,16 @@ class DistanceTest(unittest.TestCase):
 
         # Now performing the `dwithin` queries on a geodetic coordinate system.
         for dist in au_dists:
-            if isinstance(dist, D) and not oracle: type_error = True
-            else: type_error = False
+            if isinstance(dist, D) and not oracle:
+                type_error = True
+            else:
+                type_error = False
 
             if isinstance(dist, tuple):
-                if oracle: dist = dist[1]
-                else: dist = dist[0]
+                if oracle:
+                    dist = dist[1]
+                else:
+                    dist = dist[0]
 
             # Creating the query set.
             qs = AustraliaCity.objects.order_by('name')
@@ -133,8 +137,10 @@ class DistanceTest(unittest.TestCase):
 
         # Original query done on PostGIS, have to adjust AlmostEqual tolerance
         # for Oracle.
-        if oracle: tol = 2
-        else: tol = 5
+        if oracle:
+            tol = 2
+        else:
+            tol = 5
 
         # Ensuring expected distances are returned for each distance queryset.
         for qs in dist_qs:
@@ -145,12 +151,14 @@ class DistanceTest(unittest.TestCase):
     @no_spatialite
     def test03b_distance_method(self):
         "Testing the `distance` GeoQuerySet method on geodetic coordnate systems."
-        if oracle: tol = 2
-        else: tol = 5
+        if oracle:
+            tol = 2
+        else:
+            tol = 5
 
         # Testing geodetic distance calculation with a non-point geometry
         # (a LineString of Wollongong and Shellharbour coords).
-        ls = LineString( ( (150.902, -34.4245), (150.87, -34.5789) ) )
+        ls = LineString(( (150.902, -34.4245), (150.87, -34.5789) ))
         if oracle or connection.ops.geography:
             # Reference query:
             #  SELECT ST_distance_sphere(point, ST_GeomFromText('LINESTRING(150.9020 -34.4245,150.8700 -34.5789)', 4326)) FROM distapp_australiacity ORDER BY name;
@@ -199,7 +207,7 @@ class DistanceTest(unittest.TestCase):
             self.assertAlmostEqual(spheroid_distances[i], c.distance.m, tol)
         if postgis:
             # PostGIS uses sphere-only distances by default, testing these as well.
-            qs =  AustraliaCity.objects.exclude(id=hillsdale.id).distance(hillsdale.point)
+            qs = AustraliaCity.objects.exclude(id=hillsdale.id).distance(hillsdale.point)
             for i, c in enumerate(qs):
                 self.assertAlmostEqual(sphere_distances[i], c.distance.m, tol)
 
@@ -241,14 +249,16 @@ class DistanceTest(unittest.TestCase):
         # Retrieving the cities within a 20km 'donut' w/a 7km radius 'hole'
         # (thus, Houston and Southside place will be excluded as tested in
         # the `test02_dwithin` above).
-        qs1 = SouthTexasCity.objects.filter(point__distance_gte=(self.stx_pnt, D(km=7))).filter(point__distance_lte=(self.stx_pnt, D(km=20)))
+        qs1 = SouthTexasCity.objects.filter(point__distance_gte=(self.stx_pnt, D(km=7))).filter(
+            point__distance_lte=(self.stx_pnt, D(km=20)))
 
         # Can't determine the units on SpatiaLite from PROJ.4 string, and
         # Oracle 11 incorrectly thinks it is not projected.
         if spatialite or oracle:
             dist_qs = (qs1,)
         else:
-            qs2 = SouthTexasCityFt.objects.filter(point__distance_gte=(self.stx_pnt, D(km=7))).filter(point__distance_lte=(self.stx_pnt, D(km=20)))
+            qs2 = SouthTexasCityFt.objects.filter(point__distance_gte=(self.stx_pnt, D(km=7))).filter(
+                point__distance_lte=(self.stx_pnt, D(km=20)))
             dist_qs = (qs1, qs2)
 
         for qs in dist_qs:
@@ -349,8 +359,10 @@ class DistanceTest(unittest.TestCase):
             self.assertRaises(ValueError, Interstate.objects.length)
         else:
             qs = Interstate.objects.length()
-            if oracle: tol = 2
-            else: tol = 5
+            if oracle:
+                tol = 2
+            else:
+                tol = 5
             self.assertAlmostEqual(len_m1, qs[0].length.m, tol)
 
         # Now doing length on a projected coordinate system.
@@ -363,8 +375,10 @@ class DistanceTest(unittest.TestCase):
         # Reference query:
         # SELECT ST_Perimeter(distapp_southtexaszipcode.poly) FROM distapp_southtexaszipcode;
         perim_m = [18404.3550889361, 15627.2108551001, 20632.5588368978, 17094.5996143697]
-        if oracle: tol = 2
-        else: tol = 7
+        if oracle:
+            tol = 2
+        else:
+            tol = 7
         for i, z in enumerate(SouthTexasZipcode.objects.perimeter()):
             self.assertAlmostEqual(perim_m[i], z.perimeter.m, tol)
 
@@ -382,6 +396,7 @@ class DistanceTest(unittest.TestCase):
         z = SouthTexasZipcode.objects.distance(htown.point).area().get(name='78212')
         self.assertEqual(None, z.distance)
         self.assertEqual(None, z.area)
+
 
 def suite():
     s = unittest.TestSuite()

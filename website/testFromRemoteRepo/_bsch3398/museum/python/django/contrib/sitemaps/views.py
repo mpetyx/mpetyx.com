@@ -1,9 +1,11 @@
 from django.http import HttpResponse, Http404
-from django.template import loader
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
 from django.utils.encoding import smart_str
 from django.core.paginator import EmptyPage, PageNotAnInteger
+
+from django.template import loader
+
 
 def index(request, sitemaps):
     current_site = Site.objects.get_current()
@@ -17,10 +19,11 @@ def index(request, sitemaps):
         sitemap_url = urlresolvers.reverse('django.contrib.sitemaps.views.sitemap', kwargs={'section': section})
         sites.append('%s://%s%s' % (protocol, current_site.domain, sitemap_url))
         if pages > 1:
-            for page in range(2, pages+1):
+            for page in range(2, pages + 1):
                 sites.append('%s://%s%s?p=%s' % (protocol, current_site.domain, sitemap_url, page))
     xml = loader.render_to_string('sitemap_index.xml', {'sitemaps': sites})
     return HttpResponse(xml, mimetype='application/xml')
+
 
 def sitemap(request, sitemaps, section=None):
     maps, urls = [], []

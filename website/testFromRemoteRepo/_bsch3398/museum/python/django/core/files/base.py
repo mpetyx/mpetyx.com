@@ -1,4 +1,5 @@
 import os
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -7,8 +8,9 @@ except ImportError:
 from django.utils.encoding import smart_str, smart_unicode
 from django.core.files.utils import FileProxyMixin
 
+
 class File(FileProxyMixin):
-    DEFAULT_CHUNK_SIZE = 64 * 2**10
+    DEFAULT_CHUNK_SIZE = 64 * 2 ** 10
 
     def __init__(self, file, name=None):
         self.file = file
@@ -49,6 +51,7 @@ class File(FileProxyMixin):
 
     def _get_closed(self):
         return not self.file or self.file.closed
+
     closed = property(_get_closed)
 
     def chunks(self, chunk_size=None):
@@ -61,7 +64,7 @@ class File(FileProxyMixin):
 
         if hasattr(self, 'seek'):
             self.seek(0)
-        # Assume the pointer is at zero...
+            # Assume the pointer is at zero...
         counter = self.size
 
         while counter > 0:
@@ -112,10 +115,12 @@ class File(FileProxyMixin):
     def close(self):
         self.file.close()
 
+
 class ContentFile(File):
     """
     A File-like object that takes just raw content, rather than an actual file.
     """
+
     def __init__(self, content):
         content = content or ''
         super(ContentFile, self).__init__(StringIO(content))

@@ -1,13 +1,18 @@
 "Database cache backend."
 
+import base64
+import time
+from datetime import datetime
+
 from django.core.cache.backends.base import BaseCache
 from django.db import connection, transaction, DatabaseError
-import base64, time
-from datetime import datetime
+
+
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
+
 
 class CacheClass(BaseCache):
     def __init__(self, table, params):
@@ -59,7 +64,7 @@ class CacheClass(BaseCache):
         try:
             result = cursor.fetchone()
             if result and (mode == 'set' or
-                    (mode == 'add' and result[1] < now)):
+                               (mode == 'add' and result[1] < now)):
                 cursor.execute("UPDATE %s SET value = %%s, expires = %%s WHERE cache_key = %%s" % self._table,
                                [encoded, connection.ops.value_to_db_datetime(exp), key])
             else:
@@ -94,7 +99,8 @@ class CacheClass(BaseCache):
             cursor.execute("SELECT COUNT(*) FROM %s" % self._table)
             num = cursor.fetchone()[0]
             if num > self._max_entries:
-                cursor.execute("SELECT cache_key FROM %s ORDER BY cache_key LIMIT 1 OFFSET %%s" % self._table, [num / self._cull_frequency])
+                cursor.execute("SELECT cache_key FROM %s ORDER BY cache_key LIMIT 1 OFFSET %%s" % self._table,
+                               [num / self._cull_frequency])
                 cursor.execute("DELETE FROM %s WHERE cache_key < %%s" % self._table, [cursor.fetchone()[0]])
 
     def clear(self):

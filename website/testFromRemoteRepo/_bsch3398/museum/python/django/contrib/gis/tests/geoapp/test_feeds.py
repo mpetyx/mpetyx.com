@@ -4,6 +4,7 @@ from xml.dom import minidom
 from django.test import Client
 from models import City
 
+
 class GeoFeedTest(unittest.TestCase):
     client = Client()
 
@@ -25,12 +26,12 @@ class GeoFeedTest(unittest.TestCase):
         self.assertChildNodes(feed2.getElementsByTagName('channel')[0],
                               ['title', 'link', 'description', 'language',
                                'lastBuildDate', 'item', 'georss:box', 'atom:link']
-                              )
+        )
 
         # Incrementing through the feeds.
         for feed in [feed1, feed2]:
             # Ensuring the georss namespace was added to the <rss> element.
-            self.assertEqual(feed.getAttribute(u'xmlns:georss'),  u'http://www.georss.org/georss')
+            self.assertEqual(feed.getAttribute(u'xmlns:georss'), u'http://www.georss.org/georss')
             chan = feed.getElementsByTagName('channel')[0]
             items = chan.getElementsByTagName('item')
             self.assertEqual(len(items), City.objects.count())
@@ -50,7 +51,7 @@ class GeoFeedTest(unittest.TestCase):
 
         for feed in [feed1, feed2]:
             # Ensuring the georsss namespace was added to the <feed> element.
-            self.assertEqual(feed.getAttribute(u'xmlns:georss'),  u'http://www.georss.org/georss')
+            self.assertEqual(feed.getAttribute(u'xmlns:georss'), u'http://www.georss.org/georss')
             entries = feed.getElementsByTagName('entry')
             self.assertEqual(len(entries), City.objects.count())
 

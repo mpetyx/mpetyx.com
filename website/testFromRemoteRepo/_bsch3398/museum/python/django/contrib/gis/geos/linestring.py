@@ -5,6 +5,7 @@ from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.geos.point import Point
 from django.contrib.gis.geos import prototypes as capi
 
+
 class LineString(GEOSGeometry):
     _init_func = capi.create_linestring
     _minlength = 2
@@ -23,15 +24,19 @@ class LineString(GEOSGeometry):
          ls = LineString(Point(1, 1), Point(2, 2))
         """
         # If only one argument provided, set the coords array appropriately
-        if len(args) == 1: coords = args[0]
-        else: coords = args
+        if len(args) == 1:
+            coords = args[0]
+        else:
+            coords = args
 
         if isinstance(coords, (tuple, list)):
             # Getting the number of coords and the number of dimensions -- which
             #  must stay the same, e.g., no LineString((1, 2), (1, 2, 3)).
             ncoords = len(coords)
-            if coords: ndim = len(coords[0])
-            else: raise TypeError('Cannot initialize on empty sequence.')
+            if coords:
+                ndim = len(coords[0])
+            else:
+                raise TypeError('Cannot initialize on empty sequence.')
             self._checkdim(ndim)
             # Incrementing through each of the coordinates and verifying
             for i in xrange(1, ncoords):
@@ -51,12 +56,15 @@ class LineString(GEOSGeometry):
 
         # Creating a coordinate sequence object because it is easier to
         # set the points using GEOSCoordSeq.__setitem__().
-        cs = GEOSCoordSeq(capi.create_cs(ncoords, ndim), z=bool(ndim==3))
+        cs = GEOSCoordSeq(capi.create_cs(ncoords, ndim), z=bool(ndim == 3))
 
         for i in xrange(ncoords):
-            if numpy_coords: cs[i] = coords[i,:]
-            elif isinstance(coords[i], Point): cs[i] = coords[i].tuple
-            else: cs[i] = coords[i]
+            if numpy_coords:
+                cs[i] = coords[i, :]
+            elif isinstance(coords[i], Point):
+                cs[i] = coords[i].tuple
+            else:
+                cs[i] = coords[i]
 
         # If SRID was passed in with the keyword arguments
         srid = kwargs.get('srid', None)
@@ -109,6 +117,7 @@ class LineString(GEOSGeometry):
     def tuple(self):
         "Returns a tuple version of the geometry from the coordinate sequence."
         return self._cs.tuple
+
     coords = tuple
 
     def _listarr(self, func):
@@ -117,8 +126,10 @@ class LineString(GEOSGeometry):
         the given function.  Will return a numpy array if possible.
         """
         lst = [func(i) for i in xrange(len(self))]
-        if numpy: return numpy.array(lst) # ARRRR!
-        else: return lst
+        if numpy:
+            return numpy.array(lst) # ARRRR!
+        else:
+            return lst
 
     @property
     def array(self):
@@ -128,7 +139,7 @@ class LineString(GEOSGeometry):
     @property
     def merged(self):
         "Returns the line merge of this LineString."
-        return self._topology(capi.geos_linemerge(self.ptr))   
+        return self._topology(capi.geos_linemerge(self.ptr))
 
     @property
     def x(self):
@@ -143,8 +154,10 @@ class LineString(GEOSGeometry):
     @property
     def z(self):
         "Returns a list or numpy array of the Z variable."
-        if not self.hasz: return None
-        else: return self._listarr(self._cs.getZ)
+        if not self.hasz:
+            return None
+        else:
+            return self._listarr(self._cs.getZ)
 
 # LinearRings are LineStrings used within Polygons.
 class LinearRing(LineString):

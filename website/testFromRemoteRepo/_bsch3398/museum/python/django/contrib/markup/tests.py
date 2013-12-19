@@ -3,10 +3,13 @@
 import re
 import unittest
 
-from django.template import Template, Context, add_to_builtins
 from django.utils.html import escape
 
+from django.template import Template, Context, add_to_builtins
+
+
 add_to_builtins('django.contrib.markup.templatetags.markup')
+
 
 class Templates(unittest.TestCase):
     def test_textile(self):

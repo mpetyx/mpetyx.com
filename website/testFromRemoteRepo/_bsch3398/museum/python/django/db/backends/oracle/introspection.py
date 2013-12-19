@@ -1,8 +1,12 @@
-from django.db.backends import BaseDatabaseIntrospection
-import cx_Oracle
 import re
 
+from django.db.backends import BaseDatabaseIntrospection
+
+import cx_Oracle
+
+
 foreign_key_re = re.compile(r"\sCONSTRAINT `[^`]*` FOREIGN KEY \(`([^`]*)`\) REFERENCES `([^`]*)` \(`([^`]*)`\)")
+
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
     # Maps type objects to Django Field types.

@@ -1,8 +1,8 @@
-from django.conf import settings
 from django.contrib.admin import ModelAdmin
 from django.contrib.gis.admin.widgets import OpenLayersWidget
 from django.contrib.gis.gdal import OGRGeomType
 from django.contrib.gis.db import models
+
 
 class GeoModelAdmin(ModelAdmin):
     """
@@ -46,6 +46,7 @@ class GeoModelAdmin(ModelAdmin):
         media.add_js([self.openlayers_url])
         media.add_js(self.extra_js)
         return media
+
     media = property(_media)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
@@ -69,49 +70,54 @@ class GeoModelAdmin(ModelAdmin):
         """
         is_collection = db_field.geom_type in ('MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON', 'GEOMETRYCOLLECTION')
         if is_collection:
-            if db_field.geom_type == 'GEOMETRYCOLLECTION': collection_type = 'Any'
-            else: collection_type = OGRGeomType(db_field.geom_type.replace('MULTI', ''))
+            if db_field.geom_type == 'GEOMETRYCOLLECTION':
+                collection_type = 'Any'
+            else:
+                collection_type = OGRGeomType(db_field.geom_type.replace('MULTI', ''))
         else:
             collection_type = 'None'
 
         class OLMap(self.widget):
             template = self.map_template
             geom_type = db_field.geom_type
-            params = {'default_lon' : self.default_lon,
-                      'default_lat' : self.default_lat,
-                      'default_zoom' : self.default_zoom,
-                      'display_wkt' : self.debug or self.display_wkt,
-                      'geom_type' : OGRGeomType(db_field.geom_type),
-                      'field_name' : db_field.name,
-                      'is_collection' : is_collection,
-                      'scrollable' : self.scrollable,
-                      'layerswitcher' : self.layerswitcher,
-                      'collection_type' : collection_type,
-                      'is_linestring' : db_field.geom_type in ('LINESTRING', 'MULTILINESTRING'),
-                      'is_polygon' : db_field.geom_type in ('POLYGON', 'MULTIPOLYGON'),
-                      'is_point' : db_field.geom_type in ('POINT', 'MULTIPOINT'),
-                      'num_zoom' : self.num_zoom,
-                      'max_zoom' : self.max_zoom,
-                      'min_zoom' : self.min_zoom,
-                      'units' : self.units, #likely shoud get from object
-                      'max_resolution' : self.max_resolution,
-                      'max_extent' : self.max_extent,
-                      'modifiable' : self.modifiable,
-                      'mouse_position' : self.mouse_position,
-                      'scale_text' : self.scale_text,
-                      'map_width' : self.map_width,
-                      'map_height' : self.map_height,
-                      'point_zoom' : self.point_zoom,
-                      'srid' : self.map_srid,
-                      'display_srid' : self.display_srid,
-                      'wms_url' : self.wms_url,
-                      'wms_layer' : self.wms_layer,
-                      'wms_name' : self.wms_name,
-                      'debug' : self.debug,
-                      }
+            params = {'default_lon': self.default_lon,
+                      'default_lat': self.default_lat,
+                      'default_zoom': self.default_zoom,
+                      'display_wkt': self.debug or self.display_wkt,
+                      'geom_type': OGRGeomType(db_field.geom_type),
+                      'field_name': db_field.name,
+                      'is_collection': is_collection,
+                      'scrollable': self.scrollable,
+                      'layerswitcher': self.layerswitcher,
+                      'collection_type': collection_type,
+                      'is_linestring': db_field.geom_type in ('LINESTRING', 'MULTILINESTRING'),
+                      'is_polygon': db_field.geom_type in ('POLYGON', 'MULTIPOLYGON'),
+                      'is_point': db_field.geom_type in ('POINT', 'MULTIPOINT'),
+                      'num_zoom': self.num_zoom,
+                      'max_zoom': self.max_zoom,
+                      'min_zoom': self.min_zoom,
+                      'units': self.units, #likely shoud get from object
+                      'max_resolution': self.max_resolution,
+                      'max_extent': self.max_extent,
+                      'modifiable': self.modifiable,
+                      'mouse_position': self.mouse_position,
+                      'scale_text': self.scale_text,
+                      'map_width': self.map_width,
+                      'map_height': self.map_height,
+                      'point_zoom': self.point_zoom,
+                      'srid': self.map_srid,
+                      'display_srid': self.display_srid,
+                      'wms_url': self.wms_url,
+                      'wms_layer': self.wms_layer,
+                      'wms_name': self.wms_name,
+                      'debug': self.debug,
+            }
+
         return OLMap
 
+
 from django.contrib.gis import gdal
+
 if gdal.HAS_GDAL:
     class OSMGeoAdmin(GeoModelAdmin):
         map_template = 'gis/admin/osm.html'

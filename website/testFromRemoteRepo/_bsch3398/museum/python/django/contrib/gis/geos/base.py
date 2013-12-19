@@ -1,6 +1,6 @@
 from ctypes import c_void_p
 from types import NoneType
-from django.contrib.gis.geos.error import GEOSException, GEOSIndexError
+from django.contrib.gis.geos.error import GEOSException
 
 # Trying to import GDAL libraries, if available.  Have to place in
 # try/except since this package may be used outside GeoDjango.
@@ -11,6 +11,7 @@ except ImportError:
     class GDALInfo(object):
         HAS_GDAL = False
         GEOJSON = False
+
     gdal = GDALInfo()
 
 # NumPy supported?
@@ -18,6 +19,7 @@ try:
     import numpy
 except ImportError:
     numpy = False
+
 
 class GEOSBase(object):
     """
@@ -35,8 +37,10 @@ class GEOSBase(object):
         # Raise an exception if the pointer isn't valid don't
         # want to be passing NULL pointers to routines --
         # that's very bad.
-        if self._ptr: return self._ptr
-        else: raise GEOSException('NULL GEOS %s pointer encountered.' % self.__class__.__name__)
+        if self._ptr:
+            return self._ptr
+        else:
+            raise GEOSException('NULL GEOS %s pointer encountered.' % self.__class__.__name__)
 
     def _set_ptr(self, ptr):
         # Only allow the pointer to be set with pointers of the

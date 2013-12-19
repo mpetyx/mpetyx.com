@@ -12,13 +12,15 @@ test_suites = [test_driver.suite(),
                test_envelope.suite(),
                test_geom.suite(),
                test_srs.suite(),
-               ]
+]
+
 
 def suite():
     "Builds a test suite for the GDAL tests."
     s = TestSuite()
     map(s.addTest, test_suites)
     return s
+
 
 def run(verbosity=1):
     "Runs the GDAL tests."

@@ -9,6 +9,7 @@ from django.contrib.gis.geos.error import GEOSException, GEOSIndexError
 from django.contrib.gis.geos.libgeos import CS_PTR
 from django.contrib.gis.geos import prototypes as capi
 
+
 class GEOSCoordSeq(GEOSBase):
     "The internal representation of a list of coordinates inside a Geometry."
 
@@ -51,7 +52,7 @@ class GEOSCoordSeq(GEOSBase):
             pass
         else:
             raise TypeError('Must set coordinate with a sequence (list, tuple, or numpy array).')
-        # Checking the dims of the input
+            # Checking the dims of the input
         if self.dims == 3 and self._z:
             n_args = 3
             set_3d = True
@@ -60,7 +61,7 @@ class GEOSCoordSeq(GEOSBase):
             set_3d = False
         if len(value) != n_args:
             raise TypeError('Dimension of value does not match.')
-        # Setting the X, Y, Z
+            # Setting the X, Y, Z
         self.setX(index, value[0])
         self.setY(index, value[1])
         if set_3d: self.setZ(index, value[2])
@@ -143,14 +144,18 @@ class GEOSCoordSeq(GEOSBase):
         "Returns the KML representation for the coordinates."
         # Getting the substitution string depending on whether the coordinates have
         #  a Z dimension.
-        if self.hasz: substr = '%s,%s,%s '
-        else: substr = '%s,%s,0 '
+        if self.hasz:
+            substr = '%s,%s,%s '
+        else:
+            substr = '%s,%s,0 '
         return '<coordinates>%s</coordinates>' % \
-            ''.join([substr % self[i] for i in xrange(len(self))]).strip()
+               ''.join([substr % self[i] for i in xrange(len(self))]).strip()
 
     @property
     def tuple(self):
         "Returns a tuple version of this coordinate sequence."
         n = self.size
-        if n == 1: return self[0]
-        else: return tuple([self[i] for i in xrange(n)])
+        if n == 1:
+            return self[0]
+        else:
+            return tuple([self[i] for i in xrange(n)])

@@ -4,8 +4,8 @@ from django.forms import ValidationError
 from django.contrib.gis import forms
 from django.contrib.gis.geos import GEOSGeometry
 
-class GeometryFieldTest(unittest.TestCase):
 
+class GeometryFieldTest(unittest.TestCase):
     def test00_init(self):
         "Testing GeometryField initialization with defaults."
         fld = forms.GeometryField()
@@ -53,13 +53,16 @@ class GeometryFieldTest(unittest.TestCase):
         self.assertEqual(GEOSGeometry('POINT(5 23)'), pnt_fld.clean('POINT(5 23)'))
         self.assertRaises(forms.ValidationError, pnt_fld.clean, 'LINESTRING(0 0, 1 1)')
 
+
 def suite():
     s = unittest.TestSuite()
     s.addTest(unittest.makeSuite(GeometryFieldTest))
     return s
 
+
 def run(verbosity=2):
     unittest.TextTestRunner(verbosity=verbosity).run(suite())
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     run()

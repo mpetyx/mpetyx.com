@@ -1,9 +1,12 @@
-from django import forms
 from django.utils.translation import ugettext_lazy as _
+
+from django import forms
+
 
 # While this couples the geographic forms to the GEOS library,
 # it decouples from database (by not importing SpatialBackend).
 from django.contrib.gis.geos import GEOSGeometry
+
 
 class GeometryField(forms.Field):
     """
@@ -14,12 +17,12 @@ class GeometryField(forms.Field):
     widget = forms.Textarea
 
     default_error_messages = {
-        'no_geom' : _(u'No geometry value provided.'),
-        'invalid_geom' : _(u'Invalid geometry value.'),
-        'invalid_geom_type' : _(u'Invalid geometry type.'),
-        'transform_error' : _(u'An error occurred when transforming the geometry '
-                              'to the SRID of the geometry form field.'),
-        }
+        'no_geom': _(u'No geometry value provided.'),
+        'invalid_geom': _(u'Invalid geometry value.'),
+        'invalid_geom_type': _(u'Invalid geometry type.'),
+        'transform_error': _(u'An error occurred when transforming the geometry '
+                             'to the SRID of the geometry form field.'),
+    }
 
     def __init__(self, **kwargs):
         # Pop out attributes from the database field, or use sensible

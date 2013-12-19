@@ -1,20 +1,22 @@
-import re, os, unittest
+import re
+import unittest
+
 from django.db import connection
 from django.contrib.gis import gdal
 from django.contrib.gis.geos import *
-from django.contrib.gis.measure import Distance
 from django.contrib.gis.tests.utils import \
-    no_mysql, no_oracle, no_postgis, no_spatialite, \
+    no_mysql, no_oracle, no_spatialite, \
     mysql, oracle, postgis, spatialite
 from django.test import TestCase
 
 from models import Country, City, PennsylvaniaCity, State, Track
 
+
 if not spatialite:
     from models import Feature, MinusOneSRID
 
-class GeoModelTest(TestCase):
 
+class GeoModelTest(TestCase):
     def test01_fixtures(self):
         "Testing geographic model initialization from fixtures."
         # Ensuring that data was loaded from initial data fixtures.
@@ -105,7 +107,7 @@ class GeoModelTest(TestCase):
         # The reference KML depends on the version of PostGIS used
         # (the output stopped including altitude in 1.3.3).
         if connection.ops.spatial_version >= (1, 3, 3):
-            ref_kml =  '<Point><coordinates>-104.609252,38.255001</coordinates></Point>'
+            ref_kml = '<Point><coordinates>-104.609252,38.255001</coordinates></Point>'
         else:
             ref_kml = '<Point><coordinates>-104.609252,38.255001,0</coordinates></Point>'
 
@@ -130,11 +132,13 @@ class GeoModelTest(TestCase):
 
         if oracle:
             # No precision parameter for Oracle :-/
-            gml_regex = re.compile(r'^<gml:Point srsName="SDO:4326" xmlns:gml="http://www.opengis.net/gml"><gml:coordinates decimal="\." cs="," ts=" ">-104.60925\d+,38.25500\d+ </gml:coordinates></gml:Point>')
+            gml_regex = re.compile(
+                r'^<gml:Point srsName="SDO:4326" xmlns:gml="http://www.opengis.net/gml"><gml:coordinates decimal="\." cs="," ts=" ">-104.60925\d+,38.25500\d+ </gml:coordinates></gml:Point>')
             for ptown in [ptown1, ptown2]:
                 self.failUnless(gml_regex.match(ptown.gml))
         else:
-            gml_regex = re.compile(r'^<gml:Point srsName="EPSG:4326"><gml:coordinates>-104\.60925\d+,38\.255001</gml:coordinates></gml:Point>')
+            gml_regex = re.compile(
+                r'^<gml:Point srsName="EPSG:4326"><gml:coordinates>-104\.60925\d+,38\.255001</gml:coordinates></gml:Point>')
             for ptown in [ptown1, ptown2]:
                 self.failUnless(gml_regex.match(ptown.gml))
 
@@ -175,7 +179,8 @@ class GeoModelTest(TestCase):
 
         # 1.(3|4).x: SELECT ST_AsGeoJson("geoapp_city"."point", 5, 3) FROM "geoapp_city" WHERE "geoapp_city"."name" = 'Chicago';
         # Finally, we set every available keyword.
-        self.assertEqual(chicago_json, City.objects.geojson(bbox=True, crs=True, precision=5).get(name='Chicago').geojson)
+        self.assertEqual(chicago_json,
+                         City.objects.geojson(bbox=True, crs=True, precision=5).get(name='Chicago').geojson)
 
     def test03d_svg(self):
         "Testing SVG output using GeoQuerySet.svg()."
@@ -241,7 +246,9 @@ class GeoModelTest(TestCase):
         self.assertRaises(TypeError, Country.objects.make_line)
         # Reference query:
         # SELECT AsText(ST_MakeLine(geoapp_city.point)) FROM geoapp_city;
-        ref_line = GEOSGeometry('LINESTRING(-95.363151 29.763374,-96.801611 32.782057,-97.521157 34.464642,174.783117 -41.315268,-104.609252 38.255001,-95.23506 38.971823,-87.650175 41.850385,-123.305196 48.462611)', srid=4326)
+        ref_line = GEOSGeometry(
+            'LINESTRING(-95.363151 29.763374,-96.801611 32.782057,-97.521157 34.464642,174.783117 -41.315268,-104.609252 38.255001,-95.23506 38.971823,-87.650175 41.850385,-123.305196 48.462611)',
+            srid=4326)
         self.assertEqual(ref_line, City.objects.make_line())
 
     @no_mysql
@@ -312,7 +319,7 @@ class GeoModelTest(TestCase):
             # San Antonio in 'Texas 4205, Southern Zone (1983, meters)' (SRID 41157)
             # Used the following Oracle SQL to get this value:
             #  SELECT SDO_UTIL.TO_WKTGEOMETRY(SDO_CS.TRANSFORM(SDO_GEOMETRY('POINT (-98.493183 29.424170)', 4326), 41157)) FROM DUAL;
-            nad_wkt  = 'POINT (300662.034646583 5416427.45974934)'
+            nad_wkt = 'POINT (300662.034646583 5416427.45974934)'
             nad_srid = 41157
         else:
             # San Antonio in 'NAD83(HARN) / Texas Centric Lambert Conformal' (SRID 3084)
@@ -537,16 +544,16 @@ class GeoModelTest(TestCase):
         # Reference values.
         if oracle:
             # SELECT SDO_UTIL.TO_WKTGEOMETRY(SDO_GEOM.SDO_POINTONSURFACE(GEOAPP_COUNTRY.MPOLY, 0.05)) FROM GEOAPP_COUNTRY;
-            ref = {'New Zealand' : fromstr('POINT (174.616364 -36.100861)', srid=4326),
-                   'Texas' : fromstr('POINT (-103.002434 36.500397)', srid=4326),
-                   }
+            ref = {'New Zealand': fromstr('POINT (174.616364 -36.100861)', srid=4326),
+                   'Texas': fromstr('POINT (-103.002434 36.500397)', srid=4326),
+            }
 
         elif postgis or spatialite:
             # Using GEOSGeometry to compute the reference point on surface values
             # -- since PostGIS also uses GEOS these should be the same.
-            ref = {'New Zealand' : Country.objects.get(name='New Zealand').mpoly.point_on_surface,
-                   'Texas' : Country.objects.get(name='Texas').mpoly.point_on_surface
-                   }
+            ref = {'New Zealand': Country.objects.get(name='New Zealand').mpoly.point_on_surface,
+                   'Texas': Country.objects.get(name='Texas').mpoly.point_on_surface
+            }
 
         for c in Country.objects.point_on_surface():
             if spatialite:
@@ -639,7 +646,8 @@ class GeoModelTest(TestCase):
     def test26_inherited_geofields(self):
         "Test GeoQuerySet methods on inherited Geometry fields."
         # Creating a Pennsylvanian city.
-        mansfield = PennsylvaniaCity.objects.create(name='Mansfield', county='Tioga', point='POINT(-77.071445 41.823881)')
+        mansfield = PennsylvaniaCity.objects.create(name='Mansfield', county='Tioga',
+                                                    point='POINT(-77.071445 41.823881)')
 
         # All transformation SQL will need to be performed on the
         # _parent_ table.
@@ -681,24 +689,27 @@ class GeoModelTest(TestCase):
 
         # SELECT AsText(ST_SnapToGrid("geoapp_country"."mpoly", 0.05, 0.23)) FROM "geoapp_country" WHERE "geoapp_country"."name" = 'San Marino';
         ref = fromstr('MULTIPOLYGON(((12.4 43.93,12.45 43.93,12.5 43.93,12.45 43.93,12.4 43.93)))')
-        self.failUnless(ref.equals_exact(Country.objects.snap_to_grid(0.05, 0.23).get(name='San Marino').snap_to_grid, tol))
+        self.failUnless(
+            ref.equals_exact(Country.objects.snap_to_grid(0.05, 0.23).get(name='San Marino').snap_to_grid, tol))
 
         # SELECT AsText(ST_SnapToGrid("geoapp_country"."mpoly", 0.5, 0.17, 0.05, 0.23)) FROM "geoapp_country" WHERE "geoapp_country"."name" = 'San Marino';
         ref = fromstr('MULTIPOLYGON(((12.4 43.87,12.45 43.87,12.45 44.1,12.5 44.1,12.5 43.87,12.45 43.87,12.4 43.87)))')
-        self.failUnless(ref.equals_exact(Country.objects.snap_to_grid(0.05, 0.23, 0.5, 0.17).get(name='San Marino').snap_to_grid, tol))
+        self.failUnless(
+            ref.equals_exact(Country.objects.snap_to_grid(0.05, 0.23, 0.5, 0.17).get(name='San Marino').snap_to_grid,
+                             tol))
 
     @no_mysql
     @no_spatialite
     def test28_reverse(self):
         "Testing GeoQuerySet.reverse_geom()."
-        coords = [ (-95.363151, 29.763374), (-95.448601, 29.713803) ]
+        coords = [(-95.363151, 29.763374), (-95.448601, 29.713803)]
         Track.objects.create(name='Foo', line=LineString(coords))
         t = Track.objects.reverse_geom().get(name='Foo')
         coords.reverse()
         self.assertEqual(tuple(coords), t.reverse_geom.coords)
         if oracle:
             self.assertRaises(TypeError, State.objects.reverse_geom)
-        
+
     @no_mysql
     @no_oracle
     @no_spatialite
@@ -706,10 +717,10 @@ class GeoModelTest(TestCase):
         "Testing GeoQuerySet.force_rhr()."
         rings = ( ( (0, 0), (5, 0), (0, 5), (0, 0) ),
                   ( (1, 1), (1, 3), (3, 1), (1, 1) ),
-                  )
+        )
         rhr_rings = ( ( (0, 0), (0, 5), (5, 0), (0, 0) ),
                       ( (1, 1), (3, 1), (1, 3), (1, 1) ),
-                      )
+        )
         State.objects.create(name='Foo', poly=Polygon(*rings))
         s = State.objects.force_rhr().get(name='Foo')
         self.assertEqual(rhr_rings, s.force_rhr.coords)
@@ -729,9 +740,11 @@ class GeoModelTest(TestCase):
         self.assertEqual(ref_hash, h1.geohash)
         self.assertEqual(ref_hash[:5], h2.geohash)
 
+
 from test_feeds import GeoFeedTest
 from test_regress import GeoRegressionTests
 from test_sitemaps import GeoSitemapTest
+
 
 def suite():
     s = unittest.TestSuite()

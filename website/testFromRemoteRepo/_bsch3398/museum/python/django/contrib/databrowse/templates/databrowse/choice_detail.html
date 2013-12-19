@@ -4,14 +4,17 @@
 
 {% block content %}
 
-<div id="breadcrumbs"><a href="%7b%7b%20root_url%20%7d%7d.html">Home</a> / <a href="%7b%7b%20model.html">{{ model.verbose_name_plural|capfirst }}</a> / <a href="%7b%7b%20field.html">By {{ field.field.verbose_name }}</a> / {{ value }}</div>
+<div id="breadcrumbs"><a href="%7b%7b%20root_url%20%7d%7d.html">Home</a> / <a href="%7b%7b%20model.html">{{
+    model.verbose_name_plural|capfirst }}</a> / <a href="%7b%7b%20field.html">By {{ field.field.verbose_name }}</a> / {{
+    value }}
+</div>
 
 <h1>{{ model.verbose_name_plural|capfirst }} by {{ field.field.verbose_name }}: {{ value }}</h1>
 
 <ul class="objectlist">
-{% for object in object_list %}
-<li class="{% cycle 'odd' 'even' %}"><a href="%7b%7b%20object.html">{{ object }}</a></li>
-{% endfor %}
+    {% for object in object_list %}
+    <li class="{% cycle 'odd' 'even' %}"><a href="%7b%7b%20object.html">{{ object }}</a></li>
+    {% endfor %}
 </ul>
 
 {% endblock %}

@@ -3,8 +3,8 @@ from django.db.backends.mysql.base import DatabaseOperations
 from django.contrib.gis.db.backends.adapter import WKTAdapter
 from django.contrib.gis.db.backends.base import BaseSpatialOperations
 
-class MySQLOperations(DatabaseOperations, BaseSpatialOperations):
 
+class MySQLOperations(DatabaseOperations, BaseSpatialOperations):
     compiler_module = 'django.contrib.gis.db.models.sql.compiler'
     mysql = True
     name = 'mysql'
@@ -16,19 +16,19 @@ class MySQLOperations(DatabaseOperations, BaseSpatialOperations):
     Adaptor = Adapter # Backwards-compatibility alias.
 
     geometry_functions = {
-        'bbcontains' : 'MBRContains', # For consistency w/PostGIS API
-        'bboverlaps' : 'MBROverlaps', # .. ..
-        'contained' : 'MBRWithin',    # .. ..
-        'contains' : 'MBRContains',
-        'disjoint' : 'MBRDisjoint',
-        'equals' : 'MBREqual',
-        'exact' : 'MBREqual',
-        'intersects' : 'MBRIntersects',
-        'overlaps' : 'MBROverlaps',
-        'same_as' : 'MBREqual',
-        'touches' : 'MBRTouches',
-        'within' : 'MBRWithin',
-        }
+        'bbcontains': 'MBRContains', # For consistency w/PostGIS API
+        'bboverlaps': 'MBROverlaps', # .. ..
+        'contained': 'MBRWithin', # .. ..
+        'contains': 'MBRContains',
+        'disjoint': 'MBRDisjoint',
+        'equals': 'MBREqual',
+        'exact': 'MBREqual',
+        'intersects': 'MBRIntersects',
+        'overlaps': 'MBROverlaps',
+        'same_as': 'MBREqual',
+        'touches': 'MBRTouches',
+        'within': 'MBRWithin',
+    }
 
     gis_terms = dict([(term, None) for term in geometry_functions.keys() + ['isnull']])
 

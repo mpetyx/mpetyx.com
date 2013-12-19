@@ -41,9 +41,11 @@ def cache_page(*args, **kwargs):
     if len(args) > 1:
         assert len(args) == 2, "cache_page accepts at most 2 arguments"
         if callable(args[0]):
-            return decorator_from_middleware_with_args(CacheMiddleware)(cache_timeout=args[1], key_prefix=key_prefix)(args[0])
+            return decorator_from_middleware_with_args(CacheMiddleware)(cache_timeout=args[1], key_prefix=key_prefix)(
+                args[0])
         elif callable(args[1]):
-            return decorator_from_middleware_with_args(CacheMiddleware)(cache_timeout=args[0], key_prefix=key_prefix)(args[1])
+            return decorator_from_middleware_with_args(CacheMiddleware)(cache_timeout=args[0], key_prefix=key_prefix)(
+                args[1])
         else:
             assert False, "cache_page must be passed either a single argument (timeout) or a view function and a timeout"
     else:
@@ -56,7 +58,9 @@ def cache_control(**kwargs):
             response = viewfunc(request, *args, **kw)
             patch_cache_control(response, **kwargs)
             return response
+
         return wraps(viewfunc, assigned=available_attrs(viewfunc))(_cache_controlled)
+
     return _cache_controller
 
 
@@ -65,8 +69,10 @@ def never_cache(view_func):
     Decorator that adds headers to a response so that it will
     never be cached.
     """
+
     def _wrapped_view_func(request, *args, **kwargs):
         response = view_func(request, *args, **kwargs)
         add_never_cache_headers(response)
         return response
+
     return wraps(view_func, assigned=available_attrs(view_func))(_wrapped_view_func)

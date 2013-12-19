@@ -1,5 +1,6 @@
 VERSION = (1, 2, 0, 'final', 0)
 
+
 def get_version():
     version = '%s.%s' % (VERSION[0], VERSION[1])
     if VERSION[2]:
@@ -10,6 +11,7 @@ def get_version():
         if VERSION[3] != 'final':
             version = '%s %s %s' % (version, VERSION[3], VERSION[4])
     from django.utils.version import get_svn_revision
+
     svn_rev = get_svn_revision()
     if svn_rev != u'SVN-unknown':
         version = "%s %s" % (version, svn_rev)

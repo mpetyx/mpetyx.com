@@ -1,14 +1,16 @@
-from django.db.models.fields import Field, FieldDoesNotExist
+from django.db.models.fields import FieldDoesNotExist
 from django.db.models.sql.constants import LOOKUP_SEP
 from django.db.models.sql.expressions import SQLEvaluator
 from django.db.models.sql.where import Constraint, WhereNode
 from django.contrib.gis.db.models.fields import GeometryField
+
 
 class GeoConstraint(Constraint):
     """
     This subclass overrides `process` to better handle geographic SQL
     construction.
     """
+
     def __init__(self, init_constraint):
         self.alias = init_constraint.alias
         self.col = init_constraint.col
@@ -27,16 +29,18 @@ class GeoConstraint(Constraint):
         params = self.field.get_db_prep_lookup(lookup_type, value, connection=connection)
         return (self.alias, self.col, db_type), params
 
+
 class GeoWhereNode(WhereNode):
     """
     Used to represent the SQL where-clause for spatial databases --
     these are tied to the GeoQuery class that created it.
     """
+
     def add(self, data, connector):
         if isinstance(data, (list, tuple)):
             obj, lookup_type, value = data
             if ( isinstance(obj, Constraint) and
-                 isinstance(obj.field, GeometryField) ):
+                     isinstance(obj.field, GeometryField) ):
                 data = (GeoConstraint(obj), lookup_type, value)
         super(GeoWhereNode, self).add(data, connector)
 

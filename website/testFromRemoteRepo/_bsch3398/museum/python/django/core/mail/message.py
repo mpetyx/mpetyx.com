@@ -3,15 +3,17 @@ import os
 import random
 import time
 from email import Charset, Encoders
+
+from django.core.mail.utils import DNS_NAME
+from django.utils.encoding import smart_str, force_unicode
+
 from email.MIMEText import MIMEText
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email.Header import Header
 from email.Utils import formatdate, getaddresses, formataddr
-
 from django.conf import settings
-from django.core.mail.utils import DNS_NAME
-from django.utils.encoding import smart_str, force_unicode
+
 
 # Don't BASE64-encode UTF-8 messages so that we avoid unwanted attention from
 # some spam filters.
@@ -76,25 +78,26 @@ def forbid_multi_line_headers(name, val, encoding):
             val = Header(val)
     return name, val
 
+
 class SafeMIMEText(MIMEText):
-    
     def __init__(self, text, subtype, charset):
         self.encoding = charset
         MIMEText.__init__(self, text, subtype, charset)
-    
-    def __setitem__(self, name, val):    
+
+    def __setitem__(self, name, val):
         name, val = forbid_multi_line_headers(name, val, self.encoding)
         MIMEText.__setitem__(self, name, val)
 
+
 class SafeMIMEMultipart(MIMEMultipart):
-    
     def __init__(self, _subtype='mixed', boundary=None, _subparts=None, encoding=None, **_params):
         self.encoding = encoding
         MIMEMultipart.__init__(self, _subtype, boundary, _subparts, **_params)
-        
+
     def __setitem__(self, name, val):
         name, val = forbid_multi_line_headers(name, val, self.encoding)
         MIMEMultipart.__setitem__(self, name, val)
+
 
 class EmailMessage(object):
     """
@@ -133,6 +136,7 @@ class EmailMessage(object):
 
     def get_connection(self, fail_silently=False):
         from django.core.mail import get_connection
+
         if not self.connection:
             self.connection = get_connection(fail_silently=fail_silently)
         return self.connection
@@ -252,7 +256,7 @@ class EmailMultiAlternatives(EmailMessage):
     alternative_subtype = 'alternative'
 
     def __init__(self, subject='', body='', from_email=None, to=None, bcc=None,
-            connection=None, attachments=None, headers=None, alternatives=None):
+                 connection=None, attachments=None, headers=None, alternatives=None):
         """
         Initialize a single email message (which can be sent to multiple
         recipients).
@@ -261,8 +265,9 @@ class EmailMultiAlternatives(EmailMessage):
         bytestrings). The SafeMIMEText class will handle any necessary encoding
         conversions.
         """
-        super(EmailMultiAlternatives, self).__init__(subject, body, from_email, to, bcc, connection, attachments, headers)
-        self.alternatives=alternatives or []
+        super(EmailMultiAlternatives, self).__init__(subject, body, from_email, to, bcc, connection, attachments,
+                                                     headers)
+        self.alternatives = alternatives or []
 
     def attach_alternative(self, content, mimetype):
         """Attach an alternative content representation."""

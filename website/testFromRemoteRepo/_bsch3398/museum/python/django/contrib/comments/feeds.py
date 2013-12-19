@@ -1,8 +1,10 @@
-from django.conf import settings
 from django.contrib.syndication.views import Feed
 from django.contrib.sites.models import Site
 from django.contrib import comments
 from django.utils.translation import ugettext as _
+
+from django.conf import settings
+
 
 class LatestCommentFeed(Feed):
     """Feed of latest comments on the current site."""
@@ -24,9 +26,9 @@ class LatestCommentFeed(Feed):
 
     def items(self):
         qs = comments.get_model().objects.filter(
-            site__pk = settings.SITE_ID,
-            is_public = True,
-            is_removed = False,
+            site__pk=settings.SITE_ID,
+            is_public=True,
+            is_removed=False,
         )
         if getattr(settings, 'COMMENTS_BANNED_USERS_GROUP', None):
             where = ['user_id NOT IN (SELECT user_id FROM auth_user_groups WHERE group_id = %s)']

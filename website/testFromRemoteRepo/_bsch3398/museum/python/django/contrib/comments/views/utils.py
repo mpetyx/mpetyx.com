@@ -4,12 +4,15 @@ A few bits of helper functions for comment views.
 
 import urllib
 import textwrap
+
 from django.http import HttpResponseRedirect
 from django.core import urlresolvers
 from django.shortcuts import render_to_response
-from django.template import RequestContext
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import comments
+
+from django.template import RequestContext
+
 
 def next_redirect(data, default, default_view, **get_kwargs):
     """
@@ -29,11 +32,13 @@ def next_redirect(data, default, default_view, **get_kwargs):
         next += joiner + urllib.urlencode(get_kwargs)
     return HttpResponseRedirect(next)
 
+
 def confirmation_view(template, doc="Display a confirmation view."):
     """
     Confirmation view generator for the "comment was
     posted/flagged/deleted/approved" views.
     """
+
     def confirmed(request):
         comment = None
         if 'c' in request.GET:
@@ -42,8 +47,8 @@ def confirmation_view(template, doc="Display a confirmation view."):
             except (ObjectDoesNotExist, ValueError):
                 pass
         return render_to_response(template,
-            {'comment': comment},
-            context_instance=RequestContext(request)
+                                  {'comment': comment},
+                                  context_instance=RequestContext(request)
         )
 
     confirmed.__doc__ = textwrap.dedent("""\

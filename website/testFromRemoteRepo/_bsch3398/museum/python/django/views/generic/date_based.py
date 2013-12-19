@@ -1,16 +1,18 @@
 import datetime
 import time
 
-from django.template import loader, RequestContext
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.xheaders import populate_xheaders
 from django.db.models.fields import DateTimeField
 from django.http import Http404, HttpResponse
 
+from django.template import loader, RequestContext
+from django.core.xheaders import populate_xheaders
+
+
 def archive_index(request, queryset, date_field, num_latest=15,
-        template_name=None, template_loader=loader,
-        extra_context=None, allow_empty=True, context_processors=None,
-        mimetype=None, allow_future=False, template_object_name='latest'):
+                  template_name=None, template_loader=loader,
+                  extra_context=None, allow_empty=True, context_processors=None,
+                  mimetype=None, allow_future=False, template_object_name='latest'):
     """
     Generic top-level archive of date-based objects.
 
@@ -30,7 +32,7 @@ def archive_index(request, queryset, date_field, num_latest=15,
         raise Http404("No %s available" % model._meta.verbose_name)
 
     if date_list and num_latest:
-        latest = queryset.order_by('-'+date_field)[:num_latest]
+        latest = queryset.order_by('-' + date_field)[:num_latest]
     else:
         latest = None
 
@@ -38,8 +40,8 @@ def archive_index(request, queryset, date_field, num_latest=15,
         template_name = "%s/%s_archive.html" % (model._meta.app_label, model._meta.object_name.lower())
     t = template_loader.get_template(template_name)
     c = RequestContext(request, {
-        'date_list' : date_list,
-        template_object_name : latest,
+        'date_list': date_list,
+        template_object_name: latest,
     }, context_processors)
     for key, value in extra_context.items():
         if callable(value):
@@ -48,10 +50,11 @@ def archive_index(request, queryset, date_field, num_latest=15,
             c[key] = value
     return HttpResponse(t.render(c), mimetype=mimetype)
 
+
 def archive_year(request, year, queryset, date_field, template_name=None,
-        template_loader=loader, extra_context=None, allow_empty=False,
-        context_processors=None, template_object_name='object', mimetype=None,
-        make_object_list=False, allow_future=False):
+                 template_loader=loader, extra_context=None, allow_empty=False,
+                 context_processors=None, template_object_name='object', mimetype=None,
+                 make_object_list=False, allow_future=False):
     """
     Generic yearly archive view.
 
@@ -96,10 +99,11 @@ def archive_year(request, year, queryset, date_field, template_name=None,
             c[key] = value
     return HttpResponse(t.render(c), mimetype=mimetype)
 
+
 def archive_month(request, year, month, queryset, date_field,
-        month_format='%b', template_name=None, template_loader=loader,
-        extra_context=None, allow_empty=False, context_processors=None,
-        template_object_name='object', mimetype=None, allow_future=False):
+                  month_format='%b', template_name=None, template_loader=loader,
+                  extra_context=None, allow_empty=False, context_processors=None,
+                  template_object_name='object', mimetype=None, allow_future=False):
     """
     Generic monthly archive view.
 
@@ -155,9 +159,9 @@ def archive_month(request, year, month, queryset, date_field,
 
     # Calculate the previous month
     if first_day.month == 1:
-        previous_month = first_day.replace(year=first_day.year-1,month=12)
+        previous_month = first_day.replace(year=first_day.year - 1, month=12)
     else:
-        previous_month = first_day.replace(month=first_day.month-1)
+        previous_month = first_day.replace(month=first_day.month - 1)
 
     if not template_name:
         template_name = "%s/%s_archive_month.html" % (model._meta.app_label, model._meta.object_name.lower())
@@ -176,10 +180,11 @@ def archive_month(request, year, month, queryset, date_field,
             c[key] = value
     return HttpResponse(t.render(c), mimetype=mimetype)
 
+
 def archive_week(request, year, week, queryset, date_field,
-        template_name=None, template_loader=loader,
-        extra_context=None, allow_empty=True, context_processors=None,
-        template_object_name='object', mimetype=None, allow_future=False):
+                 template_name=None, template_loader=loader,
+                 extra_context=None, allow_empty=True, context_processors=None,
+                 template_object_name='object', mimetype=None, allow_future=False):
     """
     Generic weekly archive view.
 
@@ -192,7 +197,7 @@ def archive_week(request, year, week, queryset, date_field,
     """
     if extra_context is None: extra_context = {}
     try:
-        tt = time.strptime(year+'-0-'+week, '%Y-%w-%U')
+        tt = time.strptime(year + '-0-' + week, '%Y-%w-%U')
         date = datetime.date(*tt[:3])
     except ValueError:
         raise Http404
@@ -228,11 +233,12 @@ def archive_week(request, year, week, queryset, date_field,
             c[key] = value
     return HttpResponse(t.render(c), mimetype=mimetype)
 
+
 def archive_day(request, year, month, day, queryset, date_field,
-        month_format='%b', day_format='%d', template_name=None,
-        template_loader=loader, extra_context=None, allow_empty=False,
-        context_processors=None, template_object_name='object',
-        mimetype=None, allow_future=False):
+                month_format='%b', day_format='%d', template_name=None,
+                template_loader=loader, extra_context=None, allow_empty=False,
+                context_processors=None, template_object_name='object',
+                mimetype=None, allow_future=False):
     """
     Generic daily archive view.
 
@@ -259,7 +265,8 @@ def archive_day(request, year, month, day, queryset, date_field,
     now = datetime.datetime.now()
 
     if isinstance(model._meta.get_field(date_field), DateTimeField):
-        lookup_kwargs = {'%s__range' % date_field: (datetime.datetime.combine(date, datetime.time.min), datetime.datetime.combine(date, datetime.time.max))}
+        lookup_kwargs = {'%s__range' % date_field: (
+        datetime.datetime.combine(date, datetime.time.min), datetime.datetime.combine(date, datetime.time.max))}
     else:
         lookup_kwargs = {date_field: date}
 
@@ -294,6 +301,7 @@ def archive_day(request, year, month, day, queryset, date_field,
             c[key] = value
     return HttpResponse(t.render(c), mimetype=mimetype)
 
+
 def archive_today(request, **kwargs):
     """
     Generic daily archive view for today. Same as archive_day view.
@@ -306,11 +314,12 @@ def archive_today(request, **kwargs):
     })
     return archive_day(request, **kwargs)
 
+
 def object_detail(request, year, month, day, queryset, date_field,
-        month_format='%b', day_format='%d', object_id=None, slug=None,
-        slug_field='slug', template_name=None, template_name_field=None,
-        template_loader=loader, extra_context=None, context_processors=None,
-        template_object_name='object', mimetype=None, allow_future=False):
+                  month_format='%b', day_format='%d', object_id=None, slug=None,
+                  slug_field='slug', template_name=None, template_name_field=None,
+                  template_loader=loader, extra_context=None, context_processors=None,
+                  template_object_name='object', mimetype=None, allow_future=False):
     """
     Generic detail view from year/month/day/slug or year/month/day/id structure.
 
@@ -331,7 +340,8 @@ def object_detail(request, year, month, day, queryset, date_field,
     now = datetime.datetime.now()
 
     if isinstance(model._meta.get_field(date_field), DateTimeField):
-        lookup_kwargs = {'%s__range' % date_field: (datetime.datetime.combine(date, datetime.time.min), datetime.datetime.combine(date, datetime.time.max))}
+        lookup_kwargs = {'%s__range' % date_field: (
+        datetime.datetime.combine(date, datetime.time.min), datetime.datetime.combine(date, datetime.time.max))}
     else:
         lookup_kwargs = {date_field: date}
 

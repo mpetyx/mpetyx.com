@@ -6,17 +6,22 @@ file upload handlers for processing.
 """
 
 import cgi
-from django.conf import settings
+
 from django.core.exceptions import SuspiciousOperation
 from django.utils.datastructures import MultiValueDict
 from django.utils.encoding import force_unicode
 from django.utils.text import unescape_entities
 from django.core.files.uploadhandler import StopUpload, SkipFile, StopFutureHandlers
 
+from django.conf import settings
+
+
 __all__ = ('MultiPartParser', 'MultiPartParserError', 'InputStreamExhausted')
+
 
 class MultiPartParserError(Exception):
     pass
+
 
 class InputStreamExhausted(Exception):
     """
@@ -24,9 +29,11 @@ class InputStreamExhausted(Exception):
     """
     pass
 
+
 RAW = "raw"
 FILE = "file"
 FIELD = "field"
+
 
 class MultiPartParser(object):
     """
@@ -35,6 +42,7 @@ class MultiPartParser(object):
     ``MultiValueDict.parse()`` reads the input stream in ``chunk_size`` chunks
     and returns a tuple of ``(MultiValueDict(POST), MultiValueDict(FILES))``. If
     """
+
     def __init__(self, META, input_data, upload_handlers, encoding=None):
         """
         Initialize the MultiPartParser object.
@@ -70,7 +78,7 @@ class MultiPartParser(object):
         # to receive.
         #
         try:
-            content_length = int(META.get('HTTP_CONTENT_LENGTH', META.get('CONTENT_LENGTH',0)))
+            content_length = int(META.get('HTTP_CONTENT_LENGTH', META.get('CONTENT_LENGTH', 0)))
         except (ValueError, TypeError):
             # For now set it to 0; we'll try again later on down.
             content_length = 0
@@ -85,7 +93,7 @@ class MultiPartParser(object):
         # For compatibility with low-level network APIs (with 32-bit integers),
         # the chunk size should be < 2^31, but still divisible by 4.
         possible_sizes = [x.chunk_size for x in upload_handlers if x.chunk_size]
-        self._chunk_size = min([2**31-4] + possible_sizes)
+        self._chunk_size = min([2 ** 31 - 4] + possible_sizes)
 
         self._meta = META
         self._encoding = encoding or settings.DEFAULT_CHARSET
@@ -170,7 +178,7 @@ class MultiPartParser(object):
 
                     content_type = meta_data.get('content-type', ('',))[0].strip()
                     try:
-                        charset = meta_data.get('content-type', (0,{}))[1].get('charset', None)
+                        charset = meta_data.get('content-type', (0, {}))[1].get('charset', None)
                     except:
                         charset = None
 
@@ -247,7 +255,8 @@ class MultiPartParser(object):
 
     def IE_sanitize(self, filename):
         """Cleanup filename from Internet Explorer full paths."""
-        return filename and filename[filename.rfind("\\")+1:].strip()
+        return filename and filename[filename.rfind("\\") + 1:].strip()
+
 
 class LazyStream(object):
     """
@@ -257,6 +266,7 @@ class LazyStream(object):
     LazyStream object will support iteration, reading, and keeping a "look-back"
     variable in case you need to "unget" some bytes.
     """
+
     def __init__(self, producer, length=None):
         """
         Every LazyStream must have a producer when instantiated.
@@ -360,12 +370,14 @@ class LazyStream(object):
                 " if there is none, report this to the Django developers."
             )
 
+
 class ChunkIter(object):
     """
     An iterable that will yield chunks of data. Given a file-like object as the
     constructor, this object will yield chunks of read operations from that
     object.
     """
+
     def __init__(self, flo, chunk_size=64 * 1024):
         self.flo = flo
         self.chunk_size = chunk_size
@@ -383,8 +395,10 @@ class ChunkIter(object):
     def __iter__(self):
         return self
 
+
 class LimitBytes(object):
     """ Limit bytes for a file object. """
+
     def __init__(self, fileobject, length):
         self._file = fileobject
         self.remaining = length
@@ -404,10 +418,12 @@ class LimitBytes(object):
         self.remaining -= num_bytes
         return self._file.read(num_bytes)
 
+
 class InterBoundaryIter(object):
     """
     A Producer that will iterate over boundaries.
     """
+
     def __init__(self, stream, boundary):
         self._stream = stream
         self._boundary = boundary
@@ -420,6 +436,7 @@ class InterBoundaryIter(object):
             return LazyStream(BoundaryIter(self._stream, self._boundary))
         except InputStreamExhausted:
             raise StopIteration()
+
 
 class BoundaryIter(object):
     """
@@ -449,6 +466,7 @@ class BoundaryIter(object):
         self._stream.unget(unused_char)
         try:
             from mx.TextTools import FS
+
             self._fs = FS(boundary).find
         except ImportError:
             self._fs = lambda data: data.find(boundary)
@@ -497,7 +515,7 @@ class BoundaryIter(object):
                 stream.unget(chunk[-rollback:])
                 return chunk[:-rollback]
 
-    def _find_boundary(self, data, eof = False):
+    def _find_boundary(self, data, eof=False):
         """
         Finds a multipart boundary in data.
 
@@ -514,11 +532,12 @@ class BoundaryIter(object):
             end = index
             next = index + len(self._boundary)
             # backup over CRLF
-            if data[max(0,end-1)] == '\n':
+            if data[max(0, end - 1)] == '\n':
                 end -= 1
-            if data[max(0,end-1)] == '\r':
+            if data[max(0, end - 1)] == '\r':
                 end -= 1
             return end, next
+
 
 def exhaust(stream_or_iterable):
     """
@@ -537,6 +556,7 @@ def exhaust(stream_or_iterable):
 
     for __ in iterator:
         pass
+
 
 def parse_boundary_stream(stream, max_header_size):
     """
@@ -596,6 +616,7 @@ def parse_boundary_stream(stream, max_header_size):
 
     return (TYPE, outdict, stream)
 
+
 class Parser(object):
     def __init__(self, stream, boundary):
         self._stream = stream
@@ -607,6 +628,7 @@ class Parser(object):
             # Iterate over each part
             yield parse_boundary_stream(sub_stream, 1024)
 
+
 def parse_header(line):
     """ Parse the header into a key-value. """
     plist = _parse_header_params(';' + line)
@@ -616,12 +638,13 @@ def parse_header(line):
         i = p.find('=')
         if i >= 0:
             name = p[:i].strip().lower()
-            value = p[i+1:].strip()
+            value = p[i + 1:].strip()
             if len(value) >= 2 and value[0] == value[-1] == '"':
                 value = value[1:-1]
                 value = value.replace('\\\\', '\\').replace('\\"', '"')
             pdict[name] = value
     return key, pdict
+
 
 def _parse_header_params(s):
     plist = []

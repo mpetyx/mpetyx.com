@@ -8,10 +8,12 @@ import os
 import sys
 from optparse import make_option, OptionParser
 
-import django
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.color import color_style
 from django.utils.encoding import smart_str
+
+import django
+
 
 class CommandError(Exception):
     """
@@ -28,6 +30,7 @@ class CommandError(Exception):
     """
     pass
 
+
 def handle_default_options(options):
     """
     Include any default options that all commands should accept here
@@ -39,6 +42,7 @@ def handle_default_options(options):
         os.environ['DJANGO_SETTINGS_MODULE'] = options.settings
     if options.pythonpath:
         sys.path.insert(0, options.pythonpath)
+
 
 class BaseCommand(object):
     """
@@ -118,14 +122,14 @@ class BaseCommand(object):
     # Metadata about this command.
     option_list = (
         make_option('-v', '--verbosity', action='store', dest='verbosity', default='1',
-            type='choice', choices=['0', '1', '2'],
-            help='Verbosity level; 0=minimal output, 1=normal output, 2=all output'),
+                    type='choice', choices=['0', '1', '2'],
+                    help='Verbosity level; 0=minimal output, 1=normal output, 2=all output'),
         make_option('--settings',
-            help='The Python path to a settings module, e.g. "myproject.settings.main". If this isn\'t provided, the DJANGO_SETTINGS_MODULE environment variable will be used.'),
+                    help='The Python path to a settings module, e.g. "myproject.settings.main". If this isn\'t provided, the DJANGO_SETTINGS_MODULE environment variable will be used.'),
         make_option('--pythonpath',
-            help='A directory to add to the Python path, e.g. "/home/djangoprojects/myproject".'),
+                    help='A directory to add to the Python path, e.g. "/home/djangoprojects/myproject".'),
         make_option('--traceback', action='store_true',
-            help='Print traceback on exception'),
+                    help='Print traceback on exception'),
     )
     help = ''
     args = ''
@@ -206,6 +210,7 @@ class BaseCommand(object):
         if self.can_import_settings:
             try:
                 from django.utils import translation
+
                 translation.activate('en-us')
             except ImportError, e:
                 # If settings should be available, but aren't,
@@ -220,6 +225,7 @@ class BaseCommand(object):
                 if self.output_transaction:
                     # This needs to be imported here, because it relies on settings.
                     from django.db import connection
+
                     if connection.ops.start_transaction_sql():
                         print self.style.SQL_KEYWORD(connection.ops.start_transaction_sql())
                 print output
@@ -237,6 +243,7 @@ class BaseCommand(object):
 
         """
         from django.core.management.validation import get_validation_errors
+
         try:
             from cStringIO import StringIO
         except ImportError:
@@ -258,6 +265,7 @@ class BaseCommand(object):
         """
         raise NotImplementedError()
 
+
 class AppCommand(BaseCommand):
     """
     A management command which takes one or more installed application
@@ -271,6 +279,7 @@ class AppCommand(BaseCommand):
 
     def handle(self, *app_labels, **options):
         from django.db import models
+
         if not app_labels:
             raise CommandError('Enter at least one appname.')
         try:
@@ -292,6 +301,7 @@ class AppCommand(BaseCommand):
 
         """
         raise NotImplementedError()
+
 
 class LabelCommand(BaseCommand):
     """
@@ -328,6 +338,7 @@ class LabelCommand(BaseCommand):
         """
         raise NotImplementedError()
 
+
 class NoArgsCommand(BaseCommand):
     """
     A command which takes no arguments on the command line.
@@ -353,6 +364,7 @@ class NoArgsCommand(BaseCommand):
         """
         raise NotImplementedError()
 
+
 def copy_helper(style, app_or_project, name, directory, other_name=''):
     """
     Copies either a Django application layout template or a Django project
@@ -367,6 +379,7 @@ def copy_helper(style, app_or_project, name, directory, other_name=''):
     #               of the project.
     import re
     import shutil
+
     other = {'project': 'app', 'app': 'project'}[app_or_project]
     if not re.search(r'^[_a-zA-Z]\w*$', name): # If it's not a valid directory name.
         # Provide a smart error message, depending on the error.
@@ -387,7 +400,7 @@ def copy_helper(style, app_or_project, name, directory, other_name=''):
     template_dir = os.path.join(django.__path__[0], 'conf', '%s_template' % app_or_project)
 
     for d, subdirs, files in os.walk(template_dir):
-        relative_dir = d[len(template_dir)+1:].replace('%s_name' % app_or_project, name)
+        relative_dir = d[len(template_dir) + 1:].replace('%s_name' % app_or_project, name)
         if relative_dir:
             os.mkdir(os.path.join(top_dir, relative_dir))
         for i, subdir in enumerate(subdirs):
@@ -402,14 +415,17 @@ def copy_helper(style, app_or_project, name, directory, other_name=''):
             path_new = os.path.join(top_dir, relative_dir, f.replace('%s_name' % app_or_project, name))
             fp_old = open(path_old, 'r')
             fp_new = open(path_new, 'w')
-            fp_new.write(fp_old.read().replace('{{ %s_name }}' % app_or_project, name).replace('{{ %s_name }}' % other, other_name))
+            fp_new.write(fp_old.read().replace('{{ %s_name }}' % app_or_project, name).replace('{{ %s_name }}' % other,
+                                                                                               other_name))
             fp_old.close()
             fp_new.close()
             try:
                 shutil.copymode(path_old, path_new)
                 _make_writeable(path_new)
             except OSError:
-                sys.stderr.write(style.NOTICE("Notice: Couldn't set permission bits on %s. You're probably using an uncommon filesystem setup. No problem.\n" % path_new))
+                sys.stderr.write(style.NOTICE(
+                    "Notice: Couldn't set permission bits on %s. You're probably using an uncommon filesystem setup. No problem.\n" % path_new))
+
 
 def _make_writeable(filename):
     """
@@ -418,6 +434,7 @@ def _make_writeable(filename):
 
     """
     import stat
+
     if sys.platform.startswith('java'):
         # On Jython there is no os.access()
         return

@@ -7,14 +7,17 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.uploadedfile import TemporaryUploadedFile, InMemoryUploadedFile
 from django.utils import importlib
 
-__all__ = ['UploadFileException','StopUpload', 'SkipFile', 'FileUploadHandler',
+from django.conf import settings
+
+
+__all__ = ['UploadFileException', 'StopUpload', 'SkipFile', 'FileUploadHandler',
            'TemporaryFileUploadHandler', 'MemoryFileUploadHandler',
            'load_handler', 'StopFutureHandlers']
+
 
 class UploadFileException(Exception):
     """
@@ -22,10 +25,12 @@ class UploadFileException(Exception):
     """
     pass
 
+
 class StopUpload(UploadFileException):
     """
     This exception is raised when an upload must abort.
     """
+
     def __init__(self, connection_reset=False):
         """
         If ``connection_reset`` is ``True``, Django knows will halt the upload
@@ -40,11 +45,13 @@ class StopUpload(UploadFileException):
         else:
             return u'StopUpload: Consume request data, then halt.'
 
+
 class SkipFile(UploadFileException):
     """
     This exception is raised by an upload handler that wants to skip a given file.
     """
     pass
+
 
 class StopFutureHandlers(UploadFileException):
     """
@@ -52,6 +59,7 @@ class StopFutureHandlers(UploadFileException):
     run should raise this exception instead of returning None.
     """
     pass
+
 
 class FileUploadHandler(object):
     """
@@ -120,10 +128,12 @@ class FileUploadHandler(object):
         """
         pass
 
+
 class TemporaryFileUploadHandler(FileUploadHandler):
     """
     Upload handler that streams data into a temporary file.
     """
+
     def __init__(self, *args, **kwargs):
         super(TemporaryFileUploadHandler, self).__init__(*args, **kwargs)
 
@@ -141,6 +151,7 @@ class TemporaryFileUploadHandler(FileUploadHandler):
         self.file.seek(0)
         self.file.size = file_size
         return self.file
+
 
 class MemoryFileUploadHandler(FileUploadHandler):
     """
@@ -182,12 +193,12 @@ class MemoryFileUploadHandler(FileUploadHandler):
 
         self.file.seek(0)
         return InMemoryUploadedFile(
-            file = self.file,
-            field_name = self.field_name,
-            name = self.file_name,
-            content_type = self.content_type,
-            size = file_size,
-            charset = self.charset
+            file=self.file,
+            field_name=self.field_name,
+            name=self.file_name,
+            content_type=self.content_type,
+            size=file_size,
+            charset=self.charset
         )
 
 
@@ -201,13 +212,14 @@ def load_handler(path, *args, **kwargs):
 
     """
     i = path.rfind('.')
-    module, attr = path[:i], path[i+1:]
+    module, attr = path[:i], path[i + 1:]
     try:
         mod = importlib.import_module(module)
     except ImportError, e:
         raise ImproperlyConfigured('Error importing upload handler module %s: "%s"' % (module, e))
     except ValueError, e:
-        raise ImproperlyConfigured('Error importing upload handler module. Is FILE_UPLOAD_HANDLERS a correctly defined list or tuple?')
+        raise ImproperlyConfigured(
+            'Error importing upload handler module. Is FILE_UPLOAD_HANDLERS a correctly defined list or tuple?')
     try:
         cls = getattr(mod, attr)
     except AttributeError:

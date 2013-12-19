@@ -4,7 +4,6 @@ import gzip
 import zipfile
 from optparse import make_option
 
-from django.conf import settings
 from django.core import serializers
 from django.core.management.base import BaseCommand
 from django.core.management.color import no_style
@@ -12,11 +11,16 @@ from django.db import connections, router, transaction, DEFAULT_DB_ALIAS
 from django.db.models import get_apps
 from django.utils.itercompat import product
 
+from django.conf import settings
+
+
 try:
     import bz2
+
     has_bz2 = True
 except ImportError:
     has_bz2 = False
+
 
 class Command(BaseCommand):
     help = 'Installs the named fixture(s) in the database.'
@@ -24,8 +28,8 @@ class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
         make_option('--database', action='store', dest='database',
-            default=DEFAULT_DB_ALIAS, help='Nominates a specific database to load '
-                'fixtures into. Defaults to the "default" database.'),
+                    default=DEFAULT_DB_ALIAS, help='Nominates a specific database to load '
+                                                   'fixtures into. Defaults to the "default" database.'),
     )
 
     def handle(self, *fixture_labels, **options):
@@ -69,13 +73,14 @@ class Command(BaseCommand):
                 zipfile.ZipFile.__init__(self, *args, **kwargs)
                 if settings.DEBUG:
                     assert len(self.namelist()) == 1, "Zip-compressed fixtures must contain only one file."
+
             def read(self):
                 return zipfile.ZipFile.read(self, self.namelist()[0])
 
         compression_types = {
-            None:   file,
-            'gz':   gzip.GzipFile,
-            'zip':  SingleZipReader
+            None: file,
+            'gz': gzip.GzipFile,
+            'zip': SingleZipReader
         }
         if has_bz2:
             compression_types['bz2'] = bz2.BZ2File
@@ -116,7 +121,7 @@ class Command(BaseCommand):
             else:
                 sys.stderr.write(
                     self.style.ERROR("Problem installing fixture '%s': %s is not a known serialization format." %
-                        (fixture_name, format)))
+                                     (fixture_name, format)))
                 transaction.rollback(using=using)
                 transaction.leave_transaction_management(using=using)
                 return
@@ -142,7 +147,7 @@ class Command(BaseCommand):
 
                     if verbosity > 1:
                         print "Trying %s for %s fixture '%s'..." % \
-                            (humanize(fixture_dir), file_name, fixture_name)
+                              (humanize(fixture_dir), file_name, fixture_name)
                     full_path = os.path.join(fixture_dir, file_name)
                     open_method = compression_types[compression_format]
                     try:
@@ -150,7 +155,7 @@ class Command(BaseCommand):
                         if label_found:
                             fixture.close()
                             print self.style.ERROR("Multiple fixtures named '%s' in %s. Aborting." %
-                                (fixture_name, humanize(fixture_dir)))
+                                                   (fixture_name, humanize(fixture_dir)))
                             transaction.rollback(using=using)
                             transaction.leave_transaction_management(using=using)
                             return
@@ -159,7 +164,7 @@ class Command(BaseCommand):
                             objects_in_fixture = 0
                             if verbosity > 0:
                                 print "Installing %s fixture '%s' from %s." % \
-                                    (format, fixture_name, humanize(fixture_dir))
+                                      (format, fixture_name, humanize(fixture_dir))
                             try:
                                 objects = serializers.deserialize(format, fixture, using=using)
                                 for obj in objects:
@@ -173,6 +178,7 @@ class Command(BaseCommand):
                                 raise
                             except Exception:
                                 import traceback
+
                                 fixture.close()
                                 transaction.rollback(using=using)
                                 transaction.leave_transaction_management(using=using)
@@ -181,8 +187,9 @@ class Command(BaseCommand):
                                 else:
                                     sys.stderr.write(
                                         self.style.ERROR("Problem installing fixture '%s': %s\n" %
-                                             (full_path, ''.join(traceback.format_exception(sys.exc_type,
-                                                 sys.exc_value, sys.exc_traceback)))))
+                                                         (full_path, ''.join(traceback.format_exception(sys.exc_type,
+                                                                                                        sys.exc_value,
+                                                                                                        sys.exc_traceback)))))
                                 return
                             fixture.close()
 
@@ -191,7 +198,7 @@ class Command(BaseCommand):
                             if objects_in_fixture == 0:
                                 sys.stderr.write(
                                     self.style.ERROR("No fixture data found for '%s'. (File format may be invalid.)" %
-                                        (fixture_name)))
+                                                     (fixture_name)))
                                 transaction.rollback(using=using)
                                 transaction.leave_transaction_management(using=using)
                                 return
@@ -199,7 +206,7 @@ class Command(BaseCommand):
                     except Exception, e:
                         if verbosity > 1:
                             print "No %s fixture '%s' in %s." % \
-                                (format, fixture_name, humanize(fixture_dir))
+                                  (format, fixture_name, humanize(fixture_dir))
 
         # If we found even one object in a fixture, we need to reset the
         # database sequences.

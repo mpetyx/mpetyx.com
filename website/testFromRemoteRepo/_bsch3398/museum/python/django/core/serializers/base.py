@@ -5,16 +5,18 @@ Module for abstract serializer/unserializer base classes.
 from StringIO import StringIO
 
 from django.db import models
-from django.utils.encoding import smart_str, smart_unicode
-from django.utils import datetime_safe
+from django.utils.encoding import smart_unicode
+
 
 class SerializationError(Exception):
     """Something bad happened during serialization."""
     pass
 
+
 class DeserializationError(Exception):
     """Something bad happened during deserialization."""
     pass
+
 
 class Serializer(object):
     """
@@ -110,6 +112,7 @@ class Serializer(object):
         if callable(getattr(self.stream, 'getvalue', None)):
             return self.stream.getvalue()
 
+
 class Deserializer(object):
     """
     Abstract base deserializer class.
@@ -124,7 +127,7 @@ class Deserializer(object):
             self.stream = StringIO(stream_or_string)
         else:
             self.stream = stream_or_string
-        # hack to make sure that the models have all been loaded before
+            # hack to make sure that the models have all been loaded before
         # deserialization starts (otherwise subclass calls to get_model()
         # and friends might fail...)
         models.get_apps()
@@ -135,6 +138,7 @@ class Deserializer(object):
     def next(self):
         """Iteration iterface -- return the next item in the stream"""
         raise NotImplementedError
+
 
 class DeserializedObject(object):
     """

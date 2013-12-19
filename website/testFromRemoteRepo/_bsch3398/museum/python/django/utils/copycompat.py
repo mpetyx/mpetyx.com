@@ -11,4 +11,3 @@ if (hasattr(copy, '_deepcopy_dispatch') and types.FunctionType not in copy._deep
 
 # Pose as the copy module now.
 del copy, types
-from copy import *

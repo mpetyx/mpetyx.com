@@ -9,4 +9,4 @@ def get_validation_digit(number):
     for i in range(0, len(number)):
         sum = (int(number[-1 - i]) * dvs[i] + sum) % 10
 
-    return (10-sum) % 10
+    return (10 - sum) % 10

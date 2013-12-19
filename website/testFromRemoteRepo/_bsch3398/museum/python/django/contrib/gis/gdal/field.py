@@ -20,7 +20,7 @@ class Field(GDALBase):
         # Setting the feature pointer and index.
         self._feat = feat
         self._index = index
-        
+
         # Getting the pointer for this field.
         fld_ptr = capi.get_feat_field_defn(feat, index)
         if not fld_ptr:
@@ -109,6 +109,7 @@ class OFTInteger(Field):
         """
         return 0
 
+
 class OFTReal(Field):
     @property
     def value(self):
@@ -117,7 +118,11 @@ class OFTReal(Field):
 
 # String & Binary fields, just subclasses
 class OFTString(Field): pass
+
+
 class OFTWideString(Field): pass
+
+
 class OFTBinary(Field): pass
 
 # OFTDate, OFTTime, OFTDateTime fields.
@@ -130,6 +135,7 @@ class OFTDate(Field):
             return date(yy.value, mm.value, dd.value)
         except (ValueError, OGRException):
             return None
+
 
 class OFTDateTime(Field):
     @property
@@ -145,6 +151,7 @@ class OFTDateTime(Field):
         except (ValueError, OGRException):
             return None
 
+
 class OFTTime(Field):
     @property
     def value(self):
@@ -157,22 +164,28 @@ class OFTTime(Field):
 
 # List fields are also just subclasses
 class OFTIntegerList(Field): pass
+
+
 class OFTRealList(Field): pass
+
+
 class OFTStringList(Field): pass
+
+
 class OFTWideStringList(Field): pass
 
 # Class mapping dictionary for OFT Types and reverse mapping.
-OGRFieldTypes = { 0 : OFTInteger,
-                  1 : OFTIntegerList,
-                  2 : OFTReal,
-                  3 : OFTRealList,
-                  4 : OFTString,
-                  5 : OFTStringList,
-                  6 : OFTWideString,
-                  7 : OFTWideStringList,
-                  8 : OFTBinary,
-                  9 : OFTDate,
-                 10 : OFTTime,
-                 11 : OFTDateTime,
-                  }
+OGRFieldTypes = {0: OFTInteger,
+                 1: OFTIntegerList,
+                 2: OFTReal,
+                 3: OFTRealList,
+                 4: OFTString,
+                 5: OFTStringList,
+                 6: OFTWideString,
+                 7: OFTWideStringList,
+                 8: OFTBinary,
+                 9: OFTDate,
+                 10: OFTTime,
+                 11: OFTDateTime,
+}
 ROGRFieldTypes = dict([(cls, num) for num, cls in OGRFieldTypes.items()])

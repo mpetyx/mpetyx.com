@@ -1,10 +1,10 @@
-import decimal
 from threading import local
 
 from django.db import DEFAULT_DB_ALIAS
 from django.db.backends import util
 from django.utils import datetime_safe
 from django.utils.importlib import import_module
+
 
 class BaseDatabaseWrapper(local):
     """
@@ -72,6 +72,7 @@ class BaseDatabaseWrapper(local):
 
     def cursor(self):
         from django.conf import settings
+
         cursor = self._cursor()
         if settings.DEBUG:
             return self.make_debug_cursor(cursor)
@@ -79,6 +80,7 @@ class BaseDatabaseWrapper(local):
 
     def make_debug_cursor(self, cursor):
         return util.CursorDebugWrapper(cursor, self)
+
 
 class BaseDatabaseFeatures(object):
     allows_group_by_pk = False
@@ -96,6 +98,7 @@ class BaseDatabaseFeatures(object):
     # integer primary keys.
     related_fields_match_type = False
     allow_sliced_subqueries = True
+
 
 class BaseDatabaseOperations(object):
     """
@@ -363,6 +366,7 @@ class BaseDatabaseOperations(object):
     def prep_for_like_query(self, x):
         """Prepares a value for use in a LIKE query."""
         from django.utils.encoding import smart_unicode
+
         return smart_unicode(x).replace("\\", "\\\\").replace("%", "\%").replace("_", "\_")
 
     # Same as prep_for_like_query(), but called for "iexact" matches, which
@@ -440,7 +444,7 @@ class BaseDatabaseOperations(object):
             return int(value)
         elif internal_type in ('DateField', 'DateTimeField', 'TimeField'):
             return value
-        # No field, or the field isn't known to be a decimal or integer
+            # No field, or the field isn't known to be a decimal or integer
         # Default to a float
         return float(value)
 
@@ -462,6 +466,7 @@ class BaseDatabaseOperations(object):
         """
         conn = ' %s ' % connector
         return conn.join(sub_expressions)
+
 
 class BaseDatabaseIntrospection(object):
     """
@@ -501,6 +506,7 @@ class BaseDatabaseIntrospection(object):
         that actually exist in the database.
         """
         from django.db import models, router
+
         tables = set()
         for app in models.get_apps():
             for model in models.get_models(app):
@@ -517,13 +523,14 @@ class BaseDatabaseIntrospection(object):
     def installed_models(self, tables):
         "Returns a set of all models represented by the provided list of table names."
         from django.db import models, router
+
         all_models = []
         for app in models.get_apps():
             for model in models.get_models(app):
                 if router.allow_syncdb(self.connection.alias, model):
                     all_models.append(model)
         return set([m for m in all_models
-            if self.table_name_converter(m._meta.db_table) in map(self.table_name_converter, tables)
+                    if self.table_name_converter(m._meta.db_table) in map(self.table_name_converter, tables)
         ])
 
     def sequence_list(self):
@@ -552,6 +559,7 @@ class BaseDatabaseIntrospection(object):
 
         return sequence_list
 
+
 class BaseDatabaseClient(object):
     """
     This class encapsulates all backend-specific methods for opening a
@@ -568,10 +576,12 @@ class BaseDatabaseClient(object):
     def runshell(self):
         raise NotImplementedError()
 
+
 class BaseDatabaseValidation(object):
     """
     This class encapsualtes all backend-specific model validation.
     """
+
     def __init__(self, connection):
         self.connection = connection
 

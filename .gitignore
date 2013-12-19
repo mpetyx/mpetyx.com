@@ -3,3 +3,6 @@
 website/src/*
 
 .idea/workspace.xml
+
+website/testFromRemoteRepo/*
+website/testFromRemoteRepo/_bsch3398/*

@@ -8,6 +8,7 @@ from django.forms.fields import CharField, Select
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
+
 class UKPostcodeField(CharField):
     """
     A form field that validates its input is a UK postcode.
@@ -36,18 +37,24 @@ class UKPostcodeField(CharField):
             raise ValidationError(self.error_messages['invalid'])
         return postcode
 
+
 class UKCountySelect(Select):
     """
     A Select widget that uses a list of UK Counties/Regions as its choices.
     """
+
     def __init__(self, attrs=None):
         from uk_regions import UK_REGION_CHOICES
+
         super(UKCountySelect, self).__init__(attrs, choices=UK_REGION_CHOICES)
+
 
 class UKNationSelect(Select):
     """
     A Select widget that uses a list of UK Nations as its choices.
     """
+
     def __init__(self, attrs=None):
         from uk_regions import UK_NATIONS_CHOICES
+
         super(UKNationSelect, self).__init__(attrs, choices=UK_NATIONS_CHOICES)

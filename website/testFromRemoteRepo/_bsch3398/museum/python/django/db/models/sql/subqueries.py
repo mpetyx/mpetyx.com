@@ -3,15 +3,14 @@ Query subclasses which provide extra functionality beyond simple data retrieval.
 """
 
 from django.core.exceptions import FieldError
-from django.db import connections
 from django.db.models.sql.constants import *
 from django.db.models.sql.datastructures import Date
-from django.db.models.sql.expressions import SQLEvaluator
 from django.db.models.sql.query import Query
 from django.db.models.sql.where import AND, Constraint
 
 __all__ = ['DeleteQuery', 'UpdateQuery', 'InsertQuery', 'DateQuery',
-        'AggregateQuery']
+           'AggregateQuery']
+
 
 class DeleteQuery(Query):
     """
@@ -37,8 +36,9 @@ class DeleteQuery(Query):
             where = self.where_class()
             field = self.model._meta.pk
             where.add((Constraint(None, field.column, field), 'in',
-                    pk_list[offset : offset + GET_ITERATOR_CHUNK_SIZE]), AND)
+                       pk_list[offset: offset + GET_ITERATOR_CHUNK_SIZE]), AND)
             self.do_query(self.model._meta.db_table, where, using=using)
+
 
 class UpdateQuery(Query):
     """
@@ -64,7 +64,7 @@ class UpdateQuery(Query):
 
     def clone(self, klass=None, **kwargs):
         return super(UpdateQuery, self).clone(klass,
-                related_updates=self.related_updates.copy(), **kwargs)
+                                              related_updates=self.related_updates.copy(), **kwargs)
 
 
     def clear_related(self, related_field, pk_list, using):
@@ -78,8 +78,8 @@ class UpdateQuery(Query):
             self.where = self.where_class()
             f = self.model._meta.pk
             self.where.add((Constraint(None, f.column, f), 'in',
-                    pk_list[offset : offset + GET_ITERATOR_CHUNK_SIZE]),
-                    AND)
+                            pk_list[offset: offset + GET_ITERATOR_CHUNK_SIZE]),
+                           AND)
             self.values = [(related_field, None, None)]
             self.get_compiler(using).execute_sql(None)
 
@@ -93,7 +93,8 @@ class UpdateQuery(Query):
         for name, val in values.iteritems():
             field, model, direct, m2m = self.model._meta.get_field_by_name(name)
             if not direct or m2m:
-                raise FieldError('Cannot update model field %r (only non-relations and foreign keys permitted).' % field)
+                raise FieldError(
+                    'Cannot update model field %r (only non-relations and foreign keys permitted).' % field)
             if model:
                 self.add_related_update(model, field, val)
                 continue
@@ -136,6 +137,7 @@ class UpdateQuery(Query):
             result.append(query)
         return result
 
+
 class InsertQuery(Query):
     compiler = 'SQLInsertCompiler'
 
@@ -175,6 +177,7 @@ class InsertQuery(Query):
             self.params += tuple(values)
             self.values.extend(placeholders)
 
+
 class DateQuery(Query):
     """
     A DateQuery is a normal query, except that it specifically selects a single
@@ -189,7 +192,7 @@ class DateQuery(Query):
         Converts the query into a date extraction query.
         """
         result = self.setup_joins([field.name], self.get_meta(),
-                self.get_initial_alias(), False)
+                                  self.get_initial_alias(), False)
         alias = result[3][-1]
         select = Date((alias, field.column), lookup_type)
         self.select = [select]
@@ -198,6 +201,7 @@ class DateQuery(Query):
         self.set_extra_mask([])
         self.distinct = True
         self.order_by = order == 'ASC' and [1] or [-1]
+
 
 class AggregateQuery(Query):
     """

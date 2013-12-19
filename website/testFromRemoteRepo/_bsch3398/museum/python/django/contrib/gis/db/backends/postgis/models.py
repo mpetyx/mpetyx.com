@@ -4,6 +4,7 @@
 from django.db import models
 from django.contrib.gis.db.backends.base import SpatialRefSysMixin
 
+
 class GeometryColumns(models.Model):
     """
     The 'geometry_columns' table from the PostGIS. See the PostGIS
@@ -41,6 +42,7 @@ class GeometryColumns(models.Model):
         return "%s.%s - %dD %s field (SRID: %d)" % \
                (self.f_table_name, self.f_geometry_column,
                 self.coord_dimension, self.type, self.srid)
+
 
 class SpatialRefSys(models.Model, SpatialRefSysMixin):
     """

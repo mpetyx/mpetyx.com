@@ -1,5 +1,7 @@
-from mod_python import apache
 import os
+
+from mod_python import apache
+
 
 def authenhandler(req, **kwargs):
     """
@@ -27,6 +29,7 @@ def authenhandler(req, **kwargs):
 
     from django.contrib.auth.models import User
     from django import db
+
     db.reset_queries()
 
     # check that the username is valid
@@ -40,7 +43,7 @@ def authenhandler(req, **kwargs):
             user = User.objects.get(**kwargs)
         except User.DoesNotExist:
             return apache.HTTP_UNAUTHORIZED
-    
+
         # check the password and any permission given
         if user.check_password(req.get_basic_auth_pw()):
             if permission_name:

@@ -1,7 +1,10 @@
-from django import template
 from django.contrib.admin.models import LogEntry
 
+from django import template
+
+
 register = template.Library()
+
 
 class AdminLogNode(template.Node):
     def __init__(self, limit, varname, user):
@@ -17,8 +20,10 @@ class AdminLogNode(template.Node):
             user_id = self.user
             if not user_id.isdigit():
                 user_id = context[self.user].id
-            context[self.varname] = LogEntry.objects.filter(user__id__exact=user_id).select_related('content_type', 'user')[:self.limit]
+            context[self.varname] = LogEntry.objects.filter(user__id__exact=user_id).select_related('content_type',
+                                                                                                    'user')[:self.limit]
         return ''
+
 
 class DoGetAdminLog:
     """
@@ -38,6 +43,7 @@ class DoGetAdminLog:
     (user ID) or the name of a template context variable containing the user
     object whose ID you want.
     """
+
     def __init__(self, tag_name):
         self.tag_name = tag_name
 
@@ -53,5 +59,6 @@ class DoGetAdminLog:
             if tokens[4] != 'for_user':
                 raise template.TemplateSyntaxError("Fourth argument in '%s' must be 'for_user'" % self.tag_name)
         return AdminLogNode(limit=tokens[1], varname=tokens[3], user=(len(tokens) > 5 and tokens[5] or None))
+
 
 register.tag('get_admin_log', DoGetAdminLog('get_admin_log'))

@@ -4,12 +4,14 @@ of MVC. In other words, these functions/classes introduce controlled coupling
 for convenience's sake.
 """
 
-from django.template import loader
 from django.http import HttpResponse, Http404
 from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.db.models.manager import Manager
 from django.db.models.query import QuerySet
 from django.core import urlresolvers
+
+from django.template import loader
+
 
 def render_to_response(*args, **kwargs):
     """
@@ -18,6 +20,7 @@ def render_to_response(*args, **kwargs):
     """
     httpresponse_kwargs = {'mimetype': kwargs.pop('mimetype', None)}
     return HttpResponse(loader.render_to_string(*args, **kwargs), **httpresponse_kwargs)
+
 
 def redirect(to, *args, **kwargs):
     """
@@ -40,11 +43,11 @@ def redirect(to, *args, **kwargs):
         redirect_class = HttpResponsePermanentRedirect
     else:
         redirect_class = HttpResponseRedirect
-    
+
     # If it's a model, use get_absolute_url()
     if hasattr(to, 'get_absolute_url'):
         return redirect_class(to.get_absolute_url())
-    
+
     # Next try a reverse URL resolution.
     try:
         return redirect_class(urlresolvers.reverse(to, args=args, kwargs=kwargs))
@@ -52,12 +55,13 @@ def redirect(to, *args, **kwargs):
         # If this is a callable, re-raise.
         if callable(to):
             raise
-        # If this doesn't "feel" like a URL, re-raise.
+            # If this doesn't "feel" like a URL, re-raise.
         if '/' not in to and '.' not in to:
             raise
-        
+
     # Finally, fall back and assume it's a URL
     return redirect_class(to)
+
 
 def _get_queryset(klass):
     """
@@ -71,6 +75,7 @@ def _get_queryset(klass):
     else:
         manager = klass._default_manager
     return manager.all()
+
 
 def get_object_or_404(klass, *args, **kwargs):
     """
@@ -88,6 +93,7 @@ def get_object_or_404(klass, *args, **kwargs):
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
         raise Http404('No %s matches the given query.' % queryset.model._meta.object_name)
+
 
 def get_list_or_404(klass, *args, **kwargs):
     """

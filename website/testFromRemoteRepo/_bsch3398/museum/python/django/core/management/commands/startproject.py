@@ -1,8 +1,10 @@
-from django.core.management.base import copy_helper, CommandError, LabelCommand
-from django.utils.importlib import import_module
 import os
 import re
 from random import choice
+
+from django.core.management.base import copy_helper, CommandError, LabelCommand
+from django.utils.importlib import import_module
+
 
 class Command(LabelCommand):
     help = "Creates a Django project directory structure for the given project name in the current directory."
@@ -25,7 +27,8 @@ class Command(LabelCommand):
         except ImportError:
             pass
         else:
-            raise CommandError("%r conflicts with the name of an existing Python module and cannot be used as a project name. Please try another name." % project_name)
+            raise CommandError(
+                "%r conflicts with the name of an existing Python module and cannot be used as a project name. Please try another name." % project_name)
 
         copy_helper(self.style, 'project', project_name, directory)
 

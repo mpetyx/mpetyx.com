@@ -1,6 +1,4 @@
-from django import http
 from django.test import TestCase
-from django.conf import settings
 from django.utils.translation import ugettext_lazy
 from django.contrib.messages import constants, utils, get_level, set_level
 from django.contrib.messages.api import MessageFailure
@@ -8,6 +6,9 @@ from django.contrib.messages.storage import default_storage, base
 from django.contrib.messages.storage.base import Message
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+
+from django import http
+from django.conf import settings
 
 
 def add_level_messages(storage):
@@ -41,10 +42,10 @@ class BaseTest(TestCase):
             if hasattr(settings, setting):
                 self._remembered_settings[setting] = getattr(settings, setting)
                 delattr(settings._wrapped, setting)
-        # Backup these manually because we do not want them deleted.
+            # Backup these manually because we do not want them deleted.
         self._middleware_classes = settings.MIDDLEWARE_CLASSES
         self._template_context_processors = \
-           settings.TEMPLATE_CONTEXT_PROCESSORS
+            settings.TEMPLATE_CONTEXT_PROCESSORS
         self._installed_apps = settings.INSTALLED_APPS
         self._message_storage = settings.MESSAGE_STORAGE
         settings.MESSAGE_STORAGE = '%s.%s' % (self.storage_class.__module__,
@@ -53,10 +54,10 @@ class BaseTest(TestCase):
     def tearDown(self):
         for setting in self.restore_settings:
             self.restore_setting(setting)
-        # Restore these manually (see above).
+            # Restore these manually (see above).
         settings.MIDDLEWARE_CLASSES = self._middleware_classes
         settings.TEMPLATE_CONTEXT_PROCESSORS = \
-           self._template_context_processors
+            self._template_context_processors
         settings.INSTALLED_APPS = self._installed_apps
         settings.MESSAGE_STORAGE = self._message_storage
 
@@ -162,7 +163,7 @@ class BaseTest(TestCase):
             self.assertRedirects(response, show_url)
             self.assertTrue('messages' in response.context)
             messages = [Message(self.levels[level], msg) for msg in
-                                                         data['messages']]
+                        data['messages']]
             self.assertEqual(list(response.context['messages']), messages)
             for msg in data['messages']:
                 self.assertContains(response, msg)
@@ -180,7 +181,7 @@ class BaseTest(TestCase):
         messages = []
         for level in ('debug', 'info', 'success', 'warning', 'error'):
             messages.extend([Message(self.levels[level], msg) for msg in
-                                                             data['messages']])
+                             data['messages']])
             add_url = reverse('django.contrib.messages.tests.urls.add',
                               args=(level,))
             self.client.post(add_url, data)
@@ -208,7 +209,7 @@ class BaseTest(TestCase):
             'django.contrib.messages.middleware.MessageMiddleware',
         )
         settings.TEMPLATE_CONTEXT_PROCESSORS = \
-          list(settings.TEMPLATE_CONTEXT_PROCESSORS)
+            list(settings.TEMPLATE_CONTEXT_PROCESSORS)
         settings.TEMPLATE_CONTEXT_PROCESSORS.remove(
             'django.contrib.messages.context_processors.messages',
         )
@@ -242,7 +243,7 @@ class BaseTest(TestCase):
             'django.contrib.messages.middleware.MessageMiddleware',
         )
         settings.TEMPLATE_CONTEXT_PROCESSORS = \
-          list(settings.TEMPLATE_CONTEXT_PROCESSORS)
+            list(settings.TEMPLATE_CONTEXT_PROCESSORS)
         settings.TEMPLATE_CONTEXT_PROCESSORS.remove(
             'django.contrib.messages.context_processors.messages',
         )
@@ -271,7 +272,7 @@ class BaseTest(TestCase):
             'django.contrib.messages.middleware.MessageMiddleware',
         )
         settings.TEMPLATE_CONTEXT_PROCESSORS = \
-          list(settings.TEMPLATE_CONTEXT_PROCESSORS)
+            list(settings.TEMPLATE_CONTEXT_PROCESSORS)
         settings.TEMPLATE_CONTEXT_PROCESSORS.remove(
             'django.contrib.messages.context_processors.messages',
         )
@@ -301,7 +302,7 @@ class BaseTest(TestCase):
     def get_existing_storage(self):
         return self.get_storage([Message(constants.INFO, 'Test message 1'),
                                  Message(constants.INFO, 'Test message 2',
-                                              extra_tags='tag')])
+                                         extra_tags='tag')])
 
     def test_existing_read(self):
         """
@@ -395,7 +396,7 @@ class BaseTest(TestCase):
             add_level_messages(storage)
             tags = [msg.tags for msg in storage]
             self.assertEqual(tags,
-                         ['info', 'custom', 'extra-tag', '', 'bad', 'success'])
+                             ['info', 'custom', 'extra-tag', '', 'bad', 'success'])
         finally:
             # Ensure the level tags constant is put back like we found it.
             self.restore_setting('MESSAGE_TAGS')

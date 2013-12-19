@@ -3,6 +3,7 @@
 import os
 import sys
 
+
 def unique_messages():
     basedir = None
 
@@ -23,6 +24,7 @@ def unique_messages():
                 stdout = os.popen(cmd)
                 msg = stdout.read()
                 open('%s.po' % pf, 'w').write(msg)
+
 
 if __name__ == "__main__":
     unique_messages()

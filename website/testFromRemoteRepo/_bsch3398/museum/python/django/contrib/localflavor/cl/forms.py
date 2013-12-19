@@ -14,9 +14,12 @@ class CLRegionSelect(Select):
     A Select widget that uses a list of Chilean Regions (Regiones)
     as its choices.
     """
+
     def __init__(self, attrs=None):
         from cl_regions import REGION_CHOICES
+
         super(CLRegionSelect, self).__init__(attrs, choices=REGION_CHOICES)
+
 
 class CLRutField(RegexField):
     """
@@ -36,7 +39,7 @@ class CLRutField(RegexField):
         if 'strict' in kwargs:
             del kwargs['strict']
             super(CLRutField, self).__init__(r'^(\d{1,2}\.)?\d{3}\.\d{3}-[\dkK]$',
-                error_message=self.default_error_messages['strict'], *args, **kwargs)
+                                             error_message=self.default_error_messages['strict'], *args, **kwargs)
         else:
             # In non-strict mode, accept RUTs that validate but do not exist in
             # the real world.
@@ -59,10 +62,10 @@ class CLRutField(RegexField):
         """
         Takes RUT in pure canonical form, calculates the verifier digit.
         """
-        suma  = 0
+        suma = 0
         multi = 2
         for r in rut[::-1]:
-            suma  += int(r) * multi
+            suma += int(r) * multi
             multi += 1
             if multi == 8:
                 multi = 2

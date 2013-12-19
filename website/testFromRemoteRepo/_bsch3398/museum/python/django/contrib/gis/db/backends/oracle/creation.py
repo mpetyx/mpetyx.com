@@ -1,8 +1,8 @@
 from django.db.backends.oracle.creation import DatabaseCreation
 from django.db.backends.util import truncate_name
 
-class OracleCreation(DatabaseCreation):
 
+class OracleCreation(DatabaseCreation):
     def sql_indexes_for_field(self, model, f, style):
         "Return any spatial index creation SQL for the field."
         from django.contrib.gis.db.models.fields import GeometryField

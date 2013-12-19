@@ -2,15 +2,18 @@
 South Africa-specific Form helpers
 """
 
+import re
+from datetime import date
+
 from django.core.validators import EMPTY_VALUES
 from django.forms import ValidationError
 from django.forms.fields import Field, RegexField
 from django.utils.checksums import luhn
 from django.utils.translation import gettext as _
-import re
-from datetime import date
+
 
 id_re = re.compile(r'^(?P<yy>\d\d)(?P<mm>\d\d)(?P<dd>\d\d)(?P<mid>\d{4})(?P<end>\d{3})')
+
 
 class ZAIDField(Field):
     """A form field for South African ID numbers -- the checksum is validated
@@ -50,6 +53,7 @@ class ZAIDField(Field):
 
         return value
 
+
 class ZAPostCodeField(RegexField):
     default_error_messages = {
         'invalid': _(u'Enter a valid South African postal code'),
@@ -57,4 +61,4 @@ class ZAPostCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(ZAPostCodeField, self).__init__(r'^\d{4}$',
-            max_length=None, min_length=None)
+                                              max_length=None, min_length=None)

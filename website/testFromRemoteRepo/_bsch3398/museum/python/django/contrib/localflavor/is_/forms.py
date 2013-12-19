@@ -9,6 +9,7 @@ from django.forms.widgets import Select
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_unicode
 
+
 class ISIdNumberField(RegexField):
     """
     Icelandic identification number (kennitala). This is a number every citizen
@@ -20,7 +21,7 @@ class ISIdNumberField(RegexField):
     }
 
     def __init__(self, *args, **kwargs):
-        kwargs['min_length'],kwargs['max_length'] = 10,11
+        kwargs['min_length'], kwargs['max_length'] = 10, 11
         super(ISIdNumberField, self).__init__(r'^\d{6}(-| )?\d{4}$', *args, **kwargs)
 
     def clean(self, value):
@@ -54,15 +55,17 @@ class ISIdNumberField(RegexField):
         Takes in the value in canonical form and returns it in the common
         display format.
         """
-        return smart_unicode(value[:6]+'-'+value[6:])
+        return smart_unicode(value[:6] + '-' + value[6:])
+
 
 class ISPhoneNumberField(RegexField):
     """
     Icelandic phone number. Seven digits with an optional hyphen or space after
     the first three digits.
     """
+
     def __init__(self, *args, **kwargs):
-        kwargs['min_length'], kwargs['max_length'] = 7,8
+        kwargs['min_length'], kwargs['max_length'] = 7, 8
         super(ISPhoneNumberField, self).__init__(r'^\d{3}(-| )?\d{4}$', *args, **kwargs)
 
     def clean(self, value):
@@ -73,11 +76,14 @@ class ISPhoneNumberField(RegexField):
 
         return value.replace('-', '').replace(' ', '')
 
+
 class ISPostalCodeSelect(Select):
     """
     A Select widget that uses a list of Icelandic postal codes as its choices.
     """
+
     def __init__(self, attrs=None):
         from is_postalcodes import IS_POSTALCODES
+
         super(ISPostalCodeSelect, self).__init__(attrs, choices=IS_POSTALCODES)
 

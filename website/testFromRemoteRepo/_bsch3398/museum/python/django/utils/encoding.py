@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from django.utils.functional import Promise
 
+
 class DjangoUnicodeDecodeError(UnicodeDecodeError):
     def __init__(self, obj, *args):
         self.obj = obj
@@ -15,7 +16,8 @@ class DjangoUnicodeDecodeError(UnicodeDecodeError):
     def __str__(self):
         original = UnicodeDecodeError.__str__(self)
         return '%s. You passed in %r (%s)' % (original, self.obj,
-                type(self.obj))
+                                              type(self.obj))
+
 
 class StrAndUnicode(object):
     """
@@ -23,8 +25,10 @@ class StrAndUnicode(object):
 
     Useful as a mix-in.
     """
+
     def __str__(self):
         return self.__unicode__().encode('utf-8')
+
 
 def smart_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
     """
@@ -37,6 +41,7 @@ def smart_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
         # The input is the result of a gettext_lazy() call.
         return s
     return force_unicode(s, encoding, strings_only, errors)
+
 
 def is_protected_type(obj):
     """Determine if the object instance is of a protected type.
@@ -51,6 +56,7 @@ def is_protected_type(obj):
         float, Decimal)
     )
 
+
 def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
     """
     Similar to smart_unicode, except that lazy instances are resolved to
@@ -61,7 +67,7 @@ def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
     if strings_only and is_protected_type(s):
         return s
     try:
-        if not isinstance(s, basestring,):
+        if not isinstance(s, basestring, ):
             if hasattr(s, '__unicode__'):
                 s = unicode(s)
             else:
@@ -70,14 +76,14 @@ def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
                 except UnicodeEncodeError:
                     if not isinstance(s, Exception):
                         raise
-                    # If we get to here, the caller has passed in an Exception
+                        # If we get to here, the caller has passed in an Exception
                     # subclass populated with non-ASCII data without special
                     # handling to display as a string. We need to handle this
                     # without raising a further exception. We do an
                     # approximation to what the Exception's standard str()
                     # output should be.
                     s = ' '.join([force_unicode(arg, encoding, strings_only,
-                            errors) for arg in s])
+                                                errors) for arg in s])
         elif not isinstance(s, unicode):
             # Note: We use .decode() here, instead of unicode(s, encoding,
             # errors), so that if s is a SafeString, it ends up being a
@@ -93,8 +99,9 @@ def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
             # further exception by individually forcing the exception args
             # to unicode.
             s = ' '.join([force_unicode(arg, encoding, strings_only,
-                    errors) for arg in s])
+                                        errors) for arg in s])
     return s
+
 
 def smart_str(s, encoding='utf-8', strings_only=False, errors='strict'):
     """
@@ -115,7 +122,7 @@ def smart_str(s, encoding='utf-8', strings_only=False, errors='strict'):
                 # know how to print itself properly. We shouldn't raise a
                 # further exception.
                 return ' '.join([smart_str(arg, encoding, strings_only,
-                        errors) for arg in s])
+                                           errors) for arg in s])
             return unicode(s).encode(encoding, errors)
     elif isinstance(s, unicode):
         return s.encode(encoding, errors)
@@ -123,6 +130,7 @@ def smart_str(s, encoding='utf-8', strings_only=False, errors='strict'):
         return s.decode('utf-8', errors).encode(encoding, errors)
     else:
         return s
+
 
 def iri_to_uri(iri):
     """

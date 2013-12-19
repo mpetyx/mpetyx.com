@@ -1,6 +1,5 @@
 "Functions that help with dynamically creating decorators for views."
 
-import types
 try:
     from functools import wraps, update_wrapper, WRAPPER_ASSIGNMENTS
 except ImportError:
@@ -11,15 +10,19 @@ def method_decorator(decorator):
     """
     Converts a function decorator into a method decorator
     """
+
     def _dec(func):
         def _wrapper(self, *args, **kwargs):
             def bound_func(*args2, **kwargs2):
                 return func(self, *args2, **kwargs2)
-            # bound_func has the signature that 'decorator' expects i.e.  no
+
+                # bound_func has the signature that 'decorator' expects i.e.  no
             # 'self' argument, but it is a closure over self so it can call
             # 'func' correctly.
             return decorator(bound_func)(*args, **kwargs)
+
         return wraps(func)(_wrapper)
+
     update_wrapper(_dec, decorator)
     # Change the name to aid debugging.
     _dec.__name__ = 'method_decorator(%s)' % decorator.__name__
@@ -62,6 +65,7 @@ def available_attrs(fn):
 def make_middleware_decorator(middleware_class):
     def _make_decorator(*m_args, **m_kwargs):
         middleware = middleware_class(*m_args, **m_kwargs)
+
         def _decorator(view_func):
             def _wrapped_view(request, *args, **kwargs):
                 if hasattr(middleware, 'process_request'):
@@ -85,6 +89,9 @@ def make_middleware_decorator(middleware_class):
                     if result is not None:
                         return result
                 return response
+
             return wraps(view_func, assigned=available_attrs(view_func))(_wrapped_view)
+
         return _decorator
+
     return _make_decorator

@@ -1,7 +1,5 @@
-from optparse import make_option
-
-from django.core.management.base import CommandError
 from django.core.management.commands.inspectdb import Command as InspectDBCommand
+
 
 class Command(InspectDBCommand):
     db_module = 'django.contrib.gis.db'

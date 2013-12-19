@@ -10,6 +10,7 @@ from django.forms import ValidationError
 
 re_ssn = re.compile(r'^\d{4} \d{6}')
 
+
 class ATZipCodeField(RegexField):
     """
     A form field that validates its input is an Austrian postcode.
@@ -19,17 +20,22 @@ class ATZipCodeField(RegexField):
     default_error_messages = {
         'invalid': _('Enter a zip code in the format XXXX.'),
     }
+
     def __init__(self, *args, **kwargs):
         super(ATZipCodeField, self).__init__(r'^\d{4}$',
-                max_length=None, min_length=None, *args, **kwargs)
+                                             max_length=None, min_length=None, *args, **kwargs)
+
 
 class ATStateSelect(Select):
     """
     A Select widget that uses a list of AT states as its choices.
     """
+
     def __init__(self, attrs=None):
         from django.contrib.localflavor.at.at_states import STATE_CHOICES
+
         super(ATStateSelect, self).__init__(attrs, choices=STATE_CHOICES)
+
 
 class ATSocialSecurityNumberField(Field):
     """
@@ -54,12 +60,12 @@ class ATSocialSecurityNumberField(Field):
         sqnr, date = value.split(" ")
         sqnr, check = (sqnr[:3], (sqnr[3]))
         if int(sqnr) < 100:
-           raise ValidationError(self.error_messages['invalid'])
-        res = int(sqnr[0])*3 + int(sqnr[1])*7 + int(sqnr[2])*9 \
-           + int(date[0])*5 + int(date[1])*8 + int(date[2])*4 \
-           + int(date[3])*2 + int(date[4])*1 + int(date[5])*6
+            raise ValidationError(self.error_messages['invalid'])
+        res = int(sqnr[0]) * 3 + int(sqnr[1]) * 7 + int(sqnr[2]) * 9 \
+              + int(date[0]) * 5 + int(date[1]) * 8 + int(date[2]) * 4 \
+              + int(date[3]) * 2 + int(date[4]) * 1 + int(date[5]) * 6
         res = res % 11
         if res != int(check):
-           raise ValidationError(self.error_messages['invalid'])
-        return u'%s%s %s'%(sqnr, check, date,)
+            raise ValidationError(self.error_messages['invalid'])
+        return u'%s%s %s' % (sqnr, check, date,)
 

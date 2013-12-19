@@ -1,7 +1,9 @@
 import unittest
-import fields
+
 from django.contrib.admindocs import views
 from django.db.models import fields as builtin_fields
+
+import fields
 
 
 class TestFieldType(unittest.TestCase):
@@ -10,7 +12,7 @@ class TestFieldType(unittest.TestCase):
 
     def test_field_name(self):
         self.assertRaises(AttributeError,
-            views.get_readable_field_data_type, "NotAField"
+                          views.get_readable_field_data_type, "NotAField"
         )
 
     def test_builtin_fields(self):

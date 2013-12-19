@@ -2,6 +2,7 @@ from django.core.exceptions import FieldError
 from django.db.models.fields import FieldDoesNotExist
 from django.db.models.sql.constants import LOOKUP_SEP
 
+
 class SQLEvaluator(object):
     def __init__(self, expression, query, allow_joins=True):
         self.expression = expression
@@ -36,7 +37,7 @@ class SQLEvaluator(object):
 
         field_list = node.name.split(LOOKUP_SEP)
         if (len(field_list) == 1 and
-            node.name in query.aggregate_select.keys()):
+                    node.name in query.aggregate_select.keys()):
             self.contains_aggregate = True
             self.cols[node] = query.aggregate_select[node.name]
         else:

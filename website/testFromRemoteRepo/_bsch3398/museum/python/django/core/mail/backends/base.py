@@ -1,11 +1,13 @@
 """Base email backend class."""
 
+
 class BaseEmailBackend(object):
     """
     Base class for email backend implementations.
 
     Subclasses must at least overwrite send_messages().
     """
+
     def __init__(self, fail_silently=False, **kwargs):
         self.fail_silently = fail_silently
 

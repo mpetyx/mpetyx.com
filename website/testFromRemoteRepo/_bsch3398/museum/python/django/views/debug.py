@@ -3,24 +3,27 @@ import os
 import re
 import sys
 
-from django.conf import settings
 from django.http import HttpResponse, HttpResponseServerError, HttpResponseNotFound
-from django.template import (Template, Context, TemplateDoesNotExist,
-    TemplateSyntaxError)
 from django.utils.html import escape
 from django.utils.importlib import import_module
 from django.utils.encoding import smart_unicode, smart_str
 
+from django.conf import settings
+from django.template import (Template, Context, TemplateDoesNotExist,
+                             TemplateSyntaxError)
+
 
 HIDDEN_SETTINGS = re.compile('SECRET|PASSWORD|PROFANITIES_LIST')
+
 
 def linebreak_iter(template_source):
     yield 0
     p = template_source.find('\n')
     while p >= 0:
-        yield p+1
-        p = template_source.find('\n', p+1)
+        yield p + 1
+        p = template_source.find('\n', p + 1)
     yield len(template_source) + 1
+
 
 def cleanse_setting(key, value):
     """Cleanse an individual setting key/value of sensitive content.
@@ -33,13 +36,14 @@ def cleanse_setting(key, value):
             cleansed = '********************'
         else:
             if isinstance(value, dict):
-                cleansed = dict((k, cleanse_setting(k, v)) for k,v in value.items())
+                cleansed = dict((k, cleanse_setting(k, v)) for k, v in value.items())
             else:
                 cleansed = value
     except TypeError:
         # If the key isn't regex-able, just return as-is.
         cleansed = value
     return cleansed
+
 
 def get_safe_settings():
     "Returns a dictionary of the settings module, with sensitive settings blurred out."
@@ -48,6 +52,7 @@ def get_safe_settings():
         if k.isupper():
             settings_dict[k] = cleanse_setting(k, getattr(settings, k))
     return settings_dict
+
 
 def technical_500_response(request, exc_type, exc_value, tb):
     """
@@ -58,10 +63,12 @@ def technical_500_response(request, exc_type, exc_value, tb):
     html = reporter.get_traceback_html()
     return HttpResponseServerError(html, mimetype='text/html')
 
+
 class ExceptionReporter:
     """
     A class to organize and coordinate reporting on exceptions.
     """
+
     def __init__(self, request, exc_type, exc_value, tb):
         self.request = request
         self.exc_type = exc_type
@@ -82,6 +89,7 @@ class ExceptionReporter:
 
         if issubclass(self.exc_type, TemplateDoesNotExist):
             from django.template.loader import template_source_loaders
+
             self.template_does_not_exist = True
             self.loader_debug_info = []
             for loader in template_source_loaders:
@@ -91,7 +99,7 @@ class ExceptionReporter:
                     # NOTE: This assumes exc_value is the name of the template that
                     # the loader attempted to load.
                     template_list = [{'name': t, 'exists': os.path.exists(t)} \
-                        for t in source_list_func(str(self.exc_value))]
+                                     for t in source_list_func(str(self.exc_value))]
                 except (ImportError, AttributeError):
                     template_list = []
                 if hasattr(loader, '__class__'):
@@ -103,7 +111,7 @@ class ExceptionReporter:
                     'templates': template_list,
                 })
         if (settings.TEMPLATE_DEBUG and hasattr(self.exc_value, 'source') and
-            isinstance(self.exc_value, TemplateSyntaxError)):
+                isinstance(self.exc_value, TemplateSyntaxError)):
             self.get_template_exception_info()
 
         frames = self.get_traceback_frames()
@@ -114,8 +122,10 @@ class ExceptionReporter:
             end = getattr(self.exc_value, 'end', None)
             if start is not None and end is not None:
                 unicode_str = self.exc_value.args[1]
-                unicode_hint = smart_unicode(unicode_str[max(start-5, 0):min(end+5, len(unicode_str))], 'ascii', errors='replace')
+                unicode_hint = smart_unicode(unicode_str[max(start - 5, 0):min(end + 5, len(unicode_str))], 'ascii',
+                                             errors='replace')
         from django import get_version
+
         t = Template(TECHNICAL_500_TEMPLATE, name='Technical 500 template')
         c = Context({
             'exception_type': self.exc_type.__name__,
@@ -129,7 +139,7 @@ class ExceptionReporter:
             'sys_version_info': '%d.%d.%d' % sys.version_info[0:3],
             'server_time': datetime.datetime.now(),
             'django_version_info': get_version(),
-            'sys_path' : sys.path,
+            'sys_path': sys.path,
             'template_info': self.template_info,
             'template_does_not_exist': self.template_does_not_exist,
             'loader_debug_info': self.loader_debug_info,
@@ -150,7 +160,7 @@ class ExceptionReporter:
                 before = escape(template_source[upto:start])
                 during = escape(template_source[start:end])
                 after = escape(template_source[end:next])
-            source_lines.append( (num, escape(template_source[upto:next])) )
+            source_lines.append((num, escape(template_source[upto:next])))
             upto = next
         total = len(source_lines)
 
@@ -207,7 +217,7 @@ class ExceptionReporter:
 
         pre_context = [line.strip('\n') for line in source[lower_bound:lineno]]
         context_line = source[lineno].strip('\n')
-        post_context = [line.strip('\n') for line in source[lineno+1:upper_bound]]
+        post_context = [line.strip('\n') for line in source[lineno + 1:upper_bound]]
 
         return lower_bound, pre_context, context_line, post_context
 
@@ -225,7 +235,8 @@ class ExceptionReporter:
             lineno = tb.tb_lineno - 1
             loader = tb.tb_frame.f_globals.get('__loader__')
             module_name = tb.tb_frame.f_globals.get('__name__')
-            pre_context_lineno, pre_context, context_line, post_context = self._get_lines_from_file(filename, lineno, 7, loader, module_name)
+            pre_context_lineno, pre_context, context_line, post_context = self._get_lines_from_file(filename, lineno, 7,
+                                                                                                    loader, module_name)
             if pre_context_lineno is not None:
                 frames.append({
                     'tb': tb,
@@ -243,11 +254,11 @@ class ExceptionReporter:
 
         if not frames:
             frames = [{
-                'filename': '&lt;unknown&gt;',
-                'function': '?',
-                'lineno': '?',
-                'context_line': '???',
-            }]
+                          'filename': '&lt;unknown&gt;',
+                          'function': '?',
+                          'lineno': '?',
+                          'context_line': '???',
+                      }]
 
         return frames
 
@@ -256,8 +267,9 @@ class ExceptionReporter:
         Return the same data as from traceback.format_exception.
         """
         import traceback
+
         frames = self.get_traceback_frames()
-        tb = [ (f['filename'], f['lineno'], f['function'], f['context_line']) for f in frames ]
+        tb = [(f['filename'], f['lineno'], f['function'], f['context_line']) for f in frames]
         list = ['Traceback (most recent call last):\n']
         list += traceback.format_list(tb)
         list += traceback.format_exception_only(self.exc_type, self.exc_value)
@@ -285,6 +297,7 @@ def technical_404_response(request, exception):
         'settings': get_safe_settings(),
     })
     return HttpResponseNotFound(t.render(c), mimetype='text/html')
+
 
 def empty_urlconf(request):
     "Create an empty URLconf 404 error response."

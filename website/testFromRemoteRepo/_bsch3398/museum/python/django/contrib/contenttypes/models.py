@@ -2,8 +2,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import smart_unicode
 
-class ContentTypeManager(models.Manager):
 
+class ContentTypeManager(models.Manager):
     # Cache to avoid re-looking up ContentType objects all over the place.
     # This cache is shared by all the get_for_* methods.
     _cache = {}
@@ -33,9 +33,9 @@ class ContentTypeManager(models.Manager):
             # needed around opts.verbose_name_raw because name_raw might be a
             # django.utils.functional.__proxy__ object.
             ct, created = self.get_or_create(
-                app_label = opts.app_label,
-                model = opts.object_name.lower(),
-                defaults = {'name': smart_unicode(opts.verbose_name_raw)},
+                app_label=opts.app_label,
+                model=opts.object_name.lower(),
+                defaults={'name': smart_unicode(opts.verbose_name_raw)},
             )
             self._add_to_cache(self.db, ct)
 
@@ -71,6 +71,7 @@ class ContentTypeManager(models.Manager):
         self.__class__._cache.setdefault(using, {})[key] = ct
         self.__class__._cache.setdefault(using, {})[ct.id] = ct
 
+
 class ContentType(models.Model):
     name = models.CharField(max_length=100)
     app_label = models.CharField(max_length=100)
@@ -90,6 +91,7 @@ class ContentType(models.Model):
     def model_class(self):
         "Returns the Python model class for this type of content."
         from django.db import models
+
         return models.get_model(self.app_label, self.model)
 
     def get_object_for_this_type(self, **kwargs):

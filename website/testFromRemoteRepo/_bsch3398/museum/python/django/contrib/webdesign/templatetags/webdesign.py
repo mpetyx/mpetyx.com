@@ -3,6 +3,7 @@ from django import template
 
 register = template.Library()
 
+
 class LoremNode(template.Node):
     def __init__(self, count, method, common):
         self.count, self.method, self.common = count, method, common
@@ -50,12 +51,12 @@ def lorem(parser, token):
     common = bits[-1] != 'random'
     if not common:
         bits.pop()
-    # Method bit
+        # Method bit
     if bits[-1] in ('w', 'p', 'b'):
         method = bits.pop()
     else:
         method = 'b'
-    # Count bit
+        # Count bit
     if len(bits) > 1:
         count = bits.pop()
     else:
@@ -64,4 +65,6 @@ def lorem(parser, token):
     if len(bits) != 1:
         raise template.TemplateSyntaxError("Incorrect format for %r tag" % tagname)
     return LoremNode(count, method, common)
+
+
 lorem = register.tag(lorem)

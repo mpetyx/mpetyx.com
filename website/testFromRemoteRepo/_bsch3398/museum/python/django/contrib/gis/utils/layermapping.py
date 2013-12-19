@@ -7,7 +7,6 @@
    http://geodjango.org/docs/layermapping.html
 """
 import sys
-from datetime import date, datetime
 from decimal import Decimal
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connections, DEFAULT_DB_ALIAS
@@ -21,48 +20,57 @@ from django.contrib.localflavor.us.models import USStateField
 
 # LayerMapping exceptions.
 class LayerMapError(Exception): pass
+
+
 class InvalidString(LayerMapError): pass
+
+
 class InvalidDecimal(LayerMapError): pass
+
+
 class InvalidInteger(LayerMapError): pass
+
+
 class MissingForeignKey(LayerMapError): pass
+
 
 class LayerMapping(object):
     "A class that maps OGR Layers to GeoDjango Models."
 
     # Acceptable 'base' types for a multi-geometry type.
-    MULTI_TYPES = {1 : OGRGeomType('MultiPoint'),
-                   2 : OGRGeomType('MultiLineString'),
-                   3 : OGRGeomType('MultiPolygon'),
-                   OGRGeomType('Point25D').num : OGRGeomType('MultiPoint25D'),
-                   OGRGeomType('LineString25D').num : OGRGeomType('MultiLineString25D'),
-                   OGRGeomType('Polygon25D').num : OGRGeomType('MultiPolygon25D'),
-                   }
+    MULTI_TYPES = {1: OGRGeomType('MultiPoint'),
+                   2: OGRGeomType('MultiLineString'),
+                   3: OGRGeomType('MultiPolygon'),
+                   OGRGeomType('Point25D').num: OGRGeomType('MultiPoint25D'),
+                   OGRGeomType('LineString25D').num: OGRGeomType('MultiLineString25D'),
+                   OGRGeomType('Polygon25D').num: OGRGeomType('MultiPolygon25D'),
+    }
 
     # Acceptable Django field types and corresponding acceptable OGR
     # counterparts.
     FIELD_TYPES = {
-        models.AutoField : OFTInteger,
-        models.IntegerField : (OFTInteger, OFTReal, OFTString),
-        models.FloatField : (OFTInteger, OFTReal),
-        models.DateField : OFTDate,
-        models.DateTimeField : OFTDateTime,
-        models.EmailField : OFTString,
-        models.TimeField : OFTTime,
-        models.DecimalField : (OFTInteger, OFTReal),
-        models.CharField : OFTString,
-        models.SlugField : OFTString,
-        models.TextField : OFTString,
-        models.URLField : OFTString,
-        USStateField : OFTString,
-        models.XMLField : OFTString,
-        models.SmallIntegerField : (OFTInteger, OFTReal, OFTString),
-        models.PositiveSmallIntegerField : (OFTInteger, OFTReal, OFTString),
-        }
+        models.AutoField: OFTInteger,
+        models.IntegerField: (OFTInteger, OFTReal, OFTString),
+        models.FloatField: (OFTInteger, OFTReal),
+        models.DateField: OFTDate,
+        models.DateTimeField: OFTDateTime,
+        models.EmailField: OFTString,
+        models.TimeField: OFTTime,
+        models.DecimalField: (OFTInteger, OFTReal),
+        models.CharField: OFTString,
+        models.SlugField: OFTString,
+        models.TextField: OFTString,
+        models.URLField: OFTString,
+        USStateField: OFTString,
+        models.XMLField: OFTString,
+        models.SmallIntegerField: (OFTInteger, OFTReal, OFTString),
+        models.PositiveSmallIntegerField: (OFTInteger, OFTReal, OFTString),
+    }
 
     # The acceptable transaction modes.
-    TRANSACTION_MODES = {'autocommit' : transaction.autocommit,
-                         'commit_on_success' : transaction.commit_on_success,
-                         }
+    TRANSACTION_MODES = {'autocommit': transaction.autocommit,
+                         'commit_on_success': transaction.commit_on_success,
+    }
 
     def __init__(self, model, data, mapping, layer=0,
                  source_srs=None, encoding=None,
@@ -113,6 +121,7 @@ class LayerMapping(object):
             # Making sure the encoding exists, if not a LookupError
             # exception will be thrown.
             from codecs import lookup
+
             lookup(encoding)
             self.encoding = encoding
         else:
@@ -314,7 +323,7 @@ class LayerMapping(object):
         of the feature kwargs.
         """
         if isinstance(self.unique, basestring):
-            return {self.unique : kwargs[self.unique]}
+            return {self.unique: kwargs[self.unique]}
         else:
             return dict((fld, kwargs[fld]) for fld in self.unique)
 
@@ -326,7 +335,7 @@ class LayerMapping(object):
         otherwise the proper exception is raised.
         """
         if (isinstance(ogr_field, OFTString) and
-            isinstance(model_field, (models.CharField, models.TextField))):
+                isinstance(model_field, (models.CharField, models.TextField))):
             if self.encoding:
                 # The encoding for OGR data sources may be specified here
                 # (e.g., 'cp437' for Census Bureau boundary files).
@@ -361,8 +370,9 @@ class LayerMapping(object):
             # If we have more than the maximum digits allowed, then throw an
             # InvalidDecimal exception.
             if n_prec > max_prec:
-                raise InvalidDecimal('A DecimalField with max_digits %d, decimal_places %d must round to an absolute value less than 10^%d.' %
-                                     (model_field.max_digits, model_field.decimal_places, max_prec))
+                raise InvalidDecimal(
+                    'A DecimalField with max_digits %d, decimal_places %d must round to an absolute value less than 10^%d.' %
+                    (model_field.max_digits, model_field.decimal_places, max_prec))
             val = d
         elif isinstance(ogr_field, (OFTReal, OFTString)) and isinstance(model_field, models.IntegerField):
             # Attempt to convert any OFTReal and OFTString value to an OFTInteger.
@@ -393,7 +403,8 @@ class LayerMapping(object):
         try:
             return rel_model.objects.get(**fk_kwargs)
         except ObjectDoesNotExist:
-            raise MissingForeignKey('No ForeignKey %s model found with keyword arguments: %s' % (rel_model.__name__, fk_kwargs))
+            raise MissingForeignKey(
+                'No ForeignKey %s model found with keyword arguments: %s' % (rel_model.__name__, fk_kwargs))
 
     def verify_geom(self, geom, model_field):
         """
@@ -517,7 +528,8 @@ class LayerMapping(object):
                     kwargs = self.feature_kwargs(feat)
                 except LayerMapError, msg:
                     # Something borked the validation
-                    if strict: raise
+                    if strict:
+                        raise
                     elif not silent:
                         stream.write('Ignoring Feature ID %s because: %s\n' % (feat.fid, msg))
                 else:
@@ -562,7 +574,8 @@ class LayerMapping(object):
                         if strict:
                             # Bailing out if the `strict` keyword is set.
                             if not silent:
-                                stream.write('Failed to save the feature (id: %s) into the model with the keyword arguments:\n' % feat.fid)
+                                stream.write(
+                                    'Failed to save the feature (id: %s) into the model with the keyword arguments:\n' % feat.fid)
                                 stream.write('%s\n' % kwargs)
                             raise
                         elif not silent:
@@ -588,8 +601,10 @@ class LayerMapping(object):
             for i, end in enumerate(indices):
                 # Constructing the slice to use for this step; the last slice is
                 # special (e.g, [100:] instead of [90:100]).
-                if i+1 == n_i: step_slice = slice(beg, None)
-                else: step_slice = slice(beg, end)
+                if i + 1 == n_i:
+                    step_slice = slice(beg, None)
+                else:
+                    step_slice = slice(beg, end)
 
                 try:
                     num_feat, num_saved = _save(step_slice, num_feat, num_saved)

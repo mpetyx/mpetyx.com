@@ -52,7 +52,8 @@
 
 def curry(_curried_func, *args, **kwargs):
     def _curried(*moreargs, **morekwargs):
-        return _curried_func(*(args+moreargs), **dict(kwargs, **morekwargs))
+        return _curried_func(*(args + moreargs), **dict(kwargs, **morekwargs))
+
     return _curried
 
 ### Begin from Python 2.5 functools.py ########################################
@@ -71,10 +72,12 @@ def curry(_curried_func, *args, **kwargs):
 
 WRAPPER_ASSIGNMENTS = ('__module__', '__name__', '__doc__')
 WRAPPER_UPDATES = ('__dict__',)
+
+
 def update_wrapper(wrapper,
                    wrapped,
-                   assigned = WRAPPER_ASSIGNMENTS,
-                   updated = WRAPPER_UPDATES):
+                   assigned=WRAPPER_ASSIGNMENTS,
+                   updated=WRAPPER_UPDATES):
     """Update a wrapper function to look like the wrapped function
 
        wrapper is the function to be updated
@@ -90,12 +93,13 @@ def update_wrapper(wrapper,
         setattr(wrapper, attr, getattr(wrapped, attr))
     for attr in updated:
         getattr(wrapper, attr).update(getattr(wrapped, attr))
-    # Return the wrapper so this can be used as a decorator via curry()
+        # Return the wrapper so this can be used as a decorator via curry()
     return wrapper
 
+
 def wraps(wrapped,
-          assigned = WRAPPER_ASSIGNMENTS,
-          updated = WRAPPER_UPDATES):
+          assigned=WRAPPER_ASSIGNMENTS,
+          updated=WRAPPER_UPDATES):
     """Decorator factory to apply update_wrapper() to a wrapper function
 
        Returns a decorator that invokes update_wrapper() with the decorated
@@ -117,6 +121,7 @@ def memoize(func, cache, num_args):
 
     Only the first num_args are considered when creating the key.
     """
+
     def wrapper(*args):
         mem_args = args[:num_args]
         if mem_args in cache:
@@ -124,7 +129,9 @@ def memoize(func, cache, num_args):
         result = func(*args)
         cache[mem_args] = result
         return result
+
     return wraps(func)(wrapper)
+
 
 class Promise(object):
     """
@@ -133,6 +140,7 @@ class Promise(object):
     promises in code.
     """
     pass
+
 
 def lazy(func, *resultclasses):
     """
@@ -177,11 +185,13 @@ def lazy(func, *resultclasses):
                     setattr(cls, k, meth)
             cls._delegate_str = str in resultclasses
             cls._delegate_unicode = unicode in resultclasses
-            assert not (cls._delegate_str and cls._delegate_unicode), "Cannot call lazy() with both str and unicode return types."
+            assert not (
+            cls._delegate_str and cls._delegate_unicode), "Cannot call lazy() with both str and unicode return types."
             if cls._delegate_unicode:
                 cls.__unicode__ = cls.__unicode_cast
             elif cls._delegate_str:
                 cls.__str__ = cls.__str_cast
+
         __prepare_class__ = classmethod(__prepare_class__)
 
         def __promise__(cls, klass, funcname, func):
@@ -200,6 +210,7 @@ def lazy(func, *resultclasses):
                 cls.__dispatch[klass] = {}
             cls.__dispatch[klass][funcname] = func
             return __wrapper__
+
         __promise__ = classmethod(__promise__)
 
         def __unicode_cast(self):
@@ -241,8 +252,10 @@ def lazy(func, *resultclasses):
 
     return wraps(func)(__wrapper__)
 
+
 def _lazy_proxy_unpickle(func, args, kwargs, *resultclasses):
     return lazy(func, *resultclasses)(*args, **kwargs)
+
 
 def allow_lazy(func, *resultclasses):
     """
@@ -251,6 +264,7 @@ def allow_lazy(func, *resultclasses):
     immediately, otherwise a __proxy__ is returned that will evaluate the
     function when needed.
     """
+
     def wrapper(*args, **kwargs):
         for arg in list(args) + kwargs.values():
             if isinstance(arg, Promise):
@@ -258,7 +272,9 @@ def allow_lazy(func, *resultclasses):
         else:
             return func(*args, **kwargs)
         return lazy(func, *resultclasses)(*args, **kwargs)
+
     return wraps(func)(wrapper)
+
 
 class LazyObject(object):
     """
@@ -268,6 +284,7 @@ class LazyObject(object):
     By subclassing, you have the opportunity to intercept and alter the
     instantiation. If you don't need to do that, use SimpleLazyObject.
     """
+
     def __init__(self):
         self._wrapped = None
 
@@ -304,7 +321,8 @@ class LazyObject(object):
     def __dir__(self):
         if self._wrapped is None:
             self._setup()
-        return  dir(self._wrapped)
+        return dir(self._wrapped)
+
 
 class SimpleLazyObject(LazyObject):
     """
@@ -313,6 +331,7 @@ class SimpleLazyObject(LazyObject):
     Designed for compound objects of unknown type. For builtins or objects of
     known type, use django.utils.functional.lazy.
     """
+
     def __init__(self, func):
         """
         Pass in a callable that returns the object to be wrapped.
@@ -346,6 +365,7 @@ class SimpleLazyObject(LazyObject):
             # Changed to use deepcopy from copycompat, instead of copy
             # For Python 2.4.
             from django.utils.copycompat import deepcopy
+
             return deepcopy(self._wrapped, memo)
 
     # Need to pretend to be the wrapped class, for the sake of objects that care
@@ -353,6 +373,7 @@ class SimpleLazyObject(LazyObject):
     def __get_class(self):
         if self._wrapped is None: self._setup()
         return self._wrapped.__class__
+
     __class__ = property(__get_class)
 
     def __eq__(self, other):

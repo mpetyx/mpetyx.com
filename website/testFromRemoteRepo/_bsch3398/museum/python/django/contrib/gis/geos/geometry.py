@@ -3,8 +3,7 @@
  inherit from this object.
 """
 # Python, ctypes and types dependencies.
-import re
-from ctypes import addressof, byref, c_double, c_size_t
+from ctypes import addressof, byref, c_double
 
 # super-class for mutable list behavior
 from django.contrib.gis.geos.mutable_list import ListMixin
@@ -14,7 +13,6 @@ from django.contrib.gis.geos.base import GEOSBase, gdal
 from django.contrib.gis.geos.coordseq import GEOSCoordSeq
 from django.contrib.gis.geos.error import GEOSException, GEOSIndexError
 from django.contrib.gis.geos.libgeos import GEOM_PTR, GEOS_PREPARE
-from django.contrib.gis.geos.mutable_list import ListMixin
 
 # All other functions in this module come from the ctypes
 # prototypes module -- which handles all interaction with
@@ -27,6 +25,7 @@ from django.contrib.gis.geos.prototypes.io import wkt_r, wkt_w, wkb_r, wkb_w, ew
 
 # For recognizing geometry input.
 from django.contrib.gis.geometry.regex import hex_regex, wkt_regex, json_regex
+
 
 class GEOSGeometry(GEOSBase, ListMixin):
     "A class that, generally, encapsulates a GEOS geometry."
@@ -347,12 +346,15 @@ class GEOSGeometry(GEOSBase, ListMixin):
     def get_srid(self):
         "Gets the SRID for the geometry, returns None if no SRID is set."
         s = capi.geos_get_srid(self.ptr)
-        if s == 0: return None
-        else: return s
+        if s == 0:
+            return None
+        else:
+            return s
 
     def set_srid(self, srid):
         "Sets the SRID for the geometry."
         capi.geos_set_srid(self.ptr, srid)
+
     srid = property(get_srid, set_srid)
 
     #### Output Routines ####
@@ -363,8 +365,10 @@ class GEOSGeometry(GEOSBase, ListMixin):
         are *not* included in this representation because GEOS does not yet
         support serializing them.
         """
-        if self.get_srid(): return 'SRID=%s;%s' % (self.srid, self.wkt)
-        else: return self.wkt
+        if self.get_srid():
+            return 'SRID=%s;%s' % (self.srid, self.wkt)
+        else:
+            return self.wkt
 
     @property
     def wkt(self):
@@ -393,7 +397,7 @@ class GEOSGeometry(GEOSBase, ListMixin):
         if self.hasz:
             if not GEOS_PREPARE:
                 # See: http://trac.osgeo.org/geos/ticket/216
-                raise GEOSException('Upgrade GEOS to 3.1 to get valid 3D HEXEWKB.')               
+                raise GEOSException('Upgrade GEOS to 3.1 to get valid 3D HEXEWKB.')
             return ewkb_w3d().write_hex(self)
         else:
             return ewkb_w().write_hex(self)
@@ -408,6 +412,7 @@ class GEOSGeometry(GEOSBase, ListMixin):
             return self.ogr.json
         else:
             raise GEOSException('GeoJSON output only supported on GDAL 1.5+.')
+
     geojson = json
 
     @property
@@ -646,15 +651,16 @@ from django.contrib.gis.geos.linestring import LineString, LinearRing
 from django.contrib.gis.geos.point import Point
 from django.contrib.gis.geos.polygon import Polygon
 from django.contrib.gis.geos.collections import GeometryCollection, MultiPoint, MultiLineString, MultiPolygon
-GEOS_CLASSES = {0 : Point,
-                1 : LineString,
-                2 : LinearRing,
-                3 : Polygon,
-                4 : MultiPoint,
-                5 : MultiLineString,
-                6 : MultiPolygon,
-                7 : GeometryCollection,
-                }
+
+GEOS_CLASSES = {0: Point,
+                1: LineString,
+                2: LinearRing,
+                3: Polygon,
+                4: MultiPoint,
+                5: MultiLineString,
+                6: MultiPolygon,
+                7: GeometryCollection,
+}
 
 # If supported, import the PreparedGeometry class.
 if GEOS_PREPARE:

@@ -8,16 +8,17 @@ except ImportError:
     from django.utils.functional import wraps  # Python 2.4 fallback.
 
 from calendar import timegm
-from datetime import timedelta
-from email.Utils import formatdate
 
 from django.utils.decorators import decorator_from_middleware, available_attrs
 from django.utils.http import parse_etags, quote_etag
 from django.middleware.http import ConditionalGetMiddleware
 from django.http import HttpResponseNotAllowed, HttpResponseNotModified, HttpResponse
 
+from email.Utils import formatdate
+
 
 conditional_page = decorator_from_middleware(ConditionalGetMiddleware)
+
 
 def require_http_methods(request_method_list):
     """
@@ -30,19 +31,24 @@ def require_http_methods(request_method_list):
 
     Note that request methods should be in uppercase.
     """
+
     def decorator(func):
         def inner(request, *args, **kwargs):
             if request.method not in request_method_list:
                 return HttpResponseNotAllowed(request_method_list)
             return func(request, *args, **kwargs)
+
         return wraps(func, assigned=available_attrs(func))(inner)
+
     return decorator
+
 
 require_GET = require_http_methods(["GET"])
 require_GET.__doc__ = "Decorator to require that a view only accept the GET method."
 
 require_POST = require_http_methods(["POST"])
 require_POST.__doc__ = "Decorator to require that a view only accept the POST method."
+
 
 def condition(etag_func=None, last_modified_func=None):
     """
@@ -66,6 +72,7 @@ def condition(etag_func=None, last_modified_func=None):
     plus If-modified-since headers) will result in the view function being
     called.
     """
+
     def decorator(func):
         def inner(request, *args, **kwargs):
             # Get HTTP request headers
@@ -101,23 +108,23 @@ def condition(etag_func=None, last_modified_func=None):
 
             response = None
             if not ((if_match and (if_modified_since or if_none_match)) or
-                    (if_match and if_none_match)):
+                        (if_match and if_none_match)):
                 # We only get here if no undefined combinations of headers are
                 # specified.
                 if ((if_none_match and (res_etag in etags or
-                        "*" in etags and res_etag)) and
+                                                    "*" in etags and res_etag)) and
                         (not if_modified_since or
-                            res_last_modified == if_modified_since)):
+                                 res_last_modified == if_modified_since)):
                     if request.method in ("GET", "HEAD"):
                         response = HttpResponseNotModified()
                     else:
                         response = HttpResponse(status=412)
                 elif if_match and ((not res_etag and "*" in etags) or
-                        (res_etag and res_etag not in etags)):
+                                       (res_etag and res_etag not in etags)):
                     response = HttpResponse(status=412)
                 elif (not if_none_match and if_modified_since and
-                        request.method == "GET" and
-                        res_last_modified == if_modified_since):
+                              request.method == "GET" and
+                              res_last_modified == if_modified_since):
                     response = HttpResponseNotModified()
 
             if response is None:
@@ -132,11 +139,13 @@ def condition(etag_func=None, last_modified_func=None):
             return response
 
         return inner
+
     return decorator
 
 # Shortcut decorators for common cases based on ETag or Last-Modified only
 def etag(etag_func):
     return condition(etag_func=etag_func)
+
 
 def last_modified(last_modified_func):
     return condition(last_modified_func=last_modified_func)

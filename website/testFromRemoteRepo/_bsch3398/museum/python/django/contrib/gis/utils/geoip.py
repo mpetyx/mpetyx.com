@@ -38,10 +38,14 @@
  >>> g.geos('24.124.1.80').wkt
  'POINT (-95.2087020874023438 39.0392990112304688)'
 """
-import os, re
+import os
+import re
 from ctypes import c_char_p, c_float, c_int, Structure, CDLL, POINTER
 from ctypes.util import find_library
+
 from django.conf import settings
+
+
 if not settings.configured: settings.configure()
 
 # Creating the settings dictionary with any settings, if needed.
@@ -94,7 +98,9 @@ class GeoIPRecord(Structure):
                 # longer distributed by package maintainers.
                 #('charset', c_int),
                 #('continent_code', c_char_p),
-                ]
+    ]
+
+
 class GeoIPTag(Structure): pass
 
 #### ctypes function prototypes ####
@@ -105,6 +111,8 @@ DBTYPE = POINTER(GeoIPTag)
 def record_output(func):
     func.restype = RECTYPE
     return func
+
+
 rec_by_addr = record_output(lgeoip.GeoIP_record_by_addr)
 rec_by_name = record_output(lgeoip.GeoIP_record_by_name)
 
@@ -119,6 +127,8 @@ geoip_close.restype = None
 def string_output(func):
     func.restype = c_char_p
     return func
+
+
 geoip_dbinfo = string_output(lgeoip.GeoIP_database_info)
 cntry_code_by_addr = string_output(lgeoip.GeoIP_country_code_by_addr)
 cntry_code_by_name = string_output(lgeoip.GeoIP_country_code_by_name)
@@ -269,8 +279,10 @@ class GeoIP(object):
         "Returns the country code for the given IP Address or FQDN."
         self._check_query(query, city_or_country=True)
         if self._country:
-            if ipregex.match(query): return cntry_code_by_addr(self._country, query)
-            else: return cntry_code_by_name(self._country, query)
+            if ipregex.match(query):
+                return cntry_code_by_addr(self._country, query)
+            else:
+                return cntry_code_by_name(self._country, query)
         else:
             return self.city(query)['country_code']
 
@@ -278,8 +290,10 @@ class GeoIP(object):
         "Returns the country name for the given IP Address or FQDN."
         self._check_query(query, city_or_country=True)
         if self._country:
-            if ipregex.match(query): return cntry_name_by_addr(self._country, query)
-            else: return cntry_name_by_name(self._country, query)
+            if ipregex.match(query):
+                return cntry_name_by_addr(self._country, query)
+            else:
+                return cntry_name_by_name(self._country, query)
         else:
             return self.city(query)['country_name']
 
@@ -290,15 +304,17 @@ class GeoIP(object):
         '24.124.1.80' and 'djangoproject.com' are valid parameters.
         """
         # Returning the country code and name
-        return {'country_code' : self.country_code(query),
-                'country_name' : self.country_name(query),
-                }
+        return {'country_code': self.country_code(query),
+                'country_name': self.country_name(query),
+        }
 
     #### Coordinate retrieval routines ####
     def coords(self, query, ordering=('longitude', 'latitude')):
         cdict = self.city(query)
-        if cdict is None: return None
-        else: return tuple(cdict[o] for o in ordering)
+        if cdict is None:
+            return None
+        else:
+            return tuple(cdict[o] for o in ordering)
 
     def lon_lat(self, query):
         "Returns a tuple of the (longitude, latitude) for the given query."
@@ -313,6 +329,7 @@ class GeoIP(object):
         ll = self.lon_lat(query)
         if ll:
             from django.contrib.gis.geos import Point
+
             return Point(ll, srid=4326)
         else:
             return None
@@ -325,6 +342,7 @@ class GeoIP(object):
         else:
             ci = geoip_dbinfo(self._country)
         return ci
+
     country_info = property(country_info)
 
     def city_info(self):
@@ -334,11 +352,13 @@ class GeoIP(object):
         else:
             ci = geoip_dbinfo(self._city)
         return ci
+
     city_info = property(city_info)
 
     def info(self):
         "Returns information about all GeoIP databases in use."
         return 'Country:\n\t%s\nCity:\n\t%s' % (self.country_info, self.city_info)
+
     info = property(info)
 
     #### Methods for compatibility w/the GeoIP-Python API. ####
@@ -351,6 +371,7 @@ class GeoIP(object):
             return self.city(arg)
         else:
             return self.country(arg)
+
     region_by_addr = city
     region_by_name = city
     record_by_addr = _rec_by_arg

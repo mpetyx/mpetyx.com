@@ -59,6 +59,7 @@ CSRF_FAILRE_TEMPLATE = """
 </html>
 """
 
+
 def csrf_failure(request, reason=""):
     """
     Default view used when request fails CSRF protection

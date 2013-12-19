@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db.backends.postgresql.creation import DatabaseCreation
 
+
 class PostGISCreation(DatabaseCreation):
     geom_index_type = 'GIST'
     geom_index_opts = 'GIST_GEOMETRY_OPS'
@@ -37,7 +38,6 @@ class PostGISCreation(DatabaseCreation):
                                   style.SQL_KEYWORD(' ALTER ') +
                                   style.SQL_FIELD(qn(f.column)) +
                                   style.SQL_KEYWORD(' SET NOT NULL') + ';')
-
 
             if f.spatial_index:
                 # Spatial indexes created the same way for both Geometry and

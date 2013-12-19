@@ -10,10 +10,13 @@ ADDITION = 1
 CHANGE = 2
 DELETION = 3
 
+
 class LogEntryManager(models.Manager):
     def log_action(self, user_id, content_type_id, object_id, object_repr, action_flag, change_message=''):
-        e = self.model(None, None, user_id, content_type_id, smart_unicode(object_id), object_repr[:200], action_flag, change_message)
+        e = self.model(None, None, user_id, content_type_id, smart_unicode(object_id), object_repr[:200], action_flag,
+                       change_message)
         e.save()
+
 
 class LogEntry(models.Model):
     action_time = models.DateTimeField(_('action time'), auto_now=True)
@@ -24,6 +27,7 @@ class LogEntry(models.Model):
     action_flag = models.PositiveSmallIntegerField(_('action flag'))
     change_message = models.TextField(_('change message'), blank=True)
     objects = LogEntryManager()
+
     class Meta:
         verbose_name = _('log entry')
         verbose_name_plural = _('log entries')

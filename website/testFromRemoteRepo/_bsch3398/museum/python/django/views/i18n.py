@@ -1,13 +1,15 @@
 import os
 import gettext as gettext_module
 
-from django import http
-from django.conf import settings
 from django.utils import importlib
 from django.utils.translation import check_for_language, activate, to_locale, get_language
 from django.utils.text import javascript_quote
 from django.utils.encoding import smart_unicode
 from django.utils.formats import get_format_modules
+
+from django import http
+from django.conf import settings
+
 
 def set_language(request):
     """
@@ -35,6 +37,7 @@ def set_language(request):
                 response.set_cookie(settings.LANGUAGE_COOKIE_NAME, lang_code)
     return response
 
+
 def get_formats():
     """
     Returns all formats strings required for i18n to work
@@ -61,6 +64,7 @@ def get_formats():
             v = [javascript_quote(smart_unicode(value)) for value in v]
             src.append("formats['%s'] = ['%s'];\n" % (javascript_quote(k), "', '".join(v)))
     return ''.join(src)
+
 
 NullSource = """
 /* gettext identity library */
@@ -143,6 +147,7 @@ function pluralidx(n) {
 }
 """
 
+
 def null_javascript_catalog(request, domain=None, packages=None):
     """
     Returns "identity" versions of the JavaScript i18n functions -- i.e.,
@@ -150,6 +155,7 @@ def null_javascript_catalog(request, domain=None, packages=None):
     """
     src = [NullSource, InterPolate, LibFormatHead, get_formats(), LibFormatFoot]
     return http.HttpResponse(''.join(src), 'text/javascript')
+
 
 def javascript_catalog(request, domain='djangojs', packages=None):
     """
@@ -192,9 +198,9 @@ def javascript_catalog(request, domain='djangojs', packages=None):
                 # If 'en' is the selected language this would cause issues
                 # later on if default_locale is something other than 'en'.
                 en_catalog_missing = True
-            # Otherwise it is harmless.
+                # Otherwise it is harmless.
             pass
-    # next load the settings.LANGUAGE_CODE translations if it isn't english
+        # next load the settings.LANGUAGE_CODE translations if it isn't english
     if default_locale != 'en':
         for path in paths:
             try:
@@ -203,7 +209,7 @@ def javascript_catalog(request, domain='djangojs', packages=None):
                 catalog = None
             if catalog is not None:
                 t.update(catalog._catalog)
-    # last load the currently selected language, if it isn't identical to the default.
+        # last load the currently selected language, if it isn't identical to the default.
     if locale != default_locale:
         # If the flag en_catalog_missing has been set, the currently
         # selected language is English but it doesn't have a translation
@@ -228,11 +234,11 @@ def javascript_catalog(request, domain='djangojs', packages=None):
     if '' in t:
         for l in t[''].split('\n'):
             if l.startswith('Plural-Forms:'):
-                plural = l.split(':',1)[1].strip()
+                plural = l.split(':', 1)[1].strip()
     if plural is not None:
         # this should actually be a compiled function of a typical plural-form:
         # Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;
-        plural = [el.strip() for el in plural.split(';') if el.strip().startswith('plural=')][0].split('=',1)[1]
+        plural = [el.strip() for el in plural.split(';') if el.strip().startswith('plural=')][0].split('=', 1)[1]
         src.append(PluralIdx % plural)
     else:
         src.append(SimplePlural)
@@ -253,7 +259,7 @@ def javascript_catalog(request, domain='djangojs', packages=None):
             raise TypeError(k)
     csrc.sort()
     for k, v in pdict.items():
-        src.append("catalog['%s'] = [%s];\n" % (javascript_quote(k), ','.join(["''"]*(v+1))))
+        src.append("catalog['%s'] = [%s];\n" % (javascript_quote(k), ','.join(["''"] * (v + 1))))
     src.extend(csrc)
     src.append(LibFoot)
     src.append(InterPolate)

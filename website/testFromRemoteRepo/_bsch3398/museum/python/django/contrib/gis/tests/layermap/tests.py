@@ -1,14 +1,12 @@
 import os
 import unittest
 from decimal import Decimal
-
-from django.utils.copycompat import copy
-
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.tests.utils import mysql
 from django.contrib.gis.utils.layermapping import LayerMapping, LayerMapError, InvalidDecimal, MissingForeignKey
-
+from django.utils.copycompat import copy
 from models import City, County, CountyFeat, Interstate, ICity1, ICity2, State, city_mapping, co_mapping, cofeat_mapping, inter_mapping
+
 
 shp_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data'))
 city_shp = os.path.join(shp_path, 'cities', 'cities.shp')
@@ -16,12 +14,13 @@ co_shp = os.path.join(shp_path, 'counties', 'counties.shp')
 inter_shp = os.path.join(shp_path, 'interstates', 'interstates.shp')
 
 # Dictionaries to hold what's expected in the county shapefile.  
-NAMES  = ['Bexar', 'Galveston', 'Harris', 'Honolulu', 'Pueblo']
-NUMS   = [1, 2, 1, 19, 1] # Number of polygons for each.                                                                                                                                                  
+NAMES = ['Bexar', 'Galveston', 'Harris', 'Honolulu', 'Pueblo']
+NUMS = [1, 2, 1, 19,
+        1] # Number of polygons for each.
 STATES = ['Texas', 'Texas', 'Texas', 'Hawaii', 'Colorado']
 
-class LayerMapTest(unittest.TestCase):
 
+class LayerMapTest(unittest.TestCase):
     def test01_init(self):
         "Testing LayerMapping initialization."
 
@@ -98,7 +97,7 @@ class LayerMapTest(unittest.TestCase):
 
         # Two interstate should have imported correctly.
         self.assertEqual(2, Interstate.objects.count())
-        
+
         # Verifying the values in the layer w/the model.
         ds = DataSource(inter_shp)
 
@@ -106,7 +105,7 @@ class LayerMapTest(unittest.TestCase):
         valid_feats = ds[0][:2]
         for feat in valid_feats:
             istate = Interstate.objects.get(name=feat['Name'].value)
-            
+
             if feat.fid == 0:
                 self.assertEqual(Decimal(str(feat['Length'])), istate.length)
             elif feat.fid == 1:
@@ -125,7 +124,7 @@ class LayerMapTest(unittest.TestCase):
             c = County.objects.get(name=name)
             self.assertEqual(n, len(c.mpoly))
             self.assertEqual(st, c.state.name) # Checking ForeignKey mapping.
-            
+
             # Multiple records because `unique` was not set.
             if county_feat:
                 qs = CountyFeat.objects.filter(name=name)
@@ -137,7 +136,7 @@ class LayerMapTest(unittest.TestCase):
         try:
             # Telling LayerMapping that we want no transformations performed on the data.
             lm = LayerMapping(County, co_shp, co_mapping, transform=False)
-        
+
             # Specifying the source spatial reference system via the `source_srs` keyword.
             lm = LayerMapping(County, co_shp, co_mapping, source_srs=4269)
             lm = LayerMapping(County, co_shp, co_mapping, source_srs='NAD83')
@@ -147,7 +146,7 @@ class LayerMapTest(unittest.TestCase):
                 lm = LayerMapping(County, co_shp, co_mapping, transform=False, unique=arg)
         except:
             self.fail('No exception should be raised for proper use of keywords.')
-            
+
         # Testing invalid params for the `unique` keyword.
         for e, arg in ((TypeError, 5.0), (ValueError, 'foobar'), (ValueError, ('name', 'mpolygon'))):
             self.assertRaises(e, LayerMapping, County, co_shp, co_mapping, transform=False, unique=arg)
@@ -158,8 +157,10 @@ class LayerMapTest(unittest.TestCase):
 
         # Passing in invalid ForeignKey mapping parameters -- must be a dictionary
         # mapping for the model the ForeignKey points to.
-        bad_fk_map1 = copy(co_mapping); bad_fk_map1['state'] = 'name'
-        bad_fk_map2 = copy(co_mapping); bad_fk_map2['state'] = {'nombre' : 'State'}
+        bad_fk_map1 = copy(co_mapping);
+        bad_fk_map1['state'] = 'name'
+        bad_fk_map2 = copy(co_mapping);
+        bad_fk_map2['state'] = {'nombre': 'State'}
         self.assertRaises(TypeError, LayerMapping, County, co_shp, bad_fk_map1, transform=False)
         self.assertRaises(LayerMapError, LayerMapping, County, co_shp, bad_fk_map2, transform=False)
 
@@ -200,8 +201,9 @@ class LayerMapTest(unittest.TestCase):
     def test05_test_fid_range_step(self):
         "Tests the `fid_range` keyword and the `step` keyword of .save()."
         # Function for clearing out all the counties before testing.
-        def clear_counties(): County.objects.all().delete()
-        
+        def clear_counties():
+            County.objects.all().delete()
+
         # Initializing the LayerMapping object to use in these tests.
         lm = LayerMapping(County, co_shp, co_mapping, transform=False, unique='name')
 
@@ -213,9 +215,9 @@ class LayerMapTest(unittest.TestCase):
 
         # Step keyword should not be allowed w/`fid_range`.
         fr = (3, 5) # layer[3:5]
-        self.assertRaises(LayerMapError, lm.save, fid_range=fr, step=10) 
+        self.assertRaises(LayerMapError, lm.save, fid_range=fr, step=10)
         lm.save(fid_range=fr)
-        
+
         # Features IDs 3 & 4 are for Galveston County, Texas -- only
         # one model is returned because the `unique` keyword was set.
         qs = County.objects.all()
@@ -231,29 +233,31 @@ class LayerMapTest(unittest.TestCase):
         # Only Pueblo & Honolulu counties should be present because of
         # the `unique` keyword.  Have to set `order_by` on this QuerySet 
         # or else MySQL will return a different ordering than the other dbs.
-        qs = County.objects.order_by('name') 
+        qs = County.objects.order_by('name')
         self.assertEqual(2, qs.count())
         hi, co = tuple(qs)
         hi_idx, co_idx = tuple(map(NAMES.index, ('Honolulu', 'Pueblo')))
-        self.assertEqual('Pueblo', co.name); self.assertEqual(NUMS[co_idx], len(co.mpoly))
-        self.assertEqual('Honolulu', hi.name); self.assertEqual(NUMS[hi_idx], len(hi.mpoly))
+        self.assertEqual('Pueblo', co.name);
+        self.assertEqual(NUMS[co_idx], len(co.mpoly))
+        self.assertEqual('Honolulu', hi.name);
+        self.assertEqual(NUMS[hi_idx], len(hi.mpoly))
 
         # Testing the `step` keyword -- should get the same counties
         # regardless of we use a step that divides equally, that is odd,
         # or that is larger than the dataset.
-        for st in (4,7,1000):
+        for st in (4, 7, 1000):
             clear_counties()
             lm.save(step=st, strict=True)
             self.county_helper(county_feat=False)
 
     def test06_model_inheritance(self):
         "Tests LayerMapping on inherited models.  See #12093."
-        icity_mapping = {'name' : 'Name',
-                         'population' : 'Population',
-                         'density' : 'Density',
-                         'point' : 'POINT',
-                         'dt' : 'Created',
-                         }
+        icity_mapping = {'name': 'Name',
+                         'population': 'Population',
+                         'density': 'Density',
+                         'point': 'POINT',
+                         'dt': 'Created',
+        }
 
         # Parent model has geometry field.
         lm1 = LayerMapping(ICity1, city_shp, icity_mapping)
@@ -265,7 +269,8 @@ class LayerMapTest(unittest.TestCase):
 
         self.assertEqual(6, ICity1.objects.count())
         self.assertEqual(3, ICity2.objects.count())
-        
+
+
 def suite():
     s = unittest.TestSuite()
     s.addTest(unittest.makeSuite(LayerMapTest))

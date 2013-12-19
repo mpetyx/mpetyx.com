@@ -3,17 +3,20 @@ import sys
 from optparse import make_option
 from django.core.management.base import BaseCommand, CommandError
 
+
 def compile_messages(locale=None):
     basedirs = [os.path.join('conf', 'locale'), 'locale']
     if os.environ.get('DJANGO_SETTINGS_MODULE'):
         from django.conf import settings
+
         basedirs.extend(settings.LOCALE_PATHS)
 
     # Gather existing directories.
     basedirs = set(map(os.path.abspath, filter(os.path.isdir, basedirs)))
 
     if not basedirs:
-        raise CommandError("This script should be run from the Django SVN tree or your project or app tree, or with the settings module specified.")
+        raise CommandError(
+            "This script should be run from the Django SVN tree or your project or app tree, or with the settings module specified.")
 
     for basedir in basedirs:
         if locale:
@@ -40,7 +43,7 @@ def compile_messages(locale=None):
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--locale', '-l', dest='locale',
-            help='The locale to process. Default is to process all.'),
+                    help='The locale to process. Default is to process all.'),
     )
     help = 'Compiles .po files to .mo files for use with builtin gettext support.'
 

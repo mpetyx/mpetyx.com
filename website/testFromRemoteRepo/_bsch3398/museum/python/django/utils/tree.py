@@ -5,6 +5,7 @@ ORM.
 
 from django.utils.copycompat import deepcopy
 
+
 class Node(object):
     """
     A single internal node in the tree graph. A Node should be viewed as a
@@ -43,14 +44,15 @@ class Node(object):
         obj = Node(children, connector, negated)
         obj.__class__ = cls
         return obj
+
     _new_instance = classmethod(_new_instance)
 
     def __str__(self):
         if self.negated:
             return '(NOT (%s: %s))' % (self.connector, ', '.join([str(c) for c
-                    in self.children]))
+                                                                  in self.children]))
         return '(%s: %s)' % (self.connector, ', '.join([str(c) for c in
-                self.children]))
+                                                        self.children]))
 
     def __deepcopy__(self, memodict):
         """
@@ -93,13 +95,13 @@ class Node(object):
             self.connector = conn_type
         if self.connector == conn_type:
             if isinstance(node, Node) and (node.connector == conn_type or
-                    len(node) == 1):
+                                                   len(node) == 1):
                 self.children.extend(node.children)
             else:
                 self.children.append(node)
         else:
             obj = self._new_instance(self.children, self.connector,
-                    self.negated)
+                                     self.negated)
             self.connector = conn_type
             self.children = [obj, node]
 
@@ -114,7 +116,7 @@ class Node(object):
         method is useful for implementing "not" arrangements.
         """
         self.children = [self._new_instance(self.children, self.connector,
-                not self.negated)]
+                                            not self.negated)]
         self.connector = self.default
 
     def start_subtree(self, conn_type):
@@ -127,12 +129,12 @@ class Node(object):
             self.connector = conn_type
         elif self.connector != conn_type:
             self.children = [self._new_instance(self.children, self.connector,
-                    self.negated)]
+                                                self.negated)]
             self.connector = conn_type
             self.negated = False
 
         self.subtree_parents.append(self.__class__(self.children,
-                self.connector, self.negated))
+                                                   self.connector, self.negated))
         self.connector = self.default
         self.negated = False
         self.children = []

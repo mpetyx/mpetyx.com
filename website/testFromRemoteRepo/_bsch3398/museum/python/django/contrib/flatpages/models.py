@@ -9,8 +9,10 @@ class FlatPage(models.Model):
     content = models.TextField(_('content'), blank=True)
     enable_comments = models.BooleanField(_('enable comments'))
     template_name = models.CharField(_('template name'), max_length=70, blank=True,
-        help_text=_("Example: 'flatpages/contact_page.html'. If this isn't provided, the system will use 'flatpages/default.html'."))
-    registration_required = models.BooleanField(_('registration required'), help_text=_("If this is checked, only logged-in users will be able to view the page."))
+                                     help_text=_(
+                                         "Example: 'flatpages/contact_page.html'. If this isn't provided, the system will use 'flatpages/default.html'."))
+    registration_required = models.BooleanField(_('registration required'), help_text=_(
+        "If this is checked, only logged-in users will be able to view the page."))
     sites = models.ManyToManyField(Site)
 
     class Meta:

@@ -20,17 +20,19 @@ def fix_location_header(request, response):
         response['Location'] = request.build_absolute_uri(response['Location'])
     return response
 
+
 def conditional_content_removal(request, response):
     """
     Removes the content of responses for HEAD requests, 1xx, 204 and 304
     responses. Ensures compliance with RFC 2616, section 4.3.
     """
     if 100 <= response.status_code < 200 or response.status_code in (204, 304):
-       response.content = ''
-       response['Content-Length'] = 0
+        response.content = ''
+        response['Content-Length'] = 0
     if request.method == 'HEAD':
         response.content = ''
     return response
+
 
 def fix_IE_for_attach(request, response):
     """
@@ -49,8 +51,8 @@ def fix_IE_for_attach(request, response):
             pass
         if response.has_header('Cache-Control'):
             cache_control_values = [value.strip() for value in
-                    response['Cache-Control'].split(',')
-                    if value.strip().lower() not in offending_headers]
+                                    response['Cache-Control'].split(',')
+                                    if value.strip().lower() not in offending_headers]
 
             if not len(cache_control_values):
                 del response['Cache-Control']
@@ -58,6 +60,7 @@ def fix_IE_for_attach(request, response):
                 response['Cache-Control'] = ', '.join(cache_control_values)
 
     return response
+
 
 def fix_IE_for_vary(request, response):
     """

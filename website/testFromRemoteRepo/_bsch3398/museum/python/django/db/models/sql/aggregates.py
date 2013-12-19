@@ -2,17 +2,22 @@
 Classes to represent the default SQL aggregate functions
 """
 
+
 class AggregateField(object):
     """An internal field mockup used to identify aggregates in the
     data-conversion parts of the database backend.
     """
+
     def __init__(self, internal_type):
         self.internal_type = internal_type
+
     def get_internal_type(self):
         return self.internal_type
 
+
 ordinal_aggregate_field = AggregateField('IntegerField')
 computed_aggregate_field = AggregateField('FloatField')
+
 
 class Aggregate(object):
     """
@@ -95,6 +100,7 @@ class Avg(Aggregate):
     is_computed = True
     sql_function = 'AVG'
 
+
 class Count(Aggregate):
     is_ordinal = True
     sql_function = 'COUNT'
@@ -103,11 +109,14 @@ class Count(Aggregate):
     def __init__(self, col, distinct=False, **extra):
         super(Count, self).__init__(col, distinct=distinct and 'DISTINCT ' or '', **extra)
 
+
 class Max(Aggregate):
     sql_function = 'MAX'
 
+
 class Min(Aggregate):
     sql_function = 'MIN'
+
 
 class StdDev(Aggregate):
     is_computed = True
@@ -116,8 +125,10 @@ class StdDev(Aggregate):
         super(StdDev, self).__init__(col, **extra)
         self.sql_function = sample and 'STDDEV_SAMP' or 'STDDEV_POP'
 
+
 class Sum(Aggregate):
     sql_function = 'SUM'
+
 
 class Variance(Aggregate):
     is_computed = True

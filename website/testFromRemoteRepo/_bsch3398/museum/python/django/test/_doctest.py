@@ -99,9 +99,16 @@ __all__ = [
 ]
 
 import __future__
-
-import sys, traceback, inspect, linecache, os, re
-import unittest, difflib, pdb, tempfile
+import sys
+import traceback
+import inspect
+import linecache
+import os
+import re
+import unittest
+import difflib
+import pdb
+import tempfile
 import warnings
 from StringIO import StringIO
 
@@ -110,7 +117,9 @@ if sys.platform.startswith('java'):
     def patch_isclass(isclass):
         def patched_isclass(obj):
             return isclass(obj) and hasattr(obj, '__module__')
+
         return patched_isclass
+
     inspect.isclass = patch_isclass(inspect.isclass)
 
 # Don't whine about the deprecated is_private function in this
@@ -140,10 +149,13 @@ warnings.filterwarnings("ignore", "is_private", DeprecationWarning,
 # Option constants.
 
 OPTIONFLAGS_BY_NAME = {}
+
+
 def register_optionflag(name):
     flag = 1 << len(OPTIONFLAGS_BY_NAME)
     OPTIONFLAGS_BY_NAME[name] = flag
     return flag
+
 
 DONT_ACCEPT_TRUE_FOR_1 = register_optionflag('DONT_ACCEPT_TRUE_FOR_1')
 DONT_ACCEPT_BLANKLINE = register_optionflag('DONT_ACCEPT_BLANKLINE')
@@ -218,6 +230,7 @@ def is_private(prefix, base):
                   DeprecationWarning, stacklevel=2)
     return base[:1] == "_" and not base[:2] == "__" == base[-2:]
 
+
 def _extract_future_flags(globs):
     """
     Return the compiler-flags associated with the future features that
@@ -229,6 +242,7 @@ def _extract_future_flags(globs):
         if feature is getattr(__future__, fname):
             flags |= feature.compiler_flag
     return flags
+
 
 def _normalize_module(module, depth=2):
     """
@@ -249,13 +263,15 @@ def _normalize_module(module, depth=2):
     else:
         raise TypeError("Expected a module, string, or None")
 
+
 def _indent(s, indent=4):
     """
     Add the given number of space characters to the beginning every
     non-blank line in `s`, and return the result.
     """
     # This regexp matches the start of non-blank lines:
-    return re.sub('(?m)^(?!$)', indent*' ', s)
+    return re.sub('(?m)^(?!$)', indent * ' ', s)
+
 
 def _exception_traceback(exc_info):
     """
@@ -277,13 +293,13 @@ class _SpoofOut(StringIO):
         # that a trailing newline is missing.
         if result and not result.endswith("\n"):
             result += "\n"
-        # Prevent softspace from screwing up the next test case, in
+            # Prevent softspace from screwing up the next test case, in
         # case they used print with a trailing comma in an example.
         if hasattr(self, "softspace"):
             del self.softspace
         return result
 
-    def truncate(self,   size=None):
+    def truncate(self, size=None):
         StringIO.truncate(self, size)
         if hasattr(self, "softspace"):
             del self.softspace
@@ -338,13 +354,15 @@ def _ellipsis_match(want, got):
 
     return True
 
+
 def _comment_line(line):
     "Return a commented form of the given line"
     line = line.rstrip()
     if line:
-        return '# '+line
+        return '# ' + line
     else:
         return '#'
+
 
 class _OutputRedirectingPdb(pdb.Pdb):
     """
@@ -352,6 +370,7 @@ class _OutputRedirectingPdb(pdb.Pdb):
     to a given stream when interacting with the user.  Stdout is *not*
     redirected when traced code is executed.
     """
+
     def __init__(self, out):
         self.__out = out
         self.__debugger_used = False
@@ -390,7 +409,7 @@ def _module_relative_path(module, path):
         basedir = os.path.split(module.__file__)[0]
     elif module.__name__ == '__main__':
         # An interactive session.
-        if len(sys.argv)>0 and sys.argv[0] != '':
+        if len(sys.argv) > 0 and sys.argv[0] != '':
             basedir = os.path.split(sys.argv[0])[0]
         else:
             basedir = os.curdir
@@ -449,6 +468,7 @@ class Example:
         are left at their default value (as specified by the
         DocTestRunner's optionflags).  By default, no options are set.
     """
+
     def __init__(self, source, want, exc_msg=None, lineno=0, indent=0,
                  options=None):
         # Normalize inputs.
@@ -458,7 +478,7 @@ class Example:
             want += '\n'
         if exc_msg is not None and not exc_msg.endswith('\n'):
             exc_msg += '\n'
-        # Store properties.
+            # Store properties.
         self.source = source
         self.want = want
         self.lineno = lineno
@@ -466,6 +486,7 @@ class Example:
         if options is None: options = {}
         self.options = options
         self.exc_msg = exc_msg
+
 
 class DocTest:
     """
@@ -491,13 +512,14 @@ class DocTest:
       - docstring: The string that the examples were extracted from,
         or `None` if the string is unavailable.
     """
+
     def __init__(self, examples, globs, name, filename, lineno, docstring):
         """
         Create a new DocTest containing the given examples.  The
         DocTest's globals are initialized with a copy of `globs`.
         """
         assert not isinstance(examples, basestring), \
-               "DocTest no longer accepts str; use DocTestParser instead"
+            "DocTest no longer accepts str; use DocTestParser instead"
         self.examples = examples
         self.docstring = docstring
         self.globs = globs.copy()
@@ -599,18 +621,18 @@ class DocTestParser:
             lineno += string.count('\n', charno, m.start())
             # Extract info from the regexp match.
             (source, options, want, exc_msg) = \
-                     self._parse_example(m, name, lineno)
+                self._parse_example(m, name, lineno)
             # Create an Example, and add it to the list.
             if not self._IS_BLANK_OR_COMMENT(source):
-                output.append( Example(source, want, exc_msg,
-                                    lineno=lineno,
-                                    indent=min_indent+len(m.group('indent')),
-                                    options=options) )
-            # Update lineno (lines inside this example)
+                output.append(Example(source, want, exc_msg,
+                                      lineno=lineno,
+                                      indent=min_indent + len(m.group('indent')),
+                                      options=options))
+                # Update lineno (lines inside this example)
             lineno += string.count('\n', m.start(), m.end())
             # Update charno.
             charno = m.end()
-        # Add any remaining post-example text to `output`.
+            # Add any remaining post-example text to `output`.
         output.append(string[charno:])
         return output
 
@@ -658,8 +680,8 @@ class DocTestParser:
         # indented; and then strip their indentation & prompts.
         source_lines = m.group('source').split('\n')
         self._check_prompt_blank(source_lines, indent, name, lineno)
-        self._check_prefix(source_lines[1:], ' '*indent + '.', name, lineno)
-        source = '\n'.join([sl[indent+4:] for sl in source_lines])
+        self._check_prefix(source_lines[1:], ' ' * indent + '.', name, lineno)
+        source = '\n'.join([sl[indent + 4:] for sl in source_lines])
 
         # Divide want into lines; check that it's properly indented; and
         # then strip the indentation.  Spaces before the last newline should
@@ -668,7 +690,7 @@ class DocTestParser:
         want_lines = want.split('\n')
         if len(want_lines) > 1 and re.match(r' *$', want_lines[-1]):
             del want_lines[-1]  # forget final newline & spaces after it
-        self._check_prefix(want_lines, ' '*indent, name,
+        self._check_prefix(want_lines, ' ' * indent, name,
                            lineno + len(source_lines))
         want = '\n'.join([wl[indent:] for wl in want_lines])
 
@@ -708,10 +730,10 @@ class DocTestParser:
             option_strings = m.group(1).replace(',', ' ').split()
             for option in option_strings:
                 if (option[0] not in '+-' or
-                    option[1:] not in OPTIONFLAGS_BY_NAME):
+                            option[1:] not in OPTIONFLAGS_BY_NAME):
                     raise ValueError('line %r of the doctest for %s '
                                      'has an invalid option: %r' %
-                                     (lineno+1, name, option))
+                                     (lineno + 1, name, option))
                 flag = OPTIONFLAGS_BY_NAME[option[1:]]
                 options[flag] = (option[0] == '+')
         if options and self._IS_BLANK_OR_COMMENT(source):
@@ -740,11 +762,11 @@ class DocTestParser:
         a space character, then raise ValueError.
         """
         for i, line in enumerate(lines):
-            if len(line) >= indent+4 and line[indent+3] != ' ':
+            if len(line) >= indent + 4 and line[indent + 3] != ' ':
                 raise ValueError('line %r of the docstring for %s '
                                  'lacks blank after %s: %r' %
-                                 (lineno+i+1, name,
-                                  line[indent:indent+3], line))
+                                 (lineno + i + 1, name,
+                                  line[indent:indent + 3], line))
 
     def _check_prefix(self, lines, prefix, name, lineno):
         """
@@ -755,7 +777,7 @@ class DocTestParser:
             if line and not line.startswith(prefix):
                 raise ValueError('line %r of the docstring for %s has '
                                  'inconsistent leading whitespace: %r' %
-                                 (lineno+i+1, name, line))
+                                 (lineno + i + 1, name, line))
 
 
 ######################################################################
@@ -837,7 +859,7 @@ class DocTestFinder:
             name = getattr(obj, '__name__', None)
             if name is None:
                 raise ValueError("DocTestFinder.find: name must be given "
-                        "when obj.__name__ doesn't exist: %r" %
+                                 "when obj.__name__ doesn't exist: %r" %
                                  (type(obj),))
 
         # Find the module that contains the given object (if obj is
@@ -929,7 +951,7 @@ class DocTestFinder:
                 valname = '%s.%s' % (name, valname)
                 # Recurse to functions & classes.
                 if ((inspect.isfunction(val) or inspect.isclass(val)) and
-                    self._from_module(module, val)):
+                        self._from_module(module, val)):
                     self._find(tests, val, valname, module, source_lines,
                                globs, seen)
 
@@ -941,8 +963,8 @@ class DocTestFinder:
                                      "must be strings: %r" %
                                      (type(valname),))
                 if not (inspect.isfunction(val) or inspect.isclass(val) or
-                        inspect.ismethod(val) or inspect.ismodule(val) or
-                        isinstance(val, basestring)):
+                            inspect.ismethod(val) or inspect.ismodule(val) or
+                            isinstance(val, basestring)):
                     raise ValueError("DocTestFinder.find: __test__ values "
                                      "must be strings, functions, methods, "
                                      "classes, or modules: %r" %
@@ -957,7 +979,7 @@ class DocTestFinder:
                 # Check if this contained object should be ignored.
                 if self._filter(val, name, valname):
                     continue
-                # Special handling for staticmethod/classmethod.
+                    # Special handling for staticmethod/classmethod.
                 if isinstance(val, staticmethod):
                     val = getattr(obj, valname)
                 if isinstance(val, classmethod):
@@ -965,8 +987,8 @@ class DocTestFinder:
 
                 # Recurse to methods, properties, and nested classes.
                 if ((inspect.isfunction(val) or inspect.isclass(val) or
-                      isinstance(val, property)) and
-                      self._from_module(module, val)):
+                         isinstance(val, property)) and
+                        self._from_module(module, val)):
                     valname = '%s.%s' % (name, valname)
                     self._find(tests, val, valname, module, source_lines,
                                globs, seen)
@@ -1038,7 +1060,7 @@ class DocTestFinder:
         if inspect.istraceback(obj): obj = obj.tb_frame
         if inspect.isframe(obj): obj = obj.f_code
         if inspect.iscode(obj):
-            lineno = getattr(obj, 'co_firstlineno', None)-1
+            lineno = getattr(obj, 'co_firstlineno', None) - 1
 
         # Find the line number where the docstring starts.  Assume
         # that it's the first line that begins with a quote mark.
@@ -1047,7 +1069,7 @@ class DocTestFinder:
         # mark.
         if lineno is not None:
             if source_lines is None:
-                return lineno+1
+                return lineno + 1
             pat = re.compile('(^|.*:)\s*\w*("|\')')
             for lineno in range(lineno, len(source_lines)):
                 if pat.match(source_lines[lineno]):
@@ -1200,7 +1222,7 @@ class DocTestRunner:
             out.append('File "%s", line %s, in %s' %
                        (test.filename, lineno, test.name))
         else:
-            out.append('Line %s, in %s' % (example.lineno+1, test.name))
+            out.append('Line %s, in %s' % (example.lineno + 1, test.name))
         out.append('Failed example:')
         source = example.source
         out.append(_indent(source))
@@ -1335,14 +1357,15 @@ class DocTestRunner:
         Record the fact that the given DocTest (`test`) generated `f`
         failures out of `t` tried examples.
         """
-        f2, t2 = self._name2ft.get(test.name, (0,0))
-        self._name2ft[test.name] = (f+f2, t+t2)
+        f2, t2 = self._name2ft.get(test.name, (0, 0))
+        self._name2ft[test.name] = (f + f2, t + t2)
         self.failures += f
         self.tries += t
 
     __LINECACHE_FILENAME_RE = re.compile(r'<doctest '
                                          r'(?P<name>[\w\.]+)'
                                          r'\[(?P<examplenum>\d+)\]>$')
+
     def __patched_linecache_getlines(self, filename, module_globals=None):
         m = self.__LINECACHE_FILENAME_RE.match(filename)
         if m and m.group('name') == self.test.name:
@@ -1436,7 +1459,7 @@ class DocTestRunner:
             if t == 0:
                 notests.append(name)
             elif f == 0:
-                passed.append( (name, t) )
+                passed.append((name, t))
             else:
                 failed.append(x)
         if verbose:
@@ -1473,11 +1496,12 @@ class DocTestRunner:
         for name, (f, t) in other._name2ft.items():
             if name in d:
                 print "*** DocTestRunner.merge: '" + name + "' in both" \
-                    " testers; summing outcomes."
+                                                            " testers; summing outcomes."
                 f2, t2 = d[name]
                 f = f + f2
                 t = t + t2
             d[name] = f, t
+
 
 class OutputChecker:
     """
@@ -1487,6 +1511,7 @@ class OutputChecker:
     and returns true if they match; and `output_difference`, which
     returns a string describing the differences between two outputs.
     """
+
     def check_output(self, want, got, optionflags):
         """
         Return True iff the actual output from an example (`got`)
@@ -1505,9 +1530,9 @@ class OutputChecker:
         # The values True and False replaced 1 and 0 as the return
         # value for boolean comparisons in Python 2.3.
         if not (optionflags & DONT_ACCEPT_TRUE_FOR_1):
-            if (got,want) == ("True\n", "1\n"):
+            if (got, want) == ("True\n", "1\n"):
                 return True
-            if (got,want) == ("False\n", "0\n"):
+            if (got, want) == ("False\n", "0\n"):
                 return True
 
         # <BLANKLINE> can be used as a special sequence to signify a
@@ -1544,8 +1569,8 @@ class OutputChecker:
     def _do_a_fancy_diff(self, want, got, optionflags):
         # Not unless they asked for a fancy diff.
         if not optionflags & (REPORT_UDIFF |
-                              REPORT_CDIFF |
-                              REPORT_NDIFF):
+                                  REPORT_CDIFF |
+                                  REPORT_NDIFF):
             return False
 
         # If expected output uses ellipsis, a meaningful fancy diff is
@@ -1597,7 +1622,7 @@ class OutputChecker:
                 kind = 'ndiff with -expected +actual'
             else:
                 assert 0, 'Bad diff option'
-            # Remove trailing whitespace on diff output.
+                # Remove trailing whitespace on diff output.
             diff = [line.rstrip() + '\n' for line in diff]
             return 'Differences (%s):\n' % kind + _indent(''.join(diff))
 
@@ -1612,6 +1637,7 @@ class OutputChecker:
         else:
             return 'Expected nothing\nGot nothing\n'
 
+
 class DocTestFailure(Exception):
     """A DocTest example has failed in debugging mode.
 
@@ -1623,6 +1649,7 @@ class DocTestFailure(Exception):
 
     - got: the actual output
     """
+
     def __init__(self, test, example, got):
         self.test = test
         self.example = example
@@ -1630,6 +1657,7 @@ class DocTestFailure(Exception):
 
     def __str__(self):
         return str(self.test)
+
 
 class UnexpectedException(Exception):
     """A DocTest example has encountered an unexpected exception
@@ -1642,6 +1670,7 @@ class UnexpectedException(Exception):
 
     - exc_info: the exception info
     """
+
     def __init__(self, test, example, exc_info):
         self.test = test
         self.example = example
@@ -1649,6 +1678,7 @@ class UnexpectedException(Exception):
 
     def __str__(self):
         return str(self.test)
+
 
 class DebugRunner(DocTestRunner):
     r"""Run doc tests but raise an exception as soon as there is a failure.
@@ -1761,6 +1791,7 @@ class DebugRunner(DocTestRunner):
 # For backward compatibility, a global instance of a DocTestRunner
 # class, updated by testmod.
 master = None
+
 
 def testmod(m=None, name=None, globs=None, verbose=None, isprivate=None,
             report=True, optionflags=0, extraglobs=None,
@@ -1877,6 +1908,7 @@ def testmod(m=None, name=None, globs=None, verbose=None, isprivate=None,
         master.merge(runner)
 
     return runner.failures, runner.tries
+
 
 def testfile(filename, module_relative=True, name=None, package=None,
              globs=None, verbose=None, report=True, optionflags=0,
@@ -1996,6 +2028,7 @@ def testfile(filename, module_relative=True, name=None, package=None,
 
     return runner.failures, runner.tries
 
+
 def run_docstring_examples(f, globs, verbose=False, name="NoName",
                            compileflags=None, optionflags=0):
     """
@@ -2052,10 +2085,10 @@ class Tester:
         test = DocTestParser().get_doctest(s, self.globs, name, None, None)
         if self.verbose:
             print "Running string", name
-        (f,t) = self.testrunner.run(test)
+        (f, t) = self.testrunner.run(test)
         if self.verbose:
             print f, "of", t, "examples failed in string", name
-        return (f,t)
+        return (f, t)
 
     def rundoc(self, object, name=None, module=None):
         f = t = 0
@@ -2063,11 +2096,12 @@ class Tester:
                                      globs=self.globs)
         for test in tests:
             (f2, t2) = self.testrunner.run(test)
-            (f,t) = (f+f2, t+t2)
-        return (f,t)
+            (f, t) = (f + f2, t + t2)
+        return (f, t)
 
     def rundict(self, d, name, module=None):
         import new
+
         m = new.module(name)
         m.__dict__.update(d)
         if module is None:
@@ -2076,6 +2110,7 @@ class Tester:
 
     def run__test__(self, d, name):
         import new
+
         m = new.module(name)
         m.__test__ = d
         return self.rundoc(m, name)
@@ -2091,6 +2126,7 @@ class Tester:
 ######################################################################
 
 _unittest_reportflags = 0
+
 
 def set_unittest_reportflags(flags):
     """Sets the unittest option flags.
@@ -2129,7 +2165,6 @@ def set_unittest_reportflags(flags):
 
 
 class DocTestCase(unittest.TestCase):
-
     def __init__(self, test, optionflags=0, setUp=None, tearDown=None,
                  checker=None, runner=DocTestRunner):
 
@@ -2170,7 +2205,7 @@ class DocTestCase(unittest.TestCase):
                                  checker=self._dt_checker, verbose=False)
 
         try:
-            runner.DIVIDER = "-"*70
+            runner.DIVIDER = "-" * 70
             failures, tries = runner.run(
                 test, out=new.write, clear_globs=False)
         finally:
@@ -2189,7 +2224,7 @@ class DocTestCase(unittest.TestCase):
         return ('Failed doctest test for %s\n'
                 '  File "%s", line %s, in %s\n\n%s'
                 % (test.name, test.filename, lineno, lname, err)
-                )
+        )
 
     def debug(self):
         r"""Run the test case without results and without catching exceptions
@@ -2275,6 +2310,7 @@ class DocTestCase(unittest.TestCase):
     def shortDescription(self):
         return "Doctest: " + self._dt_test.name
 
+
 def DocTestSuite(module=None, globs=None, extraglobs=None, test_finder=None,
                  test_class=DocTestCase, **options):
     """
@@ -2338,19 +2374,21 @@ def DocTestSuite(module=None, globs=None, extraglobs=None, test_finder=None,
 
     return suite
 
-class DocFileCase(DocTestCase):
 
+class DocFileCase(DocTestCase):
     def id(self):
         return '_'.join(self._dt_test.name.split('.'))
 
     def __repr__(self):
         return self._dt_test.filename
+
     __str__ = __repr__
 
     def format_failure(self, err):
         return ('Failed doctest test for %s\n  File "%s", line 0\n\n%s'
                 % (self._dt_test.name, self._dt_test.filename, err)
-                )
+        )
+
 
 def DocFileTest(path, module_relative=True, package=None,
                 globs=None, parser=DocTestParser(), **options):
@@ -2373,6 +2411,7 @@ def DocFileTest(path, module_relative=True, package=None,
     # Convert it to a test, and wrap it in a DocFileCase.
     test = parser.get_doctest(doc, globs, name, path, 0)
     return DocFileCase(test, **options)
+
 
 def DocFileSuite(*paths, **kw):
     """A unittest suite for one or more doctest files.
@@ -2510,7 +2549,7 @@ def script_from_examples(s):
             want = piece.want
             if want:
                 output.append('# Expected:')
-                output += ['## '+l for l in want.split('\n')[:-1]]
+                output += ['## ' + l for l in want.split('\n')[:-1]]
         else:
             # Add non-example text.
             output += [_comment_line(l)
@@ -2521,8 +2560,9 @@ def script_from_examples(s):
         output.pop()
     while output and output[0] == '#':
         output.pop(0)
-    # Combine the output, and return it.
+        # Combine the output, and return it.
     return '\n'.join(output)
+
 
 def testsource(module, name):
     """Extract the test sources from a doctest docstring as a script.
@@ -2540,10 +2580,12 @@ def testsource(module, name):
     testsrc = script_from_examples(test.docstring)
     return testsrc
 
+
 def debug_src(src, pm=False, globs=None):
     """Debug a single doctest docstring, in argument `src`'"""
     testsrc = script_from_examples(src)
     debug_script(testsrc, pm, globs)
+
 
 def debug_script(src, pm=False, globs=None):
     "Debug a test script.  `src` is the script, as a string."
@@ -2576,6 +2618,7 @@ def debug_script(src, pm=False, globs=None):
 
     finally:
         os.remove(srcfilename)
+
 
 def debug(module, name, pm=False):
     """Debug a single doctest docstring.
@@ -2635,6 +2678,7 @@ class _TestClass:
 
         return self.val
 
+
 __test__ = {"_TestClass": _TestClass,
             "string": r"""
                       Example of a string object, searched as-is.
@@ -2683,11 +2727,13 @@ __test__ = {"_TestClass": _TestClass,
                      15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
                      27, 28, 29]
             """,
-           }
+}
+
 
 def _test():
     r = unittest.TextTestRunner()
     r.run(DocTestSuite())
+
 
 if __name__ == "__main__":
     _test()

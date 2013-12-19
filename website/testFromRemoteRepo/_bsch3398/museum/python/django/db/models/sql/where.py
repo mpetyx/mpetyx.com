@@ -5,12 +5,12 @@ import datetime
 
 from django.utils import tree
 from django.db.models.fields import Field
-from django.db.models.query_utils import QueryWrapper
 from datastructures import EmptyResultSet, FullResultSet
 
 # Connection types
 AND = 'AND'
 OR = 'OR'
+
 
 class EmptyShortCircuit(Exception):
     """
@@ -18,6 +18,7 @@ class EmptyShortCircuit(Exception):
     added to the where-clause.
     """
     pass
+
 
 class WhereNode(tree.Node):
     """
@@ -65,11 +66,11 @@ class WhereNode(tree.Node):
         if hasattr(obj, "prepare"):
             value = obj.prepare(lookup_type, value)
             super(WhereNode, self).add((obj, lookup_type, annotation, value),
-                connector)
+                                       connector)
             return
 
         super(WhereNode, self).add((obj, lookup_type, annotation, value),
-                connector)
+                                   connector)
 
     def as_sql(self, qn, connection):
         """
@@ -105,7 +106,7 @@ class WhereNode(tree.Node):
                     if self.negated:
                         empty = True
                         break
-                    # We match everything. No need for any constraints.
+                        # We match everything. No need for any constraints.
                     return '', []
                 if self.negated:
                     empty = True
@@ -143,7 +144,7 @@ class WhereNode(tree.Node):
                 raise EmptyResultSet
         else:
             params = Field().get_db_prep_lookup(lookup_type, params_or_value,
-                connection=connection, prepared=True)
+                                                connection=connection, prepared=True)
         if isinstance(lvalue, tuple):
             # A direct database column lookup.
             field_sql = self.sql_for_columns(lvalue, qn, connection)
@@ -187,7 +188,7 @@ class WhereNode(tree.Node):
                     params)
         elif lookup_type == 'isnull':
             return ('%s IS %sNULL' % (field_sql,
-                (not value_annot and 'NOT ' or '')), ())
+                                      (not value_annot and 'NOT ' or '')), ())
         elif lookup_type == 'search':
             return (connection.ops.fulltext_search_sql(field_sql), params)
         elif lookup_type in ('regex', 'iregex'):
@@ -233,6 +234,7 @@ class WhereNode(tree.Node):
                 if hasattr(child[3], 'relabel_aliases'):
                     child[3].relabel_aliases(change_map)
 
+
 class EverythingNode(object):
     """
     A node that matches everything.
@@ -244,15 +246,18 @@ class EverythingNode(object):
     def relabel_aliases(self, change_map, node=None):
         return
 
+
 class NothingNode(object):
     """
     A node that matches nothing.
     """
+
     def as_sql(self, qn=None, connection=None):
         raise EmptyResultSet
 
     def relabel_aliases(self, change_map, node=None):
         return
+
 
 class ExtraWhere(object):
     def __init__(self, sqls, params):
@@ -262,11 +267,13 @@ class ExtraWhere(object):
     def as_sql(self, qn=None, connection=None):
         return " AND ".join(self.sqls), tuple(self.params or ())
 
+
 class Constraint(object):
     """
     An object that can be passed to WhereNode.add() and knows how to
     pre-process itself prior to including in the WhereNode.
     """
+
     def __init__(self, alias, col, field):
         self.alias, self.col, self.field = alias, col, field
 
@@ -306,17 +313,18 @@ class Constraint(object):
         """
         # Because of circular imports, we need to import this here.
         from django.db.models.base import ObjectDoesNotExist
+
         try:
             if self.field:
                 params = self.field.get_db_prep_lookup(lookup_type, value,
-                    connection=connection, prepared=True)
+                                                       connection=connection, prepared=True)
                 db_type = self.field.db_type(connection=connection)
             else:
                 # This branch is used at times when we add a comparison to NULL
                 # (we don't really want to waste time looking up the associated
                 # field object at the calling location).
                 params = Field().get_db_prep_lookup(lookup_type, value,
-                    connection=connection, prepared=True)
+                                                    connection=connection, prepared=True)
                 db_type = None
         except ObjectDoesNotExist:
             raise EmptyShortCircuit

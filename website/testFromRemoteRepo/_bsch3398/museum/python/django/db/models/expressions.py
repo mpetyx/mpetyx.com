@@ -1,7 +1,6 @@
-from datetime import datetime
-
 from django.utils import tree
 from django.utils.copycompat import deepcopy
+
 
 class ExpressionNode(tree.Node):
     """
@@ -13,8 +12,8 @@ class ExpressionNode(tree.Node):
     MUL = '*'
     DIV = '/'
     MOD = '%%'  # This is a quoted % operator - it is quoted
-                # because it can be used in strings that also
-                # have parameter substitution.
+    # because it can be used in strings that also
+    # have parameter substitution.
 
     # Bitwise operators
     AND = '&'
@@ -93,10 +92,12 @@ class ExpressionNode(tree.Node):
     def prepare_database_save(self, unused):
         return self
 
+
 class F(ExpressionNode):
     """
     An expression representing the value of the given field.
     """
+
     def __init__(self, name):
         super(F, self).__init__(None, None, False)
         self.name = name

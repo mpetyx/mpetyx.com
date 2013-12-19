@@ -1,11 +1,15 @@
-from django.utils.translation import ungettext, ugettext as _
-from django.utils.encoding import force_unicode
-from django import template
-from django.template import defaultfilters
 from datetime import date
 import re
 
+from django.utils.translation import ungettext, ugettext as _
+from django.utils.encoding import force_unicode
+
+from django import template
+from django.template import defaultfilters
+
+
 register = template.Library()
+
 
 def ordinal(value):
     """
@@ -20,8 +24,11 @@ def ordinal(value):
     if value % 100 in (11, 12, 13): # special case
         return u"%d%s" % (value, t[0])
     return u'%d%s' % (value, t[value % 10])
+
+
 ordinal.is_safe = True
 register.filter(ordinal)
+
 
 def intcomma(value):
     """
@@ -34,8 +41,11 @@ def intcomma(value):
         return new
     else:
         return intcomma(new)
+
+
 intcomma.is_safe = True
 register.filter(intcomma)
+
 
 def intword(value):
     """
@@ -56,8 +66,11 @@ def intword(value):
         new_value = value / 1000000000000.0
         return ungettext('%(value).1f trillion', '%(value).1f trillion', new_value) % {'value': new_value}
     return value
+
+
 intword.is_safe = False
 register.filter(intword)
+
 
 def apnumber(value):
     """
@@ -70,9 +83,13 @@ def apnumber(value):
         return value
     if not 0 < value < 10:
         return value
-    return (_('one'), _('two'), _('three'), _('four'), _('five'), _('six'), _('seven'), _('eight'), _('nine'))[value-1]
+    return (_('one'), _('two'), _('three'), _('four'), _('five'), _('six'), _('seven'), _('eight'), _('nine'))[
+        value - 1]
+
+
 apnumber.is_safe = True
 register.filter(apnumber)
+
 
 def naturalday(value, arg=None):
     """
@@ -80,7 +97,7 @@ def naturalday(value, arg=None):
     present day returns representing string. Otherwise, returns a string
     formatted according to settings.DATE_FORMAT.
     """
-    try: 
+    try:
         value = date(value.year, value.month, value.day)
     except AttributeError:
         # Passed value wasn't a date object
@@ -96,4 +113,6 @@ def naturalday(value, arg=None):
     elif delta.days == -1:
         return _(u'yesterday')
     return defaultfilters.date(value, arg)
+
+
 register.filter(naturalday)

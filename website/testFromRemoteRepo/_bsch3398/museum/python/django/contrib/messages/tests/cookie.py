@@ -1,7 +1,7 @@
 from django.contrib.messages import constants
 from django.contrib.messages.tests.base import BaseTest
 from django.contrib.messages.storage.cookie import CookieStorage, \
-                                            MessageEncoder, MessageDecoder
+    MessageEncoder, MessageDecoder
 from django.contrib.messages.storage.base import Message
 from django.utils import simplejson as json
 
@@ -96,7 +96,7 @@ class CookieTest(BaseTest):
                 'message': Message(constants.INFO, 'Test message'),
                 'message_list': [Message(constants.INFO, 'message %s') \
                                  for x in xrange(5)] + [{'another-message': \
-                                 Message(constants.ERROR, 'error')}],
+                                                             Message(constants.ERROR, 'error')}],
             },
             Message(constants.INFO, 'message %s'),
         ]

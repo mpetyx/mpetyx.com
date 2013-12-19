@@ -4,14 +4,17 @@
 
 {% block content %}
 
-<div id="breadcrumbs"><a href="%7b%7b%20root_url%20%7d%7d.html">Home</a> / <a href="%7b%7b%20model.html">{{ model.verbose_name_plural|capfirst }}</a> / Fields</div>
+<div id="breadcrumbs"><a href="%7b%7b%20root_url%20%7d%7d.html">Home</a> / <a href="%7b%7b%20model.html">{{
+    model.verbose_name_plural|capfirst }}</a> / Fields
+</div>
 
 <h1>Browsable fields in {{ model.verbose_name_plural }}</h1>
 
 <ul class="objectlist">
-{% for field in field_list %}
-<li class="{% cycle 'odd' 'even' %}"><a href="%7b%7b%20field.name%20%7d%7d/index.html">{{ model.verbose_name_plural|capfirst }} by {{ field.verbose_name }}</a></li>
-{% endfor %}
+    {% for field in field_list %}
+    <li class="{% cycle 'odd' 'even' %}"><a href="%7b%7b%20field.name%20%7d%7d/index.html">{{
+        model.verbose_name_plural|capfirst }} by {{ field.verbose_name }}</a></li>
+    {% endfor %}
 </ul>
 
 {% endblock %}

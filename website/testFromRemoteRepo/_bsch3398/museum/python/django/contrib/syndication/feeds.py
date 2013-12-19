@@ -1,12 +1,16 @@
-from django.contrib.syndication import views
-from django.core.exceptions import ObjectDoesNotExist
 import warnings
 
+from django.contrib.syndication import views
+from django.core.exceptions import ObjectDoesNotExist
+
+
 # This is part of the deprecated API
-from django.contrib.syndication.views import FeedDoesNotExist, add_domain
+from django.contrib.syndication.views import FeedDoesNotExist
+
 
 class Feed(views.Feed):
     """Provided for backwards compatibility."""
+
     def __init__(self, slug, request):
         warnings.warn('The syndication feeds.Feed class is deprecated. Please '
                       'use the new class based view API.',

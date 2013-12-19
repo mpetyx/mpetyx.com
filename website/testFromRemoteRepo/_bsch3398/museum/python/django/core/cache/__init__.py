@@ -16,10 +16,13 @@ See docs/cache.txt for information on the public API.
 """
 
 from cgi import parse_qsl
-from django.conf import settings
+
 from django.core import signals
 from django.core.cache.backends.base import InvalidCacheBackendError
 from django.utils import importlib
+
+from django.conf import settings
+
 
 # Name for use in settings file --> name of module in "backends" directory.
 # Any backend scheme that is not in this dictionary is treated as a Python
@@ -31,6 +34,7 @@ BACKENDS = {
     'db': 'db',
     'dummy': 'dummy',
 }
+
 
 def parse_backend_uri(backend_uri):
     """
@@ -47,7 +51,7 @@ def parse_backend_uri(backend_uri):
     host = rest[2:]
     qpos = rest.find('?')
     if qpos != -1:
-        params = dict(parse_qsl(rest[qpos+1:]))
+        params = dict(parse_qsl(rest[qpos + 1:]))
         host = rest[2:qpos]
     else:
         params = {}
@@ -55,6 +59,7 @@ def parse_backend_uri(backend_uri):
         host = host[:-1]
 
     return scheme, host, params
+
 
 def get_cache(backend_uri):
     scheme, host, params = parse_backend_uri(backend_uri)
@@ -64,6 +69,7 @@ def get_cache(backend_uri):
         name = scheme
     module = importlib.import_module(name)
     return getattr(module, 'CacheClass')(host, params)
+
 
 cache = get_cache(settings.CACHE_BACKEND)
 

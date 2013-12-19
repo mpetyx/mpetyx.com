@@ -1,5 +1,6 @@
 from django.db import transaction
 
+
 class TransactionMiddleware(object):
     """
     Transaction middleware. If this is enabled, each view function will be run
@@ -7,6 +8,7 @@ class TransactionMiddleware(object):
     commit, the commit is done when a successful response is created. If an
     exception happens, the database is rolled back.
     """
+
     def process_request(self, request):
         """Enters transaction management"""
         transaction.enter_transaction_management()

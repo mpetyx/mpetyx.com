@@ -2,19 +2,22 @@
 HTML Widget classes
 """
 
-import django.utils.copycompat as copy
 from itertools import chain
-from django.conf import settings
+import time
+import datetime
+from urlparse import urljoin
+
 from django.utils.datastructures import MultiValueDict, MergeDict
 from django.utils.html import escape, conditional_escape
 from django.utils.translation import ugettext
 from django.utils.encoding import StrAndUnicode, force_unicode
 from django.utils.safestring import mark_safe
 from django.utils import formats
-import time
-import datetime
+
+import django.utils.copycompat as copy
+from django.conf import settings
 from util import flatatt
-from urlparse import urljoin
+
 
 __all__ = (
     'Media', 'MediaDefiningClass', 'Widget', 'TextInput', 'PasswordInput',
@@ -25,7 +28,8 @@ __all__ = (
     'SplitDateTimeWidget',
 )
 
-MEDIA_TYPES = ('css','js')
+MEDIA_TYPES = ('css', 'js')
+
 
 class Media(StrAndUnicode):
     def __init__(self, media=None, **kwargs):
@@ -40,9 +44,9 @@ class Media(StrAndUnicode):
         for name in MEDIA_TYPES:
             getattr(self, 'add_' + name)(media_attrs.get(name, None))
 
-        # Any leftover attributes must be invalid.
-        # if media_attrs != {}:
-        #     raise TypeError("'class Media' has invalid attribute(s): %s" % ','.join(media_attrs.keys()))
+            # Any leftover attributes must be invalid.
+            # if media_attrs != {}:
+            #     raise TypeError("'class Media' has invalid attribute(s): %s" % ','.join(media_attrs.keys()))
 
     def __unicode__(self):
         return self.render()
@@ -60,13 +64,13 @@ class Media(StrAndUnicode):
         media.sort()
         return chain(*[
             [u'<link href="%s" type="text/css" media="%s" rel="stylesheet" />' % (self.absolute_path(path), medium)
-                    for path in self._css[medium]]
-                for medium in media])
+             for path in self._css[medium]]
+            for medium in media])
 
     def absolute_path(self, path):
         if path.startswith(u'http://') or path.startswith(u'https://') or path.startswith(u'/'):
             return path
-        return urljoin(settings.MEDIA_URL,path)
+        return urljoin(settings.MEDIA_URL, path)
 
     def __getitem__(self, name):
         "Returns a Media object that only contains media of the given type"
@@ -94,6 +98,7 @@ class Media(StrAndUnicode):
             getattr(combined, 'add_' + name)(getattr(other, '_' + name, None))
         return combined
 
+
 def media_property(cls):
     def _media(self):
         # Get the media property of the superclass, if it exists
@@ -118,16 +123,20 @@ def media_property(cls):
                 return Media(definition)
         else:
             return base
+
     return property(_media)
+
 
 class MediaDefiningClass(type):
     "Metaclass for classes that can have media definitions"
+
     def __new__(cls, name, bases, attrs):
         new_class = super(MediaDefiningClass, cls).__new__(cls, name, bases,
                                                            attrs)
         if 'media' not in attrs:
             new_class.media = media_property(new_class)
         return new_class
+
 
 class Widget(object):
     __metaclass__ = MediaDefiningClass
@@ -199,7 +208,9 @@ class Widget(object):
         tags.
         """
         return id_
+
     id_for_label = classmethod(id_for_label)
+
 
 class Input(Widget):
     """
@@ -216,8 +227,10 @@ class Input(Widget):
             final_attrs['value'] = force_unicode(value)
         return mark_safe(u'<input%s />' % flatatt(final_attrs))
 
+
 class TextInput(Input):
     input_type = 'text'
+
 
 class PasswordInput(Input):
     input_type = 'password'
@@ -227,18 +240,21 @@ class PasswordInput(Input):
         self.render_value = render_value
 
     def render(self, name, value, attrs=None):
-        if not self.render_value: value=None
+        if not self.render_value: value = None
         return super(PasswordInput, self).render(name, value, attrs)
+
 
 class HiddenInput(Input):
     input_type = 'hidden'
     is_hidden = True
+
 
 class MultipleHiddenInput(HiddenInput):
     """
     A widget that handles <input type="hidden"> for fields that have a list
     of values.
     """
+
     def __init__(self, attrs=None, choices=()):
         super(MultipleHiddenInput, self).__init__(attrs)
         # choices can be any iterable
@@ -263,6 +279,7 @@ class MultipleHiddenInput(HiddenInput):
             return data.getlist(name)
         return data.get(name, None)
 
+
 class FileInput(Input):
     input_type = 'file'
     needs_multipart_form = True
@@ -279,6 +296,7 @@ class FileInput(Input):
             return False
         return True
 
+
 class Textarea(Widget):
     def __init__(self, attrs=None):
         # The 'rows' and 'cols' attributes are required for HTML correctness.
@@ -291,7 +309,8 @@ class Textarea(Widget):
         if value is None: value = ''
         final_attrs = self.build_attrs(attrs, name=name)
         return mark_safe(u'<textarea%s>%s</textarea>' % (flatatt(final_attrs),
-                conditional_escape(force_unicode(value))))
+                                                         conditional_escape(force_unicode(value))))
+
 
 class DateInput(Input):
     input_type = 'text'
@@ -324,6 +343,7 @@ class DateInput(Input):
             pass
         return super(DateInput, self)._has_changed(self._format_value(initial), data)
 
+
 class DateTimeInput(Input):
     input_type = 'text'
     format = None
@@ -354,6 +374,7 @@ class DateTimeInput(Input):
         except (TypeError, ValueError):
             pass
         return super(DateTimeInput, self)._has_changed(self._format_value(initial), data)
+
 
 class TimeInput(Input):
     input_type = 'text'
@@ -386,6 +407,7 @@ class TimeInput(Input):
             pass
         return super(TimeInput, self)._has_changed(self._format_value(initial), data)
 
+
 class CheckboxInput(Widget):
     def __init__(self, attrs=None, check_test=bool):
         super(CheckboxInput, self).__init__(attrs)
@@ -413,7 +435,7 @@ class CheckboxInput(Widget):
             return False
         value = data.get(name)
         # Translate true and false strings to boolean values.
-        values =  {'true': True, 'false': False}
+        values = {'true': True, 'false': False}
         if isinstance(value, basestring):
             value = values.get(value.lower(), value)
         return value
@@ -422,6 +444,7 @@ class CheckboxInput(Widget):
         # Sometimes data or initial could be None or u'' which should be the
         # same thing as False.
         return bool(initial) != bool(data)
+
 
 class Select(Widget):
     def __init__(self, attrs=None, choices=()):
@@ -448,7 +471,8 @@ class Select(Widget):
             return u'<option value="%s"%s>%s</option>' % (
                 escape(option_value), selected_html,
                 conditional_escape(force_unicode(option_label)))
-        # Normalize to strings.
+
+            # Normalize to strings.
         selected_choices = set([force_unicode(v) for v in selected_choices])
         output = []
         for option_value, option_label in chain(self.choices, choices):
@@ -461,10 +485,12 @@ class Select(Widget):
                 output.append(render_option(option_value, option_label))
         return u'\n'.join(output)
 
+
 class NullBooleanSelect(Select):
     """
     A Select Widget intended to be used with NullBooleanField.
     """
+
     def __init__(self, attrs=None):
         choices = ((u'1', ugettext('Unknown')), (u'2', ugettext('Yes')), (u'3', ugettext('No')))
         super(NullBooleanSelect, self).__init__(attrs, choices)
@@ -494,6 +520,7 @@ class NullBooleanSelect(Select):
             data = bool(data)
         return initial != data
 
+
 class SelectMultiple(Select):
     def render(self, name, value, attrs=None, choices=()):
         if value is None: value = []
@@ -521,6 +548,7 @@ class SelectMultiple(Select):
             if force_unicode(value1) != force_unicode(value2):
                 return True
         return False
+
 
 class RadioInput(StrAndUnicode):
     """
@@ -554,6 +582,7 @@ class RadioInput(StrAndUnicode):
             final_attrs['checked'] = 'checked'
         return mark_safe(u'<input%s />' % flatatt(final_attrs))
 
+
 class RadioFieldRenderer(StrAndUnicode):
     """
     An object used by RadioSelect to enable customization of radio widgets.
@@ -577,7 +606,8 @@ class RadioFieldRenderer(StrAndUnicode):
     def render(self):
         """Outputs a <ul> for this set of radio fields."""
         return mark_safe(u'<ul>\n%s\n</ul>' % u'\n'.join([u'<li>%s</li>'
-                % force_unicode(w) for w in self]))
+                                                          % force_unicode(w) for w in self]))
+
 
 class RadioSelect(Select):
     renderer = RadioFieldRenderer
@@ -608,7 +638,9 @@ class RadioSelect(Select):
         if id_:
             id_ += '_0'
         return id_
+
     id_for_label = classmethod(id_for_label)
+
 
 class CheckboxSelectMultiple(SelectMultiple):
     def render(self, name, value, attrs=None, choices=()):
@@ -640,7 +672,9 @@ class CheckboxSelectMultiple(SelectMultiple):
         if id_:
             id_ += '_0'
         return id_
+
     id_for_label = classmethod(id_for_label)
+
 
 class MultiWidget(Widget):
     """
@@ -669,6 +703,7 @@ class MultiWidget(Widget):
 
     You'll probably want to use this class with MultiValueField.
     """
+
     def __init__(self, widgets, attrs=None):
         self.widgets = [isinstance(w, type) and w() or w for w in widgets]
         super(MultiWidget, self).__init__(attrs)
@@ -696,6 +731,7 @@ class MultiWidget(Widget):
         if id_:
             id_ += '_0'
         return id_
+
     id_for_label = classmethod(id_for_label)
 
     def value_from_datadict(self, data, files, name):
@@ -736,12 +772,14 @@ class MultiWidget(Widget):
         for w in self.widgets:
             media = media + w.media
         return media
+
     media = property(_get_media)
 
     def __deepcopy__(self, memo):
         obj = super(MultiWidget, self).__deepcopy__(memo)
         obj.widgets = copy.deepcopy(self.widgets)
         return obj
+
 
 class SplitDateTimeWidget(MultiWidget):
     """
@@ -763,6 +801,7 @@ class SplitDateTimeWidget(MultiWidget):
         if value:
             return [value.date(), value.time().replace(microsecond=0)]
         return [None, None]
+
 
 class SplitHiddenDateTimeWidget(SplitDateTimeWidget):
     """

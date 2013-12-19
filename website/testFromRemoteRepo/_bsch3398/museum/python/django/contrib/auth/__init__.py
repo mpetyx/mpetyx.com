@@ -7,15 +7,17 @@ SESSION_KEY = '_auth_user_id'
 BACKEND_SESSION_KEY = '_auth_user_backend'
 REDIRECT_FIELD_NAME = 'next'
 
+
 def load_backend(path):
     i = path.rfind('.')
-    module, attr = path[:i], path[i+1:]
+    module, attr = path[:i], path[i + 1:]
     try:
         mod = import_module(module)
     except ImportError, e:
         raise ImproperlyConfigured('Error importing authentication backend %s: "%s"' % (module, e))
     except ValueError, e:
-        raise ImproperlyConfigured('Error importing authentication backends. Is AUTHENTICATION_BACKENDS a correctly defined list or tuple?')
+        raise ImproperlyConfigured(
+            'Error importing authentication backends. Is AUTHENTICATION_BACKENDS a correctly defined list or tuple?')
     try:
         cls = getattr(mod, attr)
     except AttributeError:
@@ -23,23 +25,28 @@ def load_backend(path):
     try:
         getattr(cls, 'supports_object_permissions')
     except AttributeError:
-        warn("Authentication backends without a `supports_object_permissions` attribute are deprecated. Please define it in %s." % cls,
-             PendingDeprecationWarning)
+        warn(
+            "Authentication backends without a `supports_object_permissions` attribute are deprecated. Please define it in %s." % cls,
+            PendingDeprecationWarning)
         cls.supports_object_permissions = False
     try:
         getattr(cls, 'supports_anonymous_user')
     except AttributeError:
-        warn("Authentication backends without a `supports_anonymous_user` attribute are deprecated. Please define it in %s." % cls,
-             PendingDeprecationWarning)
+        warn(
+            "Authentication backends without a `supports_anonymous_user` attribute are deprecated. Please define it in %s." % cls,
+            PendingDeprecationWarning)
         cls.supports_anonymous_user = False
     return cls()
 
+
 def get_backends():
     from django.conf import settings
+
     backends = []
     for backend_path in settings.AUTHENTICATION_BACKENDS:
         backends.append(load_backend(backend_path))
     return backends
+
 
 def authenticate(**credentials):
     """
@@ -53,9 +60,10 @@ def authenticate(**credentials):
             continue
         if user is None:
             continue
-        # Annotate the user object with the path of the backend.
+            # Annotate the user object with the path of the backend.
         user.backend = "%s.%s" % (backend.__module__, backend.__class__.__name__)
         return user
+
 
 def login(request, user):
     """
@@ -64,7 +72,7 @@ def login(request, user):
     """
     if user is None:
         user = request.user
-    # TODO: It would be nice to support different login methods, like signed cookies.
+        # TODO: It would be nice to support different login methods, like signed cookies.
     user.last_login = datetime.datetime.now()
     user.save()
 
@@ -81,6 +89,7 @@ def login(request, user):
     if hasattr(request, 'user'):
         request.user = user
 
+
 def logout(request):
     """
     Removes the authenticated user's ID from the request and flushes their
@@ -89,10 +98,13 @@ def logout(request):
     request.session.flush()
     if hasattr(request, 'user'):
         from django.contrib.auth.models import AnonymousUser
+
         request.user = AnonymousUser()
+
 
 def get_user(request):
     from django.contrib.auth.models import AnonymousUser
+
     try:
         user_id = request.session[SESSION_KEY]
         backend_path = request.session[BACKEND_SESSION_KEY]

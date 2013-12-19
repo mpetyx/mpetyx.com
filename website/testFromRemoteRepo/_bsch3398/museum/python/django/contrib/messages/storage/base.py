@@ -1,6 +1,7 @@
-from django.conf import settings
 from django.utils.encoding import force_unicode, StrAndUnicode
 from django.contrib.messages import constants, utils
+
+from django.conf import settings
 
 
 LEVEL_TAGS = utils.get_level_tags()
@@ -31,7 +32,7 @@ class Message(StrAndUnicode):
 
     def __eq__(self, other):
         return isinstance(other, Message) and self.level == other.level and \
-                                              self.message == other.message
+               self.message == other.message
 
     def __unicode__(self):
         return force_unicode(self.message)
@@ -47,6 +48,7 @@ class Message(StrAndUnicode):
         elif label_tag:
             return label_tag
         return ''
+
     tags = property(_get_tags)
 
 
@@ -146,11 +148,11 @@ class BaseStorage(object):
         """
         if not message:
             return
-        # Check that the message level is not less than the recording level.
+            # Check that the message level is not less than the recording level.
         level = int(level)
         if level < self.level:
             return
-        # Add the message.
+            # Add the message.
         self.added_new = True
         message = Message(level, message, extra_tags=extra_tags)
         self._queued_messages.append(message)

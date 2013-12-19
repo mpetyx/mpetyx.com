@@ -2,10 +2,12 @@
 Classes to represent the definitions of aggregate functions.
 """
 
+
 class Aggregate(object):
     """
     Default Aggregate definition.
     """
+
     def __init__(self, lookup, **extra):
         """Instantiate a new aggregate.
 
@@ -21,6 +23,7 @@ class Aggregate(object):
 
     def _default_alias(self):
         return '%s__%s' % (self.lookup, self.name.lower())
+
     default_alias = property(_default_alias)
 
     def add_to_query(self, query, alias, col, source, is_summary):
@@ -45,23 +48,30 @@ class Aggregate(object):
         aggregate = klass(col, source=source, is_summary=is_summary, **self.extra)
         query.aggregates[alias] = aggregate
 
+
 class Avg(Aggregate):
     name = 'Avg'
+
 
 class Count(Aggregate):
     name = 'Count'
 
+
 class Max(Aggregate):
     name = 'Max'
+
 
 class Min(Aggregate):
     name = 'Min'
 
+
 class StdDev(Aggregate):
     name = 'StdDev'
 
+
 class Sum(Aggregate):
     name = 'Sum'
+
 
 class Variance(Aggregate):
     name = 'Variance'

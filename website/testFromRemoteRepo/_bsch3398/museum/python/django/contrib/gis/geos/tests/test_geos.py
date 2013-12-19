@@ -1,10 +1,14 @@
-import ctypes, random, unittest, sys
+import ctypes
+import random
+import unittest
+
 from django.contrib.gis.geos import *
 from django.contrib.gis.geos.base import gdal, numpy, GEOSBase
+
 from django.contrib.gis.tests.geometries import *
 
-class GEOSTest(unittest.TestCase):
 
+class GEOSTest(unittest.TestCase):
     @property
     def null_srid(self):
         """
@@ -26,6 +30,7 @@ class GEOSTest(unittest.TestCase):
 
         # This one only accepts pointers to floats
         c_float_p = ctypes.POINTER(ctypes.c_float)
+
         class FakeGeom2(GEOSBase):
             ptr_type = c_float_p
 
@@ -77,7 +82,7 @@ class GEOSTest(unittest.TestCase):
 
         pnt_2d = Point(0, 1, srid=4326)
         pnt_3d = Point(0, 1, 2, srid=4326)
-        
+
         # OGC-compliant HEX will not have SRID nor Z value.
         self.assertEqual(ogc_hex, pnt_2d.hex)
         self.assertEqual(ogc_hex, pnt_3d.hex)
@@ -110,7 +115,7 @@ class GEOSTest(unittest.TestCase):
                 pass
             else:
                 self.fail('Should have raised GEOSException')
-        
+
         # Redundant sanity check.
         self.assertEqual(4326, GEOSGeometry(hexewkb_2d).srid)
 
@@ -147,6 +152,7 @@ class GEOSTest(unittest.TestCase):
     def test01e_wkb(self):
         "Testing WKB output."
         from binascii import b2a_hex
+
         for g in hex_wkt:
             geom = fromstr(g.wkt)
             wkb = geom.wkb
@@ -163,6 +169,7 @@ class GEOSTest(unittest.TestCase):
     def test01g_create_wkb(self):
         "Testing creation from WKB."
         from binascii import a2b_hex
+
         for g in hex_wkt:
             wkb = buffer(a2b_hex(g.hex))
             geom_h = GEOSGeometry(wkb)
@@ -193,6 +200,7 @@ class GEOSTest(unittest.TestCase):
     def test01k_fromfile(self):
         "Testing the fromfile() factory."
         from StringIO import StringIO
+
         ref_pnt = GEOSGeometry('POINT(5 23)')
 
         wkt_f = StringIO()
@@ -219,7 +227,7 @@ class GEOSTest(unittest.TestCase):
         # an invalid type.
         for g in (p, ls):
             self.assertNotEqual(g, None)
-            self.assertNotEqual(g, {'foo' : 'bar'})
+            self.assertNotEqual(g, {'foo': 'bar'})
             self.assertNotEqual(g, False)
 
     def test02a_points(self):
@@ -319,7 +327,8 @@ class GEOSTest(unittest.TestCase):
             self.assertEqual(ls, LineString(ls.tuple))  # tuple
             self.assertEqual(ls, LineString(*ls.tuple)) # as individual arguments
             self.assertEqual(ls, LineString([list(tup) for tup in ls.tuple])) # as list
-            self.assertEqual(ls.wkt, LineString(*tuple(Point(tup) for tup in ls.tuple)).wkt) # Point individual arguments
+            self.assertEqual(ls.wkt,
+                             LineString(*tuple(Point(tup) for tup in ls.tuple)).wkt) # Point individual arguments
             if numpy: self.assertEqual(ls, LineString(numpy.array(ls.tuple))) # as numpy array
 
     def test03b_multilinestring(self):
@@ -367,7 +376,7 @@ class GEOSTest(unittest.TestCase):
 
         # Testing `from_bbox` class method
         bbox = (-180, -90, 180, 90)
-        p = Polygon.from_bbox( bbox )
+        p = Polygon.from_bbox(bbox)
         self.assertEqual(bbox, p.extent)
 
         prev = fromstr('POINT(0 0)')
@@ -493,8 +502,10 @@ class GEOSTest(unittest.TestCase):
                     self.assertEqual(c1, c2)
 
                     # Constructing the test value to set the coordinate sequence with
-                    if len(c1) == 2: tset = (5, 23)
-                    else: tset = (5, 23, 8)
+                    if len(c1) == 2:
+                        tset = (5, 23)
+                    else:
+                        tset = (5, 23, 8)
                     cs[i] = tset
 
                     # Making sure every set point matches what we expect
@@ -688,30 +699,30 @@ class GEOSTest(unittest.TestCase):
                 self.assertEqual(mpoly[i], poly)
                 self.assertNotEqual(mpoly[i], old_poly)
 
-        # Extreme (!!) __setitem__ -- no longer works, have to detect
-        # in the first object that __setitem__ is called in the subsequent
-        # objects -- maybe mpoly[0, 0, 0] = (3.14, 2.71)?
-        #mpoly[0][0][0] = (3.14, 2.71)
-        #self.assertEqual((3.14, 2.71), mpoly[0][0][0])
-        # Doing it more slowly..
-        #self.assertEqual((3.14, 2.71), mpoly[0].shell[0])
-        #del mpoly
+                # Extreme (!!) __setitem__ -- no longer works, have to detect
+                # in the first object that __setitem__ is called in the subsequent
+                # objects -- maybe mpoly[0, 0, 0] = (3.14, 2.71)?
+                #mpoly[0][0][0] = (3.14, 2.71)
+                #self.assertEqual((3.14, 2.71), mpoly[0][0][0])
+                # Doing it more slowly..
+                #self.assertEqual((3.14, 2.71), mpoly[0].shell[0])
+                #del mpoly
 
     def test17_threed(self):
         "Testing three-dimensional geometries."
         # Testing a 3D Point
         pnt = Point(2, 3, 8)
-        self.assertEqual((2.,3.,8.), pnt.coords)
-        self.assertRaises(TypeError, pnt.set_coords, (1.,2.))
-        pnt.coords = (1.,2.,3.)
-        self.assertEqual((1.,2.,3.), pnt.coords)
+        self.assertEqual((2., 3., 8.), pnt.coords)
+        self.assertRaises(TypeError, pnt.set_coords, (1., 2.))
+        pnt.coords = (1., 2., 3.)
+        self.assertEqual((1., 2., 3.), pnt.coords)
 
         # Testing a 3D LineString
         ls = LineString((2., 3., 8.), (50., 250., -117.))
-        self.assertEqual(((2.,3.,8.), (50.,250.,-117.)), ls.tuple)
-        self.assertRaises(TypeError, ls.__setitem__, 0, (1.,2.))
-        ls[0] = (1.,2.,3.)
-        self.assertEqual((1.,2.,3.), ls[0])
+        self.assertEqual(((2., 3., 8.), (50., 250., -117.)), ls.tuple)
+        self.assertRaises(TypeError, ls.__setitem__, 0, (1., 2.))
+        ls[0] = (1., 2., 3.)
+        self.assertEqual((1., 2., 3.), ls[0])
 
     def test18_distance(self):
         "Testing the distance() function."
@@ -822,6 +833,7 @@ class GEOSTest(unittest.TestCase):
     def test22_copy(self):
         "Testing use with the Python `copy` module."
         import django.utils.copycompat as copy
+
         poly = GEOSGeometry('POLYGON((0 0, 0 23, 23 23, 23 0, 0 0), (5 5, 5 10, 10 10, 10 5, 5 5))')
         cpy1 = copy.copy(poly)
         cpy2 = copy.deepcopy(poly)
@@ -878,6 +890,7 @@ class GEOSTest(unittest.TestCase):
         # and setting the SRID on some of them.
         def get_geoms(lst, srid=None):
             return [GEOSGeometry(tg.wkt, srid) for tg in lst]
+
         tgeoms = get_geoms(points)
         tgeoms.extend(get_geoms(multilinestrings, 4326))
         tgeoms.extend(get_geoms(polygons, 3084))
@@ -912,17 +925,19 @@ class GEOSTest(unittest.TestCase):
         "Testing line merge support"
         ref_geoms = (fromstr('LINESTRING(1 1, 1 1, 3 3)'),
                      fromstr('MULTILINESTRING((1 1, 3 3), (3 3, 4 2))'),
-                     )
+        )
         ref_merged = (fromstr('LINESTRING(1 1, 3 3)'),
                       fromstr('LINESTRING (1 1, 3 3, 4 2)'),
-                      )
+        )
         for geom, merged in zip(ref_geoms, ref_merged):
             self.assertEqual(merged, geom.merged)
+
 
 def suite():
     s = unittest.TestSuite()
     s.addTest(unittest.makeSuite(GEOSTest))
     return s
+
 
 def run(verbosity=2):
     unittest.TextTestRunner(verbosity=verbosity).run(suite())

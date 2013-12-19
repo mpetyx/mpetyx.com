@@ -1,22 +1,26 @@
-from django.conf import settings
-from django.contrib.gis import geos
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
+from django.conf import settings
+
+
 class GoogleMapException(Exception): pass
-from django.contrib.gis.maps.google.overlays import GPolygon, GPolyline, GMarker, GIcon
+
+
+from django.contrib.gis.maps.google.overlays import GPolygon, GPolyline, GMarker
 
 # The default Google Maps URL (for the API javascript)
 # TODO: Internationalize for Japan, UK, etc.
-GOOGLE_MAPS_URL='http://maps.google.com/maps?file=api&amp;v=%s&amp;key='
+GOOGLE_MAPS_URL = 'http://maps.google.com/maps?file=api&amp;v=%s&amp;key='
+
 
 class GoogleMap(object):
     "A class for generating Google Maps JavaScript."
 
     # String constants
     onunload = mark_safe('onunload="GUnload()"') # Cleans up after Google Maps
-    vml_css  = mark_safe('v\:* {behavior:url(#default#VML);}') # CSS for IE VML
-    xmlns    = mark_safe('xmlns:v="urn:schemas-microsoft-com:vml"') # XML Namespace (for IE VML).
+    vml_css = mark_safe('v\:* {behavior:url(#default#VML);}') # CSS for IE VML
+    xmlns = mark_safe('xmlns:v="urn:schemas-microsoft-com:vml"') # XML Namespace (for IE VML).
 
     def __init__(self, key=None, api_url=None, version=None,
                  center=None, zoom=None, dom_id='map',
@@ -32,7 +36,8 @@ class GoogleMap(object):
             try:
                 self.key = settings.GOOGLE_MAPS_API_KEY
             except AttributeError:
-                raise GoogleMapException('Google Maps API Key not found (try adding GOOGLE_MAPS_API_KEY to your settings).')
+                raise GoogleMapException(
+                    'Google Maps API Key not found (try adding GOOGLE_MAPS_API_KEY to your settings).')
         else:
             self.key = key
 
@@ -76,7 +81,7 @@ class GoogleMap(object):
         # level and a center coordinate are provided with polygons/polylines,
         # no automatic determination will occur.
         self.calc_zoom = False
-        if self.polygons or self.polylines  or self.markers:
+        if self.polygons or self.polylines or self.markers:
             if center is None or zoom is None:
                 self.calc_zoom = True
 
@@ -91,17 +96,17 @@ class GoogleMap(object):
         """
         Generates the JavaScript necessary for displaying this Google Map.
         """
-        params = {'calc_zoom' : self.calc_zoom,
-                  'center' : self.center,
-                  'dom_id' : self.dom_id,
-                  'js_module' : self.js_module,
-                  'kml_urls' : self.kml_urls,
-                  'zoom' : self.zoom,
-                  'polygons' : self.polygons,
-                  'polylines' : self.polylines,
+        params = {'calc_zoom': self.calc_zoom,
+                  'center': self.center,
+                  'dom_id': self.dom_id,
+                  'js_module': self.js_module,
+                  'kml_urls': self.kml_urls,
+                  'zoom': self.zoom,
+                  'polygons': self.polygons,
+                  'polylines': self.polylines,
                   'icons': self.icons,
-                  'markers' : self.markers,
-                  }
+                  'markers': self.markers,
+        }
         params.update(self.extra_context)
         return render_to_string(self.template, params)
 
@@ -128,7 +133,8 @@ class GoogleMap(object):
     @property
     def scripts(self):
         "Returns all <script></script> tags required with Google Maps JavaScript."
-        return mark_safe('%s\n  <script type="text/javascript">\n//<![CDATA[\n%s//]]>\n  </script>' % (self.api_script, self.js))
+        return mark_safe(
+            '%s\n  <script type="text/javascript">\n//<![CDATA[\n%s//]]>\n  </script>' % (self.api_script, self.js))
 
     @property
     def style(self):
@@ -145,8 +151,8 @@ class GoogleMap(object):
         "Returns a sequence of GIcon objects in this map."
         return set([marker.icon for marker in self.markers if marker.icon])
 
-class GoogleMapSet(GoogleMap):
 
+class GoogleMapSet(GoogleMap):
     def __init__(self, *args, **kwargs):
         """
         A class for generating sets of Google Maps that will be shown on the
@@ -202,11 +208,11 @@ class GoogleMapSet(GoogleMap):
         Generates the JavaScript for the collection of Google Maps in
         this set.
         """
-        params = {'js_module' : self.js_module,
-                  'dom_ids' : self.dom_ids,
-                  'load_map_js' : self.load_map_js(),
-                  'icons' : self.icons,
-                  }
+        params = {'js_module': self.js_module,
+                  'dom_ids': self.dom_ids,
+                  'load_map_js': self.load_map_js(),
+                  'icons': self.icons,
+        }
         params.update(self.extra_context)
         return render_to_string(self.template, params)
 

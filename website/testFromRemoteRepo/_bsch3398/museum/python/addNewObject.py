@@ -1,4 +1,4 @@
-global stored 
+global stored
 stored = """CREATE OR REPLACE PROCEDURE addnewobject
 	(
 		p_RecordID			IN	NUMBER		,

@@ -1,9 +1,11 @@
 import sys
 
-from django import http
 from django.core import signals
 from django.utils.encoding import force_unicode
 from django.utils.importlib import import_module
+
+from django import http
+
 
 class BaseHandler(object):
     # Changes that are always applied to a response (in this order).
@@ -25,6 +27,7 @@ class BaseHandler(object):
         """
         from django.conf import settings
         from django.core import exceptions
+
         self._view_middleware = []
         self._response_middleware = []
         self._exception_middleware = []
@@ -35,7 +38,7 @@ class BaseHandler(object):
                 dot = middleware_path.rindex('.')
             except ValueError:
                 raise exceptions.ImproperlyConfigured('%s isn\'t a middleware module' % middleware_path)
-            mw_module, mw_classname = middleware_path[:dot], middleware_path[dot+1:]
+            mw_module, mw_classname = middleware_path[:dot], middleware_path[dot + 1:]
             try:
                 mod = import_module(mw_module)
             except ImportError, e:
@@ -43,7 +46,8 @@ class BaseHandler(object):
             try:
                 mw_class = getattr(mod, mw_classname)
             except AttributeError:
-                raise exceptions.ImproperlyConfigured('Middleware module "%s" does not define a "%s" class' % (mw_module, mw_classname))
+                raise exceptions.ImproperlyConfigured(
+                    'Middleware module "%s" does not define a "%s" class' % (mw_module, mw_classname))
 
             try:
                 mw_instance = mw_class()
@@ -88,7 +92,7 @@ class BaseHandler(object):
                     resolver = urlresolvers.RegexURLResolver(r'^/', urlconf)
 
                 callback, callback_args, callback_kwargs = resolver.resolve(
-                        request.path_info)
+                    request.path_info)
 
                 # Apply view middleware
                 for middleware_method in self._view_middleware:
@@ -114,12 +118,14 @@ class BaseHandler(object):
                         view_name = callback.func_name # If it's a function
                     except AttributeError:
                         view_name = callback.__class__.__name__ + '.__call__' # If it's a class
-                    raise ValueError("The view %s.%s didn't return an HttpResponse object." % (callback.__module__, view_name))
+                    raise ValueError(
+                        "The view %s.%s didn't return an HttpResponse object." % (callback.__module__, view_name))
 
                 return response
             except http.Http404, e:
                 if settings.DEBUG:
                     from django.views import debug
+
                     return debug.technical_404_response(request, e)
                 else:
                     try:
@@ -163,10 +169,12 @@ class BaseHandler(object):
 
         if settings.DEBUG:
             from django.views import debug
+
             return debug.technical_500_response(request, *exc_info)
 
         # When DEBUG is False, send an error message to the admins.
-        subject = 'Error (%s IP): %s' % ((request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS and 'internal' or 'EXTERNAL'), request.path)
+        subject = 'Error (%s IP): %s' % (
+        (request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS and 'internal' or 'EXTERNAL'), request.path)
         try:
             request_repr = repr(request)
         except:
@@ -176,13 +184,14 @@ class BaseHandler(object):
         # If Http500 handler is not installed, re-raise last exception
         if resolver.urlconf_module is None:
             raise exc_info[1], None, exc_info[2]
-        # Return an HttpResponse that displays a friendly error message.
+            # Return an HttpResponse that displays a friendly error message.
         callback, param_dict = resolver.resolve500()
         return callback(request, **param_dict)
 
     def _get_traceback(self, exc_info=None):
         "Helper function to return the traceback as a string"
         import traceback
+
         return '\n'.join(traceback.format_exception(*(exc_info or sys.exc_info())))
 
     def apply_response_fixes(self, request, response):
@@ -195,6 +204,7 @@ class BaseHandler(object):
             response = func(request, response)
         return response
 
+
 def get_script_name(environ):
     """
     Returns the equivalent of the HTTP request's SCRIPT_NAME environment
@@ -204,6 +214,7 @@ def get_script_name(environ):
     anything).
     """
     from django.conf import settings
+
     if settings.FORCE_SCRIPT_NAME is not None:
         return force_unicode(settings.FORCE_SCRIPT_NAME)
 

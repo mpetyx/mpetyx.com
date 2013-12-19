@@ -12,8 +12,11 @@ Run with the extra option "help" for a list of additional options you can
 pass to this server.
 """
 
+import sys
+import os
+
 from django.utils import importlib
-import sys, os
+
 
 __version__ = "0.1"
 __all__ = ["runfastcgi"]
@@ -80,11 +83,13 @@ FASTCGI_OPTIONS = {
     'umask': None,
 }
 
+
 def fastcgi_help(message=None):
     print FASTCGI_HELP
     if message:
         print message
     return False
+
 
 def runfastcgi(argset=[], **kwargs):
     options = FASTCGI_OPTIONS.copy()
@@ -170,6 +175,7 @@ def runfastcgi(argset=[], **kwargs):
 
     if daemonize:
         from django.utils.daemonize import become_daemon
+
         become_daemon(our_home_dir=options["workdir"], **daemon_kwargs)
 
     if options["pidfile"]:
@@ -178,6 +184,7 @@ def runfastcgi(argset=[], **kwargs):
         fp.close()
 
     WSGIServer(WSGIHandler(), **wsgi_opts).run()
+
 
 if __name__ == '__main__':
     runfastcgi(sys.argv[1:])

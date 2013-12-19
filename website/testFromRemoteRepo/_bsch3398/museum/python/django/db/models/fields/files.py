@@ -1,20 +1,17 @@
 import datetime
 import os
 
-import django.utils.copycompat as copy
-
-from django.conf import settings
 from django.db.models.fields import Field
-from django.core.files.base import File, ContentFile
+from django.core.files.base import File
 from django.core.files.storage import default_storage
-from django.core.files.images import ImageFile, get_image_dimensions
-from django.core.files.uploadedfile import UploadedFile
-from django.utils.functional import curry
+from django.core.files.images import ImageFile
 from django.db.models import signals
 from django.utils.encoding import force_unicode, smart_str
-from django.utils.translation import ugettext_lazy, ugettext as _
+from django.utils.translation import ugettext_lazy
+
+import django.utils.copycompat as copy
 from django import forms
-from django.db.models.loading import cache
+
 
 class FieldFile(File):
     def __init__(self, instance, field, name):
@@ -63,11 +60,13 @@ class FieldFile(File):
     def _get_path(self):
         self._require_file()
         return self.storage.path(self.name)
+
     path = property(_get_path)
 
     def _get_url(self):
         self._require_file()
         return self.storage.url(self.name)
+
     url = property(_get_url)
 
     def _get_size(self):
@@ -75,12 +74,14 @@ class FieldFile(File):
         if not self._committed:
             return len(self.file)
         return self.storage.size(self.name)
+
     size = property(_get_size)
 
     def open(self, mode='rb'):
         self._require_file()
         self.file.open(mode)
-    # open() doesn't alter the file's contents, but it does reset the pointer
+
+        # open() doesn't alter the file's contents, but it does reset the pointer
     open.alters_data = True
 
     # In addition to the standard File API, FieldFiles have extra methods
@@ -99,6 +100,7 @@ class FieldFile(File):
         # Save the object because it has changed, unless save is False
         if save:
             self.instance.save()
+
     save.alters_data = True
 
     def delete(self, save=True):
@@ -120,11 +122,13 @@ class FieldFile(File):
 
         if save:
             self.instance.save()
+
     delete.alters_data = True
 
     def _get_closed(self):
         file = getattr(self, '_file', None)
         return file is None or file.closed
+
     closed = property(_get_closed)
 
     def close(self):
@@ -139,6 +143,7 @@ class FieldFile(File):
         # be restored later, by FileDescriptor below.
         return {'name': self.name, 'closed': False, '_committed': True, '_file': None}
 
+
 class FileDescriptor(object):
     """
     The descriptor for the file attribute on the model instance. Returns a
@@ -151,6 +156,7 @@ class FileDescriptor(object):
         >>> instance.file = File(...)
 
     """
+
     def __init__(self, field):
         self.field = field
 
@@ -209,6 +215,7 @@ class FileDescriptor(object):
     def __set__(self, instance, value):
         instance.__dict__[self.field.name] = value
 
+
 class FileField(Field):
     # The class to wrap instance attributes in. Accessing the file object off
     # the instance will always return an instance of attr_class.
@@ -266,8 +273,8 @@ class FileField(Field):
         # and it's not the default value for future objects,
         # delete it from the backend.
         if file and file.name != self.default and \
-            not sender._default_manager.filter(**{self.name: file.name}):
-                file.delete(save=False)
+                not sender._default_manager.filter(**{self.name: file.name}):
+            file.delete(save=False)
         elif file:
             # Otherwise, just close the file, so it doesn't tie up resources.
             file.close()
@@ -297,11 +304,13 @@ class FileField(Field):
         defaults.update(kwargs)
         return super(FileField, self).formfield(**defaults)
 
+
 class ImageFileDescriptor(FileDescriptor):
     """
     Just like the FileDescriptor, but for ImageFields. The only difference is
     assigning the width/height to the width_field/height_field, if appropriate.
     """
+
     def __set__(self, instance, value):
         previous_file = instance.__dict__.get(self.field.name)
         super(ImageFileDescriptor, self).__set__(instance, value)
@@ -318,12 +327,14 @@ class ImageFileDescriptor(FileDescriptor):
         if previous_file is not None:
             self.field.update_dimension_fields(instance, force=True)
 
+
 class ImageFieldFile(ImageFile, FieldFile):
     def delete(self, save=True):
         # Clear the image dimensions cache
         if hasattr(self, '_dimensions_cache'):
             del self._dimensions_cache
         super(ImageFieldFile, self).delete(save)
+
 
 class ImageField(FileField):
     attr_class = ImageFieldFile
@@ -368,7 +379,7 @@ class ImageField(FileField):
         if not file and not force:
             return
 
-        dimension_fields_filled = not(
+        dimension_fields_filled = not (
             (self.width_field and not getattr(instance, self.width_field))
             or (self.height_field and not getattr(instance, self.height_field))
         )

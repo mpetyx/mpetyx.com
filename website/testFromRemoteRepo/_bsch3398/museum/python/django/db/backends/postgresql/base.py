@@ -9,21 +9,24 @@ import sys
 from django.db import utils
 from django.db.backends import *
 from django.db.backends.signals import connection_created
+from django.utils.encoding import smart_str, smart_unicode
+
 from django.db.backends.postgresql.client import DatabaseClient
 from django.db.backends.postgresql.creation import DatabaseCreation
 from django.db.backends.postgresql.introspection import DatabaseIntrospection
 from django.db.backends.postgresql.operations import DatabaseOperations
 from django.db.backends.postgresql.version import get_version
-from django.utils.encoding import smart_str, smart_unicode
 
 try:
     import psycopg as Database
 except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
+
     raise ImproperlyConfigured("Error loading psycopg module: %s" % e)
 
 DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
+
 
 class UnicodeCursorWrapper(object):
     """
@@ -38,6 +41,7 @@ class UnicodeCursorWrapper(object):
     All results retrieved from the database are converted into Unicode strings
     before being returned to the caller.
     """
+
     def __init__(self, cursor, charset):
         self.cursor = cursor
         self.charset = charset
@@ -78,8 +82,10 @@ class UnicodeCursorWrapper(object):
     def __iter__(self):
         return iter(self.cursor.fetchall())
 
+
 class DatabaseFeatures(BaseDatabaseFeatures):
     uses_savepoints = True
+
 
 class DatabaseWrapper(BaseDatabaseWrapper):
     operators = {
@@ -103,6 +109,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
 
         import warnings
+
         warnings.warn(
             'The "postgresql" backend has been deprecated. Use "postgresql_psycopg2" instead.',
             PendingDeprecationWarning
@@ -124,6 +131,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             set_tz = settings_dict.get('TIME_ZONE')
             if settings_dict['NAME'] == '':
                 from django.core.exceptions import ImproperlyConfigured
+
                 raise ImproperlyConfigured("You need to specify NAME in your Django settings file.")
             conn_string = "dbname=%s" % settings_dict['NAME']
             if settings_dict['USER']:
@@ -149,6 +157,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             cursor.execute("SET client_encoding to 'UNICODE'")
         return UnicodeCursorWrapper(cursor, 'utf-8')
 
+
 def typecast_string(s):
     """
     Cast all returned strings to unicode strings.
@@ -163,9 +172,10 @@ def typecast_string(s):
 try:
     Database.register_type(Database.new_type((1082,), "DATE", util.typecast_date))
 except AttributeError:
-    raise Exception("You appear to be using psycopg version 2. Set your DATABASES.ENGINE to 'postgresql_psycopg2' instead of 'postgresql'.")
-Database.register_type(Database.new_type((1083,1266), "TIME", util.typecast_time))
-Database.register_type(Database.new_type((1114,1184), "TIMESTAMP", util.typecast_timestamp))
+    raise Exception(
+        "You appear to be using psycopg version 2. Set your DATABASES.ENGINE to 'postgresql_psycopg2' instead of 'postgresql'.")
+Database.register_type(Database.new_type((1083, 1266), "TIME", util.typecast_time))
+Database.register_type(Database.new_type((1114, 1184), "TIMESTAMP", util.typecast_timestamp))
 Database.register_type(Database.new_type((16,), "BOOLEAN", util.typecast_boolean))
 Database.register_type(Database.new_type((1700,), "NUMERIC", util.typecast_decimal))
 Database.register_type(Database.new_type(Database.types[1043].values, 'STRING', typecast_string))

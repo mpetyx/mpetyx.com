@@ -10,19 +10,25 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.backends.sqlite3.base import DatabaseOperations
 from django.db.utils import DatabaseError
 
+
 class SpatiaLiteOperator(SpatialOperation):
     "For SpatiaLite operators (e.g. `&&`, `~`)."
+
     def __init__(self, operator):
         super(SpatiaLiteOperator, self).__init__(operator=operator)
 
+
 class SpatiaLiteFunction(SpatialFunction):
     "For SpatiaLite function calls."
+
     def __init__(self, function, **kwargs):
         super(SpatiaLiteFunction, self).__init__(function, **kwargs)
+
 
 class SpatiaLiteFunctionParam(SpatiaLiteFunction):
     "For SpatiaLite functions that take another parameter."
     sql_template = '%(function)s(%(geo_col)s, %(geometry)s, %%s)'
+
 
 class SpatiaLiteDistance(SpatiaLiteFunction):
     "For SpatiaLite distance operations."
@@ -33,9 +39,11 @@ class SpatiaLiteDistance(SpatiaLiteFunction):
         super(SpatiaLiteDistance, self).__init__(self.dist_func,
                                                  operator=operator)
 
+
 class SpatiaLiteRelate(SpatiaLiteFunctionParam):
     "For SpatiaLite Relate(<geom>, <pattern>) calls."
     pattern_regex = re.compile(r'^[012TF\*]{9}$')
+
     def __init__(self, pattern):
         if not self.pattern_regex.match(pattern):
             raise ValueError('Invalid intersection matrix pattern "%s".' % pattern)
@@ -43,9 +51,12 @@ class SpatiaLiteRelate(SpatiaLiteFunctionParam):
 
 # Valid distance types and substitutions
 dtypes = (Decimal, Distance, float, int, long)
+
+
 def get_dist_ops(operator):
     "Returns operations for regular distances; spherical distances are not currently supported."
     return (SpatiaLiteDistance(operator),)
+
 
 class SpatiaLiteOperations(DatabaseOperations, BaseSpatialOperations):
     compiler_module = 'django.contrib.gis.db.models.sql.compiler'
@@ -81,32 +92,32 @@ class SpatiaLiteOperations(DatabaseOperations, BaseSpatialOperations):
     select = 'AsText(%s)'
 
     geometry_functions = {
-        'equals' : SpatiaLiteFunction('Equals'),
-        'disjoint' : SpatiaLiteFunction('Disjoint'),
-        'touches' : SpatiaLiteFunction('Touches'),
-        'crosses' : SpatiaLiteFunction('Crosses'),
-        'within' : SpatiaLiteFunction('Within'),
-        'overlaps' : SpatiaLiteFunction('Overlaps'),
-        'contains' : SpatiaLiteFunction('Contains'),
-        'intersects' : SpatiaLiteFunction('Intersects'),
-        'relate' : (SpatiaLiteRelate, basestring),
+        'equals': SpatiaLiteFunction('Equals'),
+        'disjoint': SpatiaLiteFunction('Disjoint'),
+        'touches': SpatiaLiteFunction('Touches'),
+        'crosses': SpatiaLiteFunction('Crosses'),
+        'within': SpatiaLiteFunction('Within'),
+        'overlaps': SpatiaLiteFunction('Overlaps'),
+        'contains': SpatiaLiteFunction('Contains'),
+        'intersects': SpatiaLiteFunction('Intersects'),
+        'relate': (SpatiaLiteRelate, basestring),
         # Retruns true if B's bounding box completely contains A's bounding box.
-        'contained' : SpatiaLiteFunction('MbrWithin'),
+        'contained': SpatiaLiteFunction('MbrWithin'),
         # Returns true if A's bounding box completely contains B's bounding box.
-        'bbcontains' : SpatiaLiteFunction('MbrContains'),
+        'bbcontains': SpatiaLiteFunction('MbrContains'),
         # Returns true if A's bounding box overlaps B's bounding box.
-        'bboverlaps' : SpatiaLiteFunction('MbrOverlaps'),
+        'bboverlaps': SpatiaLiteFunction('MbrOverlaps'),
         # These are implemented here as synonyms for Equals
-        'same_as' : SpatiaLiteFunction('Equals'),
-        'exact' : SpatiaLiteFunction('Equals'),
-        }
+        'same_as': SpatiaLiteFunction('Equals'),
+        'exact': SpatiaLiteFunction('Equals'),
+    }
 
     distance_functions = {
-        'distance_gt' : (get_dist_ops('>'), dtypes),
-        'distance_gte' : (get_dist_ops('>='), dtypes),
-        'distance_lt' : (get_dist_ops('<'), dtypes),
-        'distance_lte' : (get_dist_ops('<='), dtypes),
-        }
+        'distance_gt': (get_dist_ops('>'), dtypes),
+        'distance_gte': (get_dist_ops('>='), dtypes),
+        'distance_lt': (get_dist_ops('<'), dtypes),
+        'distance_lte': (get_dist_ops('<='), dtypes),
+    }
     geometry_functions.update(distance_functions)
 
     def __init__(self, connection):
@@ -186,14 +197,16 @@ class SpatiaLiteOperations(DatabaseOperations, BaseSpatialOperations):
         SRID of the field.  Specifically, this routine will substitute in the
         Transform() and GeomFromText() function call(s).
         """
+
         def transform_value(value, srid):
             return not (value is None or value.srid == srid)
+
         if hasattr(value, 'expression'):
             if transform_value(value, f.srid):
                 placeholder = '%s(%%s, %s)' % (self.transform, f.srid)
             else:
                 placeholder = '%s'
-            # No geometry value used for F expression, substitue in
+                # No geometry value used for F expression, substitue in
             # the column name instead.
             return placeholder % '%s.%s' % tuple(map(self.quote_name, value.cols[value.expression]))
         else:
@@ -250,7 +263,7 @@ class SpatiaLiteOperations(DatabaseOperations, BaseSpatialOperations):
                 if tmp == 1.0: version = '2.3.0'
             except DatabaseError:
                 pass
-            # If no version string defined, then just re-raise the original
+                # If no version string defined, then just re-raise the original
             # exception.
             if version is None: raise
 
@@ -325,7 +338,7 @@ class SpatiaLiteOperations(DatabaseOperations, BaseSpatialOperations):
             else:
                 op = tmp
                 geom = value
-            # Calling the `as_sql` function on the operation instance.
+                # Calling the `as_sql` function on the operation instance.
             return op.as_sql(geo_col, self.get_geom_placeholder(field, geom))
         elif lookup_type == 'isnull':
             # Handling 'isnull' lookup type
@@ -336,8 +349,10 @@ class SpatiaLiteOperations(DatabaseOperations, BaseSpatialOperations):
     # Routines for getting the OGC-compliant models.
     def geometry_columns(self):
         from django.contrib.gis.db.backends.spatialite.models import GeometryColumns
+
         return GeometryColumns
 
     def spatial_ref_sys(self):
         from django.contrib.gis.db.backends.spatialite.models import SpatialRefSys
+
         return SpatialRefSys

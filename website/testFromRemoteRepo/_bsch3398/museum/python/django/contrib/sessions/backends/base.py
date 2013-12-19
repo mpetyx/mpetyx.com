@@ -1,9 +1,9 @@
 import base64
 import os
 import random
-import sys
 import time
 from datetime import datetime, timedelta
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -20,12 +20,14 @@ else:
     randrange = random.randrange
 MAX_SESSION_KEY = 18446744073709551616L     # 2 << 63
 
+
 class CreateError(Exception):
     """
     Used internally as a consistent exception type to catch from save (see the
     docstring for SessionBase.save() for details).
     """
     pass
+
 
 class SessionBase(object):
     """
@@ -139,8 +141,8 @@ class SessionBase(object):
             pid = 1
         while 1:
             session_key = md5_constructor("%s%s%s%s"
-                    % (randrange(0, MAX_SESSION_KEY), pid, time.time(),
-                       settings.SECRET_KEY)).hexdigest()
+                                          % (randrange(0, MAX_SESSION_KEY), pid, time.time(),
+                                             settings.SECRET_KEY)).hexdigest()
             if not self.exists(session_key):
                 break
         return session_key

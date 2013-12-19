@@ -4,4 +4,3 @@
 #
 # Use django.template.loader instead.
 
-from django.template.loader import *

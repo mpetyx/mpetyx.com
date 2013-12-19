@@ -1,18 +1,17 @@
-import os, unittest
+import unittest
 from django.contrib.gis.geos import *
 from django.contrib.gis.db.models import Collect, Count, Extent, F, Union
 from django.contrib.gis.geometry.backend import Geometry
-from django.contrib.gis.tests.utils import mysql, oracle, postgis, spatialite, no_mysql, no_oracle, no_spatialite
-from django.conf import settings
+from django.contrib.gis.tests.utils import mysql, oracle, no_mysql, no_oracle, no_spatialite
 from models import City, Location, DirectoryEntry, Parcel, Book, Author
 
 cities = (('Aurora', 'TX', -97.516111, 33.058333),
           ('Roswell', 'NM', -104.528056, 33.387222),
-          ('Kecksburg', 'PA',  -79.460734, 40.18476),
-           )
+          ('Kecksburg', 'PA', -79.460734, 40.18476),
+)
+
 
 class RelatedGeoModelTest(unittest.TestCase):
-
     def test01_setup(self):
         "Setting up for related model tests."
         for name, state, lon, lat in cities:
@@ -48,7 +47,7 @@ class RelatedGeoModelTest(unittest.TestCase):
         transformed = (('Kecksburg', 2272, 'POINT(1490553.98959621 314792.131023984)'),
                        ('Roswell', 2257, 'POINT(481902.189077221 868477.766629735)'),
                        ('Aurora', 2276, 'POINT(2269923.2484839 7069381.28722222)'),
-                       )
+        )
 
         for name, srid, wkt in transformed:
             # Doing this implicitly sets `select_related` select the location.
@@ -64,8 +63,8 @@ class RelatedGeoModelTest(unittest.TestCase):
         aggs = City.objects.aggregate(Extent('location__point'))
 
         # One for all locations, one that excludes Roswell.
-        all_extent = (-104.528060913086, 33.0583305358887,-79.4607315063477, 40.1847610473633)
-        txpa_extent = (-97.51611328125, 33.0583305358887,-79.4607315063477, 40.1847610473633)
+        all_extent = (-104.528060913086, 33.0583305358887, -79.4607315063477, 40.1847610473633)
+        txpa_extent = (-97.51611328125, 33.0583305358887, -79.4607315063477, 40.1847610473633)
         e1 = City.objects.extent(field_name='location__point')
         e2 = City.objects.exclude(name='Roswell').extent(field_name='location__point')
         e3 = aggs['location__point__extent']
@@ -117,7 +116,9 @@ class RelatedGeoModelTest(unittest.TestCase):
         "Testing F() expressions on GeometryFields."
         # Constructing a dummy parcel border and getting the City instance for
         # assigning the FK.
-        b1 = GEOSGeometry('POLYGON((-97.501205 33.052520,-97.501205 33.052576,-97.501150 33.052576,-97.501150 33.052520,-97.501205 33.052520))', srid=4326)
+        b1 = GEOSGeometry(
+            'POLYGON((-97.501205 33.052520,-97.501205 33.052576,-97.501150 33.052576,-97.501150 33.052520,-97.501205 33.052520))',
+            srid=4326)
         pcity = City.objects.get(name='Aurora')
 
         # First parcel has incorrect center point that is equal to the City;
@@ -221,6 +222,7 @@ class RelatedGeoModelTest(unittest.TestCase):
         "Ensuring GeoQuery objects are unpickled correctly.  See #10839."
         import pickle
         from django.contrib.gis.db.models.sql import GeoQuery
+
         qs = City.objects.all()
         q_str = pickle.dumps(qs.query)
         q = pickle.loads(q_str)
@@ -280,7 +282,8 @@ class RelatedGeoModelTest(unittest.TestCase):
         # SELECT AsText(ST_Collect("relatedapp_location"."point")) FROM "relatedapp_city" LEFT OUTER JOIN
         #    "relatedapp_location" ON ("relatedapp_city"."location_id" = "relatedapp_location"."id")
         #    WHERE "relatedapp_city"."state" = 'TX';
-        ref_geom = fromstr('MULTIPOINT(-97.516111 33.058333,-96.801611 32.782057,-95.363151 29.763374,-96.801611 32.782057)')
+        ref_geom = fromstr(
+            'MULTIPOINT(-97.516111 33.058333,-96.801611 32.782057,-95.363151 29.763374,-96.801611 32.782057)')
 
         c1 = City.objects.filter(state='TX').collect(field_name='location__point')
         c2 = City.objects.filter(state='TX').aggregate(Collect('location__point'))['location__point__collect']
@@ -291,7 +294,8 @@ class RelatedGeoModelTest(unittest.TestCase):
             self.assertEqual(4, len(coll))
             self.assertEqual(ref_geom, coll)
 
-    # TODO: Related tests for KML, GML, and distance lookups.
+            # TODO: Related tests for KML, GML, and distance lookups.
+
 
 def suite():
     s = unittest.TestSuite()

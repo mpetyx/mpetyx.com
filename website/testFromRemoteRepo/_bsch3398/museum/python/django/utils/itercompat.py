@@ -16,12 +16,14 @@ def product(*args, **kwds):
     pools = map(tuple, args) * kwds.get('repeat', 1)
     result = [[]]
     for pool in pools:
-        result = [x+[y] for x in result for y in pool]
+        result = [x + [y] for x in result for y in pool]
     for prod in result:
         yield tuple(prod)
 
+
 if hasattr(itertools, 'product'):
     product = itertools.product
+
 
 def is_iterable(x):
     "A implementation independent way of checking for iterables"
@@ -31,6 +33,7 @@ def is_iterable(x):
         return False
     else:
         return True
+
 
 def all(iterable):
     for item in iterable:

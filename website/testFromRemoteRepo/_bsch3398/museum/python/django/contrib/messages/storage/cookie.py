@@ -1,10 +1,10 @@
 import hmac
 
-from django.conf import settings
-from django.contrib.messages import constants
 from django.contrib.messages.storage.base import BaseStorage, Message
 from django.http import CompatCookie
 from django.utils import simplejson as json
+
+from django.conf import settings
 from django.utils.hashcompat import sha_hmac
 
 
@@ -41,6 +41,7 @@ class MessageDecoder(json.JSONDecoder):
     def decode(self, s, **kwargs):
         decoded = super(MessageDecoder, self).decode(s, **kwargs)
         return self.process_messages(decoded)
+
 
 class CookieStorage(BaseStorage):
     """
@@ -93,6 +94,7 @@ class CookieStorage(BaseStorage):
             # data is going to be stored eventually by CompatCookie, which
             # adds it's own overhead, which we must account for.
             cookie = CompatCookie() # create outside the loop
+
             def stored_length(val):
                 return len(cookie.value_encode(val)[1])
 
@@ -146,7 +148,7 @@ class CookieStorage(BaseStorage):
                     return json.loads(value, cls=MessageDecoder)
                 except ValueError:
                     pass
-        # Mark the data as used (so it gets removed) since something was wrong
+            # Mark the data as used (so it gets removed) since something was wrong
         # with the data.
         self.used = True
         return None

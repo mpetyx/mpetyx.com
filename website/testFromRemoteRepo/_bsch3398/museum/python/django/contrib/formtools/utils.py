@@ -5,7 +5,7 @@ except ImportError:
 
 from django.conf import settings
 from django.utils.hashcompat import md5_constructor
-from django.forms import BooleanField
+
 
 def security_hash(request, form, *args):
     """
@@ -27,7 +27,7 @@ def security_hash(request, form, *args):
         if isinstance(value, basestring):
             value = value.strip()
         data.append((bf.name, value))
-        
+
     data.extend(args)
     data.append(settings.SECRET_KEY)
 

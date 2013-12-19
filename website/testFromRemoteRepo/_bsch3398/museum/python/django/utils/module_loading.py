@@ -54,7 +54,7 @@ def module_has_submodule(package, module_name):
                         return True
                     except ImportError:
                         pass
-                # XXX Could insert None or NullImporter
+                        # XXX Could insert None or NullImporter
     else:
         # Exhausted the search, so the module cannot be found.
         return False

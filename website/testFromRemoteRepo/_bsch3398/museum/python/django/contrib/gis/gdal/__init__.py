@@ -40,6 +40,7 @@ try:
     from django.contrib.gis.gdal.libgdal import gdal_version, gdal_full_version, gdal_release_date, GEOJSON, GDAL_VERSION
     from django.contrib.gis.gdal.srs import SpatialReference, CoordTransform
     from django.contrib.gis.gdal.geometries import OGRGeometry
+
     HAS_GDAL = True
 except:
     HAS_GDAL, GEOJSON = False, False
@@ -50,5 +51,3 @@ except ImportError:
     # No ctypes, but don't raise an exception.
     pass
 
-from django.contrib.gis.gdal.error import check_err, OGRException, OGRIndexError, SRSException
-from django.contrib.gis.gdal.geomtype import OGRGeomType

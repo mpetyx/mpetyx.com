@@ -3,6 +3,7 @@
 from django.utils.cache import patch_vary_headers
 from django.utils import translation
 
+
 class LocaleMiddleware(object):
     """
     This is a very simple middleware that parses a request

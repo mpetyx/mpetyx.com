@@ -1,11 +1,11 @@
 from django.core.exceptions import FieldError
-from django.db import connections
 from django.db.backends.util import truncate_name
 from django.db.models.sql.constants import *
 from django.db.models.sql.datastructures import EmptyResultSet
 from django.db.models.sql.expressions import SQLEvaluator
 from django.db.models.sql.query import get_proxied_model, get_order_dir, \
-     select_related_descend, Query
+    select_related_descend, Query
+
 
 class SQLCompiler(object):
     def __init__(self, query, connection, using):
@@ -23,7 +23,7 @@ class SQLCompiler(object):
         if not self.query.tables:
             self.query.join((None, self.query.model._meta.db_table, None, None))
         if (not self.query.select and self.query.default_cols and not
-                self.query.included_inherited_models):
+        self.query.included_inherited_models):
             self.query.setup_inherited_models()
         if self.query.select_related and not self.query.related_select_cols:
             self.fill_related_selections()
@@ -37,7 +37,7 @@ class SQLCompiler(object):
         if name in self.quote_cache:
             return self.quote_cache[name]
         if ((name in self.query.alias_map and name not in self.query.table_map) or
-                name in self.query.extra_select):
+                    name in self.query.extra_select):
             self.quote_cache[name] = name
             return name
         r = self.connection.ops.quote_name(name)
@@ -182,7 +182,7 @@ class SQLCompiler(object):
 
         elif self.query.default_cols:
             cols, new_aliases = self.get_default_columns(with_aliases,
-                    col_aliases)
+                                                         col_aliases)
             result.extend(cols)
             aliases.update(new_aliases)
 
@@ -191,8 +191,8 @@ class SQLCompiler(object):
             '%s%s' % (
                 aggregate.as_sql(qn, self.connection),
                 alias is not None
-                    and ' AS %s' % qn(truncate_name(alias, max_name_length))
-                    or ''
+                and ' AS %s' % qn(truncate_name(alias, max_name_length))
+                or ''
             )
             for alias, aggregate in self.query.aggregate_select.items()
         ])
@@ -213,7 +213,7 @@ class SQLCompiler(object):
         return result
 
     def get_default_columns(self, with_aliases=False, col_aliases=None,
-            start_alias=None, opts=None, as_pairs=False, local_only=False):
+                            start_alias=None, opts=None, as_pairs=False, local_only=False):
         """
         Computes the default columns for selecting every field in the base
         model. Will sometimes be called to pull in related models (e.g. via
@@ -249,7 +249,7 @@ class SQLCompiler(object):
                     else:
                         link_field = opts.get_ancestor_link(model)
                         alias = self.query.join((start_alias, model._meta.db_table,
-                                link_field.column, model._meta.pk.column))
+                                                 link_field.column, model._meta.pk.column))
                     seen[model] = alias
             else:
                 # If we're starting from the base model of the queryset, the
@@ -266,7 +266,7 @@ class SQLCompiler(object):
             if with_aliases and field.column in col_aliases:
                 c_alias = 'Col%d' % len(col_aliases)
                 result.append('%s.%s AS %s' % (qn(alias),
-                    qn2(field.column), c_alias))
+                                               qn2(field.column), c_alias))
                 col_aliases.add(c_alias)
                 aliases.add(c_alias)
             else:
@@ -343,7 +343,7 @@ class SQLCompiler(object):
                 # 'col' is of the form 'field' or 'field1__field2' or
                 # '-field1__field2__field', etc.
                 for table, col, order in self.find_ordering_name(field,
-                        self.query.model._meta, default_order=asc):
+                                                                 self.query.model._meta, default_order=asc):
                     if (table, col) not in processed_pairs:
                         elt = '%s.%s' % (qn(table), qn2(col))
                         processed_pairs.add((table, col))
@@ -361,7 +361,7 @@ class SQLCompiler(object):
         return result, group_by
 
     def find_ordering_name(self, name, opts, alias=None, default_order='ASC',
-            already_seen=None):
+                           already_seen=None):
         """
         Returns the table alias (the name might be ambiguous, the alias will
         not be) and column name for ordering by the given 'name' parameter.
@@ -372,7 +372,7 @@ class SQLCompiler(object):
         if not alias:
             alias = self.query.get_initial_alias()
         field, target, opts, joins, last, extra = self.query.setup_joins(pieces,
-                opts, alias, False)
+                                                                         opts, alias, False)
         alias = joins[-1]
         col = target.column
         if not field.rel:
@@ -383,7 +383,7 @@ class SQLCompiler(object):
 
         # Must use left outer joins for nullable fields and their relations.
         self.query.promote_alias_chain(joins,
-            self.query.alias_map[joins[0]][JOIN_TYPE] == self.query.LOUTER)
+                                       self.query.alias_map[joins[0]][JOIN_TYPE] == self.query.LOUTER)
 
         # If we get to this point and the field is a relation to another model,
         # append the default ordering for that model.
@@ -399,7 +399,7 @@ class SQLCompiler(object):
             results = []
             for item in opts.ordering:
                 results.extend(self.find_ordering_name(item, opts, alias,
-                        order, already_seen))
+                                                       order, already_seen))
             return results
 
         if alias:
@@ -442,8 +442,8 @@ class SQLCompiler(object):
             alias_str = (alias != name and ' %s' % alias or '')
             if join_type and not first:
                 result.append('%s %s%s ON (%s.%s = %s.%s)'
-                        % (join_type, qn(name), alias_str, qn(lhs),
-                           qn2(lhs_col), qn(alias), qn2(col)))
+                              % (join_type, qn(name), alias_str, qn(lhs),
+                                 qn2(lhs_col), qn(alias), qn2(col)))
             else:
                 connector = not first and ', ' or ''
                 result.append('%s%s%s' % (connector, qn(name), alias_str))
@@ -467,7 +467,7 @@ class SQLCompiler(object):
         result, params = [], []
         if self.query.group_by is not None:
             if len(self.query.model._meta.fields) == len(self.query.select) and \
-                self.connection.features.allows_group_by_pk:
+                    self.connection.features.allows_group_by_pk:
                 self.query.group_by = [(self.query.model._meta.db_table, self.query.model._meta.pk.column)]
 
             group_by = self.query.group_by or []
@@ -486,8 +486,8 @@ class SQLCompiler(object):
         return result, params
 
     def fill_related_selections(self, opts=None, root_alias=None, cur_depth=1,
-            used=None, requested=None, restricted=None, nullable=None,
-            dupe_set=None, avoid_set=None):
+                                used=None, requested=None, restricted=None, nullable=None,
+                                dupe_set=None, avoid_set=None):
         """
         Fill in the information needed for a select_related query. The current
         depth is measured as the number of connections away from the root model
@@ -523,7 +523,7 @@ class SQLCompiler(object):
         for f, model in opts.get_fields_with_model():
             if not select_related_descend(f, restricted, requested):
                 continue
-            # The "avoid" set is aliases we want to avoid just for this
+                # The "avoid" set is aliases we want to avoid just for this
             # particular branch of the recursion. They aren't permanently
             # forbidden from reuse in the related selection tables (which is
             # what "used" specifies).
@@ -547,12 +547,12 @@ class SQLCompiler(object):
                     dedupe = lhs_col in opts.duplicate_targets
                     if dedupe:
                         avoid.update(self.query.dupe_avoidance.get((id(opts), lhs_col),
-                                ()))
+                            ()))
                         dupe_set.add((opts, lhs_col))
                     int_opts = int_model._meta
                     alias = self.query.join((alias, int_opts.db_table, lhs_col,
-                            int_opts.pk.column), exclusions=used,
-                            promote=promote)
+                                             int_opts.pk.column), exclusions=used,
+                                            promote=promote)
                     alias_chain.append(alias)
                     for (dupe_opts, dupe_col) in dupe_set:
                         self.query.update_dupe_avoidance(dupe_opts, dupe_col, alias)
@@ -568,11 +568,11 @@ class SQLCompiler(object):
                     dupe_set.add((opts, f.column))
 
             alias = self.query.join((alias, table, f.column,
-                    f.rel.get_related_field().column),
-                    exclusions=used.union(avoid), promote=promote)
+                                     f.rel.get_related_field().column),
+                                    exclusions=used.union(avoid), promote=promote)
             used.add(alias)
             columns, aliases = self.get_default_columns(start_alias=alias,
-                    opts=f.rel.to._meta, as_pairs=True)
+                                                        opts=f.rel.to._meta, as_pairs=True)
             self.query.related_select_cols.extend(columns)
             if self.query.alias_map[alias][JOIN_TYPE] == self.query.LOUTER:
                 self.query.promote_alias_chain(aliases, True)
@@ -585,7 +585,7 @@ class SQLCompiler(object):
             for dupe_opts, dupe_col in dupe_set:
                 self.query.update_dupe_avoidance(dupe_opts, dupe_col, alias)
             self.fill_related_selections(f.rel.to._meta, alias, cur_depth + 1,
-                    used, next, restricted, new_nullable, dupe_set, avoid)
+                                         used, next, restricted, new_nullable, dupe_set, avoid)
 
         if restricted:
             related_fields = [
@@ -596,7 +596,7 @@ class SQLCompiler(object):
             for f, model in related_fields:
                 if not select_related_descend(f, restricted, requested, reverse=True):
                     continue
-                # The "avoid" set is aliases we want to avoid just for this
+                    # The "avoid" set is aliases we want to avoid just for this
                 # particular branch of the recursion. They aren't permanently
                 # forbidden from reuse in the related selection tables (which is
                 # what "used" specifies).
@@ -621,7 +621,7 @@ class SQLCompiler(object):
                         dedupe = lhs_col in opts.duplicate_targets
                         if dedupe:
                             avoid.update((self.query.dupe_avoidance.get(id(opts), lhs_col),
-                                ()))
+                                          ()))
                             dupe_set.add((opts, lhs_col))
                         int_opts = int_model._meta
                         alias = self.query.join(
@@ -643,15 +643,15 @@ class SQLCompiler(object):
                 )
                 used.add(alias)
                 columns, aliases = self.get_default_columns(start_alias=alias,
-                    opts=model._meta, as_pairs=True, local_only=True)
+                                                            opts=model._meta, as_pairs=True, local_only=True)
                 self.query.related_select_cols.extend(columns)
                 self.query.related_select_fields.extend(model._meta.fields)
 
                 next = requested.get(f.related_query_name(), {})
                 new_nullable = f.null or None
 
-                self.fill_related_selections(model._meta, table, cur_depth+1,
-                    used, next, restricted, new_nullable)
+                self.fill_related_selections(model._meta, table, cur_depth + 1,
+                                             used, next, restricted, new_nullable)
 
     def deferred_to_columns(self):
         """
@@ -680,13 +680,13 @@ class SQLCompiler(object):
                             fields = self.query.select_fields + self.query.related_select_fields
                         else:
                             fields = self.query.model._meta.fields
-                        # If the field was deferred, exclude it from being passed
+                            # If the field was deferred, exclude it from being passed
                         # into `resolve_columns` because it wasn't selected.
                         only_load = self.deferred_to_columns()
                         if only_load:
                             db_table = self.query.model._meta.db_table
                             fields = [f for f in fields if db_table in only_load and
-                                      f.column in only_load[db_table]]
+                                                           f.column in only_load[db_table]]
                     row = self.resolve_columns(row, fields)
 
                 if self.query.aggregate_select:
@@ -736,10 +736,10 @@ class SQLCompiler(object):
         # The MULTI case.
         if self.query.ordering_aliases:
             result = order_modified_iter(cursor, len(self.query.ordering_aliases),
-                    self.connection.features.empty_fetchmany_value)
+                                         self.connection.features.empty_fetchmany_value)
         else:
             result = iter((lambda: cursor.fetchmany(GET_ITERATOR_CHUNK_SIZE)),
-                    self.connection.features.empty_fetchmany_value)
+                          self.connection.features.empty_fetchmany_value)
         if not self.connection.features.can_use_chunked_reads:
             # If we are using non-chunked reads, we return the same data
             # structure as normally, but ensure it is all read into memory
@@ -786,7 +786,7 @@ class SQLInsertCompiler(SQLCompiler):
         if self.connection.features.can_return_id_from_insert:
             return self.connection.ops.fetch_returned_insert_id(cursor)
         return self.connection.ops.last_insert_id(cursor,
-                self.query.model._meta.db_table, self.query.model._meta.pk.column)
+                                                  self.query.model._meta.db_table, self.query.model._meta.pk.column)
 
 
 class SQLDeleteCompiler(SQLCompiler):
@@ -796,12 +796,13 @@ class SQLDeleteCompiler(SQLCompiler):
         parameters.
         """
         assert len(self.query.tables) == 1, \
-                "Can only delete from one table at a time."
+            "Can only delete from one table at a time."
         qn = self.quote_name_unless_alias
         result = ['DELETE FROM %s' % qn(self.query.tables[0])]
         where, params = self.query.where.as_sql(qn=qn, connection=self.connection)
         result.append('WHERE %s' % where)
         return ' '.join(result), tuple(params)
+
 
 class SQLUpdateCompiler(SQLCompiler):
     def as_sql(self):
@@ -809,7 +810,6 @@ class SQLUpdateCompiler(SQLCompiler):
         Creates the SQL for this query. Returns the SQL string and list of
         parameters.
         """
-        from django.db.models.base import Model
 
         self.pre_sql_setup()
         if not self.query.values:
@@ -913,6 +913,7 @@ class SQLUpdateCompiler(SQLCompiler):
         for alias in self.query.tables[1:]:
             self.query.alias_refcount[alias] = 0
 
+
 class SQLAggregateCompiler(SQLCompiler):
     def as_sql(self, qn=None):
         """
@@ -931,6 +932,7 @@ class SQLAggregateCompiler(SQLCompiler):
         params = self.query.sub_params
         return (sql, params)
 
+
 class SQLDateCompiler(SQLCompiler):
     def results_iter(self):
         """
@@ -939,9 +941,11 @@ class SQLDateCompiler(SQLCompiler):
         resolve_columns = hasattr(self, 'resolve_columns')
         if resolve_columns:
             from django.db.models.fields import DateTimeField
+
             fields = [DateTimeField()]
         else:
             from django.db.backends.util import typecast_timestamp
+
             needs_string_cast = self.connection.features.needs_datetime_string_cast
 
         offset = len(self.query.extra_select)
@@ -970,5 +974,5 @@ def order_modified_iter(cursor, trim, sentinel):
     the results, since they're only needed to make the SQL valid.
     """
     for rows in iter((lambda: cursor.fetchmany(GET_ITERATOR_CHUNK_SIZE)),
-            sentinel):
+                     sentinel):
         yield [r[:-trim] for r in rows]

@@ -156,6 +156,7 @@ class _localbase(object):
 
         return self
 
+
 def _patch(self):
     key = object.__getattribute__(self, '_local__key')
     d = currentThread().__dict__.get(key)
@@ -173,8 +174,8 @@ def _patch(self):
     else:
         object.__setattr__(self, '__dict__', d)
 
-class local(_localbase):
 
+class local(_localbase):
     def __getattribute__(self, name):
         lock = object.__getattribute__(self, '_local__lock')
         lock.acquire()
@@ -232,7 +233,9 @@ class local(_localbase):
                         pass # didn't have anything in this thread
 
         return __del__
+
     __del__ = __del__()
+
 
 try:
     from threading import currentThread, enumerate, RLock

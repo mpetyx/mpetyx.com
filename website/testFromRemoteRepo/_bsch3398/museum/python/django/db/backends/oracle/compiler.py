@@ -34,10 +34,10 @@ class SQLCompiler(compiler.SQLCompiler):
                                      or self.query.low_mark)
         if not do_offset:
             sql, params = super(SQLCompiler, self).as_sql(with_limits=False,
-                    with_col_aliases=with_col_aliases)
+                                                          with_col_aliases=with_col_aliases)
         else:
             sql, params = super(SQLCompiler, self).as_sql(with_limits=False,
-                                                    with_col_aliases=True)
+                                                          with_col_aliases=True)
 
             # Wrap the base query in an outer SELECT * with boundaries on
             # the "_RN" column.  This is the canonical way to emulate LIMIT
@@ -45,7 +45,8 @@ class SQLCompiler(compiler.SQLCompiler):
             high_where = ''
             if self.query.high_mark is not None:
                 high_where = 'WHERE ROWNUM <= %d' % (self.query.high_mark,)
-            sql = 'SELECT * FROM (SELECT ROWNUM AS "_RN", "_SUB".* FROM (%s) "_SUB" %s) WHERE "_RN" > %d' % (sql, high_where, self.query.low_mark)
+            sql = 'SELECT * FROM (SELECT ROWNUM AS "_RN", "_SUB".* FROM (%s) "_SUB" %s) WHERE "_RN" > %d' % (
+            sql, high_where, self.query.low_mark)
 
         return sql, params
 
@@ -53,14 +54,18 @@ class SQLCompiler(compiler.SQLCompiler):
 class SQLInsertCompiler(compiler.SQLInsertCompiler, SQLCompiler):
     pass
 
+
 class SQLDeleteCompiler(compiler.SQLDeleteCompiler, SQLCompiler):
     pass
+
 
 class SQLUpdateCompiler(compiler.SQLUpdateCompiler, SQLCompiler):
     pass
 
+
 class SQLAggregateCompiler(compiler.SQLAggregateCompiler, SQLCompiler):
     pass
+
 
 class SQLDateCompiler(compiler.SQLDateCompiler, SQLCompiler):
     pass

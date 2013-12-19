@@ -14,10 +14,11 @@ prepared_destroy.restype = None
 
 # Prepared geometry binary predicate support.
 def prepared_predicate(func):
-    func.argtypes= [PREPGEOM_PTR, GEOM_PTR]
+    func.argtypes = [PREPGEOM_PTR, GEOM_PTR]
     func.restype = c_char
     func.errcheck = check_predicate
     return func
+
 
 prepared_contains = prepared_predicate(GEOSFunc('GEOSPreparedContains'))
 prepared_contains_properly = prepared_predicate(GEOSFunc('GEOSPreparedContainsProperly'))

@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.forms.forms import pretty_name
 from django.utils import formats
@@ -6,9 +5,10 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.text import capfirst
 from django.utils.encoding import force_unicode, smart_unicode, smart_str
-from django.utils.translation import ungettext, ugettext as _
+from django.utils.translation import ungettext
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils.datastructures import SortedDict
+
 
 def quote(s):
     """
@@ -25,6 +25,7 @@ def quote(s):
         if c in """:/_#?;@&=+$,"<>%\\""":
             res[i] = '_%02X' % ord(c)
     return ''.join(res)
+
 
 def unquote(s):
     """
@@ -46,6 +47,7 @@ def unquote(s):
             myappend('_' + item)
     return "".join(res)
 
+
 def flatten_fieldsets(fieldsets):
     """Returns a list of field names from an admin fieldsets structure."""
     field_names = []
@@ -58,6 +60,7 @@ def flatten_fieldsets(fieldsets):
                 field_names.append(field)
     return field_names
 
+
 def _format_callback(obj, user, admin_site, levels_to_root, perms_needed):
     has_admin = obj.__class__ in admin_site._registry
     opts = obj._meta
@@ -68,7 +71,7 @@ def _format_callback(obj, user, admin_site, levels_to_root, perms_needed):
                                opts.object_name.lower()),
                             None, (quote(obj._get_pk_val()),))
     except NoReverseMatch:
-        admin_url = '%s%s/%s/%s/' % ('../'*levels_to_root,
+        admin_url = '%s%s/%s/%s/' % ('../' * levels_to_root,
                                      opts.app_label,
                                      opts.object_name.lower(),
                                      quote(obj._get_pk_val()))
@@ -77,7 +80,7 @@ def _format_callback(obj, user, admin_site, levels_to_root, perms_needed):
                        opts.get_delete_permission())
         if not user.has_perm(p):
             perms_needed.add(opts.verbose_name)
-        # Display a link to the admin page.
+            # Display a link to the admin page.
         return mark_safe(u'%s: <a href="%s">%s</a>' %
                          (escape(capfirst(opts.verbose_name)),
                           admin_url,
@@ -87,6 +90,7 @@ def _format_callback(obj, user, admin_site, levels_to_root, perms_needed):
         # admin or is edited inline.
         return u'%s: %s' % (capfirst(opts.verbose_name),
                             force_unicode(obj))
+
 
 def get_deleted_objects(objs, opts, user, admin_site, levels_to_root=4):
     """
@@ -127,6 +131,7 @@ class NestedObjects(object):
     a nested list of objects.
 
     """
+
     def __init__(self):
         # Use object keys of the form (model, pk) because actual model
         # objects may not be unique
@@ -232,6 +237,7 @@ def model_format_dict(obj):
         'verbose_name_plural': force_unicode(opts.verbose_name_plural)
     }
 
+
 def model_ngettext(obj, n=None):
     """
     Return the appropriate `verbose_name` or `verbose_name_plural` value for
@@ -250,6 +256,7 @@ def model_ngettext(obj, n=None):
     singular, plural = d["verbose_name"], d["verbose_name_plural"]
     return ungettext(singular, plural, n or 0)
 
+
 def lookup_field(name, obj, model_admin=None):
     opts = obj._meta
     try:
@@ -261,7 +268,7 @@ def lookup_field(name, obj, model_admin=None):
             attr = name
             value = attr(obj)
         elif (model_admin is not None and hasattr(model_admin, name) and
-          not name == '__str__' and not name == '__unicode__'):
+                  not name == '__str__' and not name == '__unicode__'):
             attr = getattr(model_admin, name)
             value = attr(obj)
         else:
@@ -275,6 +282,7 @@ def lookup_field(name, obj, model_admin=None):
         attr = None
         value = getattr(obj, name)
     return f, attr, value
+
 
 def label_for_field(name, model, model_admin=None, return_attr=False):
     attr = None

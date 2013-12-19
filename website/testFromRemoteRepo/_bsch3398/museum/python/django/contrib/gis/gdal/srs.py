@@ -26,12 +26,11 @@
   >>> print srs.name
   NAD83 / Texas South Central
 """
-import re
-from ctypes import byref, c_char_p, c_int, c_void_p
+from ctypes import byref, c_char_p, c_int
 
 # Getting the error checking routine and exceptions
 from django.contrib.gis.gdal.base import GDALBase
-from django.contrib.gis.gdal.error import OGRException, SRSException
+from django.contrib.gis.gdal.error import SRSException
 from django.contrib.gis.gdal.prototypes import srs as capi
 
 #### Spatial Reference class. ####
@@ -141,7 +140,7 @@ class SpatialReference(GDALBase):
     def auth_name(self, target):
         "Returns the authority name for the given string target node."
         return capi.get_auth_name(self.ptr, target)
-    
+
     def auth_code(self, target):
         "Returns the authority code for the given string target node."
         return capi.get_auth_code(self.ptr, target)
@@ -168,15 +167,19 @@ class SpatialReference(GDALBase):
     def validate(self):
         "Checks to see if the given spatial reference is valid."
         capi.srs_validate(self.ptr)
-    
+
     #### Name & SRID properties ####
     @property
     def name(self):
         "Returns the name of this Spatial Reference."
-        if self.projected: return self.attr_value('PROJCS')
-        elif self.geographic: return self.attr_value('GEOGCS')
-        elif self.local: return self.attr_value('LOCAL_CS')
-        else: return None
+        if self.projected:
+            return self.attr_value('PROJCS')
+        elif self.geographic:
+            return self.attr_value('GEOGCS')
+        elif self.local:
+            return self.attr_value('LOCAL_CS')
+        else:
+            return None
 
     @property
     def srid(self):
@@ -185,7 +188,7 @@ class SpatialReference(GDALBase):
             return int(self.attr_value('AUTHORITY', 1))
         except (TypeError, ValueError):
             return None
-        
+
     #### Unit Properties ####
     @property
     def linear_name(self):
@@ -317,6 +320,7 @@ class SpatialReference(GDALBase):
     def xml(self, dialect=''):
         "Returns the XML representation of this Spatial Reference."
         return capi.to_xml(self.ptr, byref(c_char_p()), dialect)
+
 
 class CoordTransform(GDALBase):
     "The coordinate system transformation object."

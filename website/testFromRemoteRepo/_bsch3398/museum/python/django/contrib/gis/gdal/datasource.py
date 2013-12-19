@@ -34,7 +34,7 @@
               val = field.value
 """
 # ctypes prerequisites.
-from ctypes import byref, c_void_p
+from ctypes import byref
 
 # The GDAL C library, OGR exceptions, and the Layer object.
 from django.contrib.gis.gdal.base import GDALBase
@@ -108,7 +108,7 @@ class DataSource(GDALBase):
         else:
             raise TypeError('Invalid index type: %s' % type(index))
         return Layer(l, self)
-        
+
     def __len__(self):
         "Returns the number of layers within the data source."
         return self.layer_count

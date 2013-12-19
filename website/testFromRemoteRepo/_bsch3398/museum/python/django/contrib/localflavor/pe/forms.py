@@ -8,13 +8,17 @@ from django.forms import ValidationError
 from django.forms.fields import RegexField, CharField, Select
 from django.utils.translation import ugettext_lazy as _
 
+
 class PERegionSelect(Select):
     """
     A Select widget that uses a list of Peruvian Regions as its choices.
     """
+
     def __init__(self, attrs=None):
         from pe_region import REGION_CHOICES
+
         super(PERegionSelect, self).__init__(attrs, choices=REGION_CHOICES)
+
 
 class PEDNIField(CharField):
     """
@@ -27,7 +31,7 @@ class PEDNIField(CharField):
 
     def __init__(self, *args, **kwargs):
         super(PEDNIField, self).__init__(max_length=8, min_length=8, *args,
-                **kwargs)
+                                         **kwargs)
 
     def clean(self, value):
         """
@@ -43,6 +47,7 @@ class PEDNIField(CharField):
 
         return value
 
+
 class PERUCField(RegexField):
     """
     This field validates a RUC (Registro Unico de Contribuyentes). A RUC is of
@@ -55,7 +60,7 @@ class PERUCField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(PERUCField, self).__init__(max_length=11, min_length=11, *args,
-            **kwargs)
+                                         **kwargs)
 
     def clean(self, value):
         """

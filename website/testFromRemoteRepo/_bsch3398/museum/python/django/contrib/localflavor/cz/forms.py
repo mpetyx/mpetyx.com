@@ -2,22 +2,28 @@
 Czech-specific form helpers
 """
 
+import re
+
 from django.core.validators import EMPTY_VALUES
 from django.forms import ValidationError
 from django.forms.fields import Select, RegexField, Field
 from django.utils.translation import ugettext_lazy as _
-import re
+
 
 birth_number = re.compile(r'^(?P<birth>\d{6})/?(?P<id>\d{3,4})$')
 ic_number = re.compile(r'^(?P<number>\d{7})(?P<check>\d)$')
+
 
 class CZRegionSelect(Select):
     """
     A select widget widget with list of Czech regions as choices.
     """
+
     def __init__(self, attrs=None):
         from cz_regions import REGION_CHOICES
+
         super(CZRegionSelect, self).__init__(attrs, choices=REGION_CHOICES)
+
 
 class CZPostalCodeField(RegexField):
     """
@@ -30,7 +36,7 @@ class CZPostalCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(CZPostalCodeField, self).__init__(r'^\d{5}$|^\d{3} \d{2}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                                max_length=None, min_length=None, *args, **kwargs)
 
     def clean(self, value):
         """
@@ -39,6 +45,7 @@ class CZPostalCodeField(RegexField):
         """
         v = super(CZPostalCodeField, self).clean(value)
         return v.replace(' ', '')
+
 
 class CZBirthNumberField(Field):
     """
@@ -99,6 +106,7 @@ class CZBirthNumberField(Field):
         else:
             raise ValidationError(self.error_messages['invalid'])
 
+
 class CZICNumberField(Field):
     """
     Czech IC number field.
@@ -122,7 +130,7 @@ class CZICNumberField(Field):
         sum = 0
         weight = 8
         for digit in number:
-            sum += int(digit)*weight
+            sum += int(digit) * weight
             weight -= 1
 
         remainder = sum % 11
@@ -133,8 +141,8 @@ class CZICNumberField(Field):
         # in other case, last digin is 11 - remainder
 
         if (not remainder % 10 and check == 1) or \
-        (remainder == 1 and check == 0) or \
-        (check == (11 - remainder)):
+                (remainder == 1 and check == 0) or \
+                (check == (11 - remainder)):
             return u'%s' % value
 
         raise ValidationError(self.error_messages['invalid'])

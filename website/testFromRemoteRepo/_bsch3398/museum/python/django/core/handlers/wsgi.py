@@ -1,5 +1,6 @@
 from threading import Lock
 from pprint import pformat
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -57,7 +58,8 @@ STATUS_CODE_TEXT = {
     505: 'HTTP VERSION NOT SUPPORTED',
 }
 
-def safe_copyfileobj(fsrc, fdst, length=16*1024, size=0):
+
+def safe_copyfileobj(fsrc, fdst, length=16 * 1024, size=0):
     """
     A version of shutil.copyfileobj that will not read more than 'size' bytes.
     This makes it safe from clients sending more than CONTENT_LENGTH bytes of
@@ -71,6 +73,7 @@ def safe_copyfileobj(fsrc, fdst, length=16*1024, size=0):
             break
         fdst.write(buf)
         size -= len(buf)
+
 
 class WSGIRequest(http.HttpRequest):
     def __init__(self, environ):
@@ -117,12 +120,13 @@ class WSGIRequest(http.HttpRequest):
         except:
             meta = '<could not parse>'
         return '<WSGIRequest\nGET:%s,\nPOST:%s,\nCOOKIES:%s,\nMETA:%s>' % \
-            (get, post, cookies, meta)
+               (get, post, cookies, meta)
 
     def get_full_path(self):
         # RFC 3986 requires query string arguments to be in the ASCII range.
         # Rather than crash if this doesn't happen, we encode defensively.
-        return '%s%s' % (self.path, self.environ.get('QUERY_STRING', '') and ('?' + iri_to_uri(self.environ.get('QUERY_STRING', ''))) or '')
+        return '%s%s' % (self.path, self.environ.get('QUERY_STRING', '') and (
+        '?' + iri_to_uri(self.environ.get('QUERY_STRING', ''))) or '')
 
     def is_secure(self):
         return 'wsgi.url_scheme' in self.environ \
@@ -148,7 +152,8 @@ class WSGIRequest(http.HttpRequest):
                     self._post_parse_error = True
                     raise
             else:
-                self._post, self._files = http.QueryDict(self.raw_post_data, encoding=self._encoding), datastructures.MultiValueDict()
+                self._post, self._files = http.QueryDict(self.raw_post_data,
+                                                         encoding=self._encoding), datastructures.MultiValueDict()
         else:
             self._post, self._files = http.QueryDict('', encoding=self._encoding), datastructures.MultiValueDict()
 
@@ -202,7 +207,7 @@ class WSGIRequest(http.HttpRequest):
                 content_length = 0
             if content_length > 0:
                 safe_copyfileobj(self.environ['wsgi.input'], buf,
-                        size=content_length)
+                                 size=content_length)
             self._raw_post_data = buf.getvalue()
             buf.close()
             return self._raw_post_data
@@ -214,12 +219,12 @@ class WSGIRequest(http.HttpRequest):
     REQUEST = property(_get_request)
     raw_post_data = property(_get_raw_post_data)
 
+
 class WSGIHandler(base.BaseHandler):
     initLock = Lock()
     request_class = WSGIRequest
 
     def __call__(self, environ, start_response):
-        from django.conf import settings
 
         # Set up middleware if needed. We couldn't do this earlier, because
         # settings weren't available.

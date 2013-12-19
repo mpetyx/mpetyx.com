@@ -17,6 +17,7 @@ def binary_predicate(func, *args):
     func.errcheck = check_predicate
     return func
 
+
 def unary_predicate(func):
     "For GEOS unary predicate functions."
     func.argtypes = [GEOM_PTR]

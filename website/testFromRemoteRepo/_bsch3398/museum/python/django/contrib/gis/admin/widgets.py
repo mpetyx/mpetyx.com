@@ -1,20 +1,24 @@
-from django.conf import settings
 from django.contrib.gis.gdal import OGRException
 from django.contrib.gis.geos import GEOSGeometry, GEOSException
 from django.forms.widgets import Textarea
-from django.template import loader, Context
 from django.utils import translation
+
+from django.conf import settings
+from django.template import loader, Context
+
 
 # Creating a template context that contains Django settings
 # values needed by admin map templates.
-geo_context = Context({'ADMIN_MEDIA_PREFIX' : settings.ADMIN_MEDIA_PREFIX,
-                       'LANGUAGE_BIDI' : translation.get_language_bidi(),
-                       })
+geo_context = Context({'ADMIN_MEDIA_PREFIX': settings.ADMIN_MEDIA_PREFIX,
+                       'LANGUAGE_BIDI': translation.get_language_bidi(),
+})
+
 
 class OpenLayersWidget(Textarea):
     """
     Renders an OpenLayers map using the WKT of the geometry.
     """
+
     def render(self, name, value, attrs=None):
         # Update the template parameters with any attributes passed in.
         if attrs: self.params.update(attrs)
@@ -44,7 +48,7 @@ class OpenLayersWidget(Textarea):
         self.params['name'] = name
         # note: we must switch out dashes for underscores since js
         # functions are created using the module variable
-        js_safe_name = self.params['name'].replace('-','_')
+        js_safe_name = self.params['name'].replace('-', '_')
         self.params['module'] = 'geodjango_%s' % js_safe_name
 
         if value:
@@ -74,6 +78,7 @@ class OpenLayersWidget(Textarea):
         # JavaScript construction utilities for the Bounds and Projection.
         def ol_bounds(extent):
             return 'new OpenLayers.Bounds(%s)' % str(extent)
+
         def ol_projection(srid):
             return 'new OpenLayers.Projection("EPSG:%s")' % srid
 
@@ -87,7 +92,7 @@ class OpenLayersWidget(Textarea):
                      ('num_zoom', 'numZoomLevels', int),
                      ('max_zoom', 'maxZoomLevels', int),
                      ('min_zoom', 'minZoomLevel', int),
-                     ]
+        ]
 
         # Building the map options hash.
         map_options = {}

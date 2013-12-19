@@ -1,15 +1,19 @@
-from django.template import TemplateSyntaxError, TemplateDoesNotExist, Variable
-from django.template import Library, Node, TextNode
 from django.template.loader import get_template
-from django.conf import settings
 from django.utils.safestring import mark_safe
+
+from django.template import TemplateSyntaxError, Variable
+from django.template import Library, Node, TextNode
+from django.conf import settings
+
 
 register = Library()
 
 BLOCK_CONTEXT_KEY = 'block_context'
 
+
 class ExtendsError(Exception):
     pass
+
 
 class BlockContext(object):
     def __init__(self):
@@ -38,6 +42,7 @@ class BlockContext(object):
         except (IndexError, KeyError):
             return None
 
+
 class BlockNode(Node):
     def __init__(self, name, nodelist, parent=None):
         self.name, self.nodelist, self.parent = name, nodelist, parent
@@ -55,7 +60,7 @@ class BlockNode(Node):
             push = block = block_context.pop(self.name)
             if block is None:
                 block = self
-            # Create new block so we can store context without thread-safety issues.
+                # Create new block so we can store context without thread-safety issues.
             block = BlockNode(block.name, block.nodelist)
             block.context = context
             context['block'] = block
@@ -68,9 +73,10 @@ class BlockNode(Node):
     def super(self):
         render_context = self.context.render_context
         if (BLOCK_CONTEXT_KEY in render_context and
-            render_context[BLOCK_CONTEXT_KEY].get_block(self.name) is not None):
+                    render_context[BLOCK_CONTEXT_KEY].get_block(self.name) is not None):
             return mark_safe(self.render(self.context))
         return ''
+
 
 class ExtendsNode(Node):
     must_be_first = True
@@ -124,6 +130,7 @@ class ExtendsNode(Node):
         # the same.
         return compiled_parent._render(context)
 
+
 class ConstantIncludeNode(Node):
     def __init__(self, template_path):
         try:
@@ -140,6 +147,7 @@ class ConstantIncludeNode(Node):
         else:
             return ''
 
+
 class IncludeNode(Node):
     def __init__(self, template_name):
         self.template_name = Variable(template_name)
@@ -155,6 +163,7 @@ class IncludeNode(Node):
             return ''
         except:
             return '' # Fail silently for invalid included templates.
+
 
 def do_block(parser, token):
     """
@@ -175,6 +184,7 @@ def do_block(parser, token):
     nodelist = parser.parse(('endblock', 'endblock %s' % block_name))
     parser.delete_first_token()
     return BlockNode(block_name, nodelist)
+
 
 def do_extends(parser, token):
     """
@@ -199,6 +209,7 @@ def do_extends(parser, token):
         raise TemplateSyntaxError("'%s' cannot appear more than once in the same template" % bits[0])
     return ExtendsNode(nodelist, parent_name, parent_name_expr)
 
+
 def do_include(parser, token):
     """
     Loads a template and renders it with the current context.
@@ -214,6 +225,7 @@ def do_include(parser, token):
     if path[0] in ('"', "'") and path[-1] == path[0]:
         return ConstantIncludeNode(path[1:-1])
     return IncludeNode(bits[1])
+
 
 register.tag('block', do_block)
 register.tag('extends', do_extends)

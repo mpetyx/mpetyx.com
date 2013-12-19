@@ -2,15 +2,18 @@
 USA-specific Form helpers
 """
 
+import re
+
 from django.core.validators import EMPTY_VALUES
 from django.forms import ValidationError
 from django.forms.fields import Field, RegexField, Select, CharField
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
-import re
+
 
 phone_digits_re = re.compile(r'^(?:1-?)?(\d{3})[-\.]?(\d{3})[-\.]?(\d{4})$')
 ssn_re = re.compile(r"^(?P<area>\d{3})[-\ ]?(?P<group>\d{2})[-\ ]?(?P<serial>\d{4})$")
+
 
 class USZipCodeField(RegexField):
     default_error_messages = {
@@ -19,7 +22,8 @@ class USZipCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(USZipCodeField, self).__init__(r'^\d{5}(?:-\d{4})?$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                             max_length=None, min_length=None, *args, **kwargs)
+
 
 class USPhoneNumberField(CharField):
     default_error_messages = {
@@ -35,6 +39,7 @@ class USPhoneNumberField(CharField):
         if m:
             return u'%s-%s-%s' % (m.group(1), m.group(2), m.group(3))
         raise ValidationError(self.error_messages['invalid'])
+
 
 class USSocialSecurityNumberField(Field):
     """
@@ -66,17 +71,18 @@ class USSocialSecurityNumberField(Field):
 
         # First pass: no blocks of all zeroes.
         if area == '000' or \
-           group == '00' or \
-           serial == '0000':
+                        group == '00' or \
+                        serial == '0000':
             raise ValidationError(self.error_messages['invalid'])
 
         # Second pass: promotional and otherwise permanently invalid numbers.
         if area == '666' or \
-           (area == '987' and group == '65' and 4320 <= int(serial) <= 4329) or \
-           value == '078-05-1120' or \
-           value == '219-09-9999':
+                (area == '987' and group == '65' and 4320 <= int(serial) <= 4329) or \
+                        value == '078-05-1120' or \
+                        value == '219-09-9999':
             raise ValidationError(self.error_messages['invalid'])
         return u'%s-%s-%s' % (area, group, serial)
+
 
 class USStateField(Field):
     """
@@ -90,6 +96,7 @@ class USStateField(Field):
 
     def clean(self, value):
         from us_states import STATES_NORMALIZED
+
         super(USStateField, self).clean(value)
         if value in EMPTY_VALUES:
             return u''
@@ -104,10 +111,13 @@ class USStateField(Field):
                 pass
         raise ValidationError(self.error_messages['invalid'])
 
+
 class USStateSelect(Select):
     """
     A Select widget that uses a list of U.S. states/territories as its choices.
     """
+
     def __init__(self, attrs=None):
         from us_states import STATE_CHOICES
+
         super(USStateSelect, self).__init__(attrs, choices=STATE_CHOICES)

@@ -1,12 +1,14 @@
 import os
 from pprint import pformat
 
-from django import http
 from django.core import signals
 from django.core.handlers.base import BaseHandler
 from django.core.urlresolvers import set_script_prefix
 from django.utils import datastructures
 from django.utils.encoding import force_unicode, smart_str, iri_to_uri
+
+from django import http
+
 
 # NOTE: do *not* import settings (or any module which eventually imports
 # settings) until after ModPythonHandler has been called; otherwise os.environ
@@ -93,7 +95,8 @@ class ModPythonRequest(http.HttpRequest):
                 self._post_parse_error = True
                 raise
         else:
-            self._post, self._files = http.QueryDict(self.raw_post_data, encoding=self._encoding), datastructures.MultiValueDict()
+            self._post, self._files = http.QueryDict(self.raw_post_data,
+                                                     encoding=self._encoding), datastructures.MultiValueDict()
 
     def _get_request(self):
         if not hasattr(self, '_request'):
@@ -133,23 +136,23 @@ class ModPythonRequest(http.HttpRequest):
         "Lazy loader that returns self.META dictionary"
         if not hasattr(self, '_meta'):
             self._meta = {
-                'AUTH_TYPE':         self._req.ap_auth_type,
-                'CONTENT_LENGTH':    self._req.headers_in.get('content-length', 0),
-                'CONTENT_TYPE':      self._req.headers_in.get('content-type'),
+                'AUTH_TYPE': self._req.ap_auth_type,
+                'CONTENT_LENGTH': self._req.headers_in.get('content-length', 0),
+                'CONTENT_TYPE': self._req.headers_in.get('content-type'),
                 'GATEWAY_INTERFACE': 'CGI/1.1',
-                'PATH_INFO':         self.path_info,
-                'PATH_TRANSLATED':   None, # Not supported
-                'QUERY_STRING':      self._req.args,
-                'REMOTE_ADDR':       self._req.connection.remote_ip,
-                'REMOTE_HOST':       None, # DNS lookups not supported
-                'REMOTE_IDENT':      self._req.connection.remote_logname,
-                'REMOTE_USER':       self._req.user,
-                'REQUEST_METHOD':    self._req.method,
-                'SCRIPT_NAME':       self.django_root,
-                'SERVER_NAME':       self._req.server.server_hostname,
-                'SERVER_PORT':       self._req.connection.local_addr[1],
-                'SERVER_PROTOCOL':   self._req.protocol,
-                'SERVER_SOFTWARE':   'mod_python'
+                'PATH_INFO': self.path_info,
+                'PATH_TRANSLATED': None, # Not supported
+                'QUERY_STRING': self._req.args,
+                'REMOTE_ADDR': self._req.connection.remote_ip,
+                'REMOTE_HOST': None, # DNS lookups not supported
+                'REMOTE_IDENT': self._req.connection.remote_logname,
+                'REMOTE_USER': self._req.user,
+                'REQUEST_METHOD': self._req.method,
+                'SCRIPT_NAME': self.django_root,
+                'SERVER_NAME': self._req.server.server_hostname,
+                'SERVER_PORT': self._req.connection.local_addr[1],
+                'SERVER_PROTOCOL': self._req.protocol,
+                'SERVER_SOFTWARE': 'mod_python'
             }
             for key, value in self._req.headers_in.items():
                 key = 'HTTP_' + key.upper().replace('-', '_')
@@ -175,6 +178,7 @@ class ModPythonRequest(http.HttpRequest):
     raw_post_data = property(_get_raw_post_data)
     method = property(_get_method)
 
+
 class ModPythonHandler(BaseHandler):
     request_class = ModPythonRequest
 
@@ -184,7 +188,6 @@ class ModPythonHandler(BaseHandler):
 
         # now that the environ works we can see the correct settings, so imports
         # that use settings now can work
-        from django.conf import settings
 
         # if we need to set up middleware, now that settings works we can do it now.
         if self._request_middleware is None:
@@ -222,6 +225,7 @@ class ModPythonHandler(BaseHandler):
             response.close()
 
         return 0 # mod_python.apache.OK
+
 
 def handler(req):
     # mod_python hooks into this function.

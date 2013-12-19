@@ -4,23 +4,21 @@ step and storing the form's state as HTML hidden fields so that no state is
 stored on the server side.
 """
 
-import cPickle as pickle
-
-from django import forms
-from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.hashcompat import md5_constructor
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.formtools.utils import security_hash
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
 
+from django import forms
+from django.utils.hashcompat import md5_constructor
+
 
 class FormWizard(object):
     # The HTML (and POST data) field name for the "step" variable.
-    step_field_name="wizard_step"
+    step_field_name = "wizard_step"
 
     # METHODS SUBCLASSES SHOULDN'T OVERRIDE ###################################
 
@@ -37,7 +35,7 @@ class FormWizard(object):
         self.extra_context = {}
 
         # A zero-based counter keeping track of which step we're in.
-        self.step = 0 
+        self.step = 0
 
     def __repr__(self):
         return "step: %d\nform_list: %s\ninitial_data: %s" % (self.step, self.form_list, self.initial)
@@ -118,7 +116,8 @@ class FormWizard(object):
                 old_form = self.get_form(i, old_data)
                 hash_name = 'hash_%s' % i
                 prev_fields.extend([bf.as_hidden() for bf in old_form])
-                prev_fields.append(hidden.render(hash_name, old_data.get(hash_name, self.security_hash(request, old_form))))
+                prev_fields.append(
+                    hidden.render(hash_name, old_data.get(hash_name, self.security_hash(request, old_form))))
         return self.render_template(request, form, ''.join(prev_fields), step, context)
 
     # METHODS SUBCLASSES MIGHT OVERRIDE IF APPROPRIATE ########################
@@ -137,7 +136,8 @@ class FormWizard(object):
         This default implementation simply renders the form for the given step,
         but subclasses may want to display an error message, etc.
         """
-        return self.render(self.get_form(step), request, step, context={'wizard_error': _('We apologize, but your form has expired. Please continue filling out the form from this page.')})
+        return self.render(self.get_form(step), request, step, context={'wizard_error': _(
+            'We apologize, but your form has expired. Please continue filling out the form from this page.')})
 
     def render_revalidation_failure(self, request, step, form):
         """
@@ -215,12 +215,12 @@ class FormWizard(object):
         context = context or {}
         context.update(self.extra_context)
         return render_to_response(self.get_template(step), dict(context,
-            step_field=self.step_field_name,
-            step0=step,
-            step=step + 1,
-            step_count=self.num_steps(),
-            form=form,
-            previous_fields=previous_fields
+                                                                step_field=self.step_field_name,
+                                                                step0=step,
+                                                                step=step + 1,
+                                                                step_count=self.num_steps(),
+                                                                form=form,
+                                                                previous_fields=previous_fields
         ), context_instance=RequestContext(request))
 
     def process_step(self, request, form, step):
@@ -248,4 +248,5 @@ class FormWizard(object):
         form_list is a list of Form instances, each containing clean, valid
         data.
         """
-        raise NotImplementedError("Your %s class has not defined a done() method, which is required." % self.__class__.__name__)
+        raise NotImplementedError(
+            "Your %s class has not defined a done() method, which is required." % self.__class__.__name__)

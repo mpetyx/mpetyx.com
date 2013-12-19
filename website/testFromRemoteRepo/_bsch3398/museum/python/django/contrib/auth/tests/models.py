@@ -1,9 +1,12 @@
-from django.conf import settings
 from django.test import TestCase
 from django.contrib.auth.models import User, SiteProfileNotAvailable
 
+from django.conf import settings
+
+
 class ProfileTestCase(TestCase):
     fixtures = ['authtestdata.json']
+
     def setUp(self):
         """Backs up the AUTH_PROFILE_MODULE"""
         self.old_AUTH_PROFILE_MODULE = getattr(settings,

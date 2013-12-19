@@ -4,7 +4,6 @@ Oracle database backend for Django.
 Requires cx_Oracle: http://cx-oracle.sourceforge.net/
 """
 
-
 import datetime
 import os
 import sys
@@ -21,6 +20,7 @@ try:
     import cx_Oracle as Database
 except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
+
     raise ImproperlyConfigured("Error loading cx_Oracle module: %s" % e)
 
 from django.db import utils
@@ -138,13 +138,14 @@ WHEN (new.%(col_name)s IS NULL)
             # Timestamp object that we must convert to a datetime class.
             if not isinstance(value, datetime.datetime):
                 value = datetime.datetime(value.year, value.month,
-                        value.day, value.hour, value.minute, value.second,
-                        value.fsecond)
+                                          value.day, value.hour, value.minute, value.second,
+                                          value.fsecond)
             if field and field.get_internal_type() == 'DateTimeField':
                 pass
             elif field and field.get_internal_type() == 'DateField':
                 value = value.date()
-            elif field and field.get_internal_type() == 'TimeField' or (value.year == 1900 and value.month == value.day == 1):
+            elif field and field.get_internal_type() == 'TimeField' or (
+                    value.year == 1900 and value.month == value.day == 1):
                 value = value.time()
             elif value.hour == value.minute == value.second == value.microsecond == 0:
                 value = value.date()
@@ -216,6 +217,7 @@ WHEN (new.%(col_name)s IS NULL)
         # If regex_lookup is called before it's been initialized, then create
         # a cursor to initialize it and recur.
         from django.db import connection
+
         connection.cursor()
         return connection.ops.regex_lookup(lookup_type)
 
@@ -235,10 +237,10 @@ WHEN (new.%(col_name)s IS NULL)
             # Oracle does support TRUNCATE, but it seems to get us into
             # FK referential trouble, whereas DELETE FROM table works.
             sql = ['%s %s %s;' % \
-                    (style.SQL_KEYWORD('DELETE'),
-                     style.SQL_KEYWORD('FROM'),
-                     style.SQL_FIELD(self.quote_name(table)))
-                    for table in tables]
+                   (style.SQL_KEYWORD('DELETE'),
+                    style.SQL_KEYWORD('FROM'),
+                    style.SQL_FIELD(self.quote_name(table)))
+                   for table in tables]
             # Since we've just deleted all the rows, running our sequence
             # ALTER code will reset the sequence to 0.
             for sequence_info in sequences:
@@ -255,6 +257,7 @@ WHEN (new.%(col_name)s IS NULL)
 
     def sequence_reset_sql(self, style, model_list):
         from django.db import models
+
         output = []
         query = _get_sequence_reset_sql()
         for model in model_list:
@@ -284,7 +287,7 @@ WHEN (new.%(col_name)s IS NULL)
 
     def tablespace_sql(self, tablespace, inline=False):
         return "%sTABLESPACE %s" % ((inline and "USING INDEX " or ""),
-            self.quote_name(tablespace))
+                                    self.quote_name(tablespace))
 
     def value_to_db_time(self, value):
         if value is None:
@@ -311,7 +314,6 @@ WHEN (new.%(col_name)s IS NULL)
 
 
 class DatabaseWrapper(BaseDatabaseWrapper):
-
     operators = {
         'exact': '= %s',
         'iexact': '= UPPER(%s)',
@@ -519,7 +521,7 @@ class FormatStylePlaceholderCursor(object):
         except (IndexError, TypeError):
             # No params given, nothing to do
             return None
-        # cx_Oracle wants no trailing ';' for SQL statements.  For PL/SQL, it
+            # cx_Oracle wants no trailing ';' for SQL statements.  For PL/SQL, it
         # it does want a trailing ';' but not a trailing '/'.  However, these
         # characters must be included in the original query in case the query
         # is being passed to SQL*Plus.
@@ -530,7 +532,7 @@ class FormatStylePlaceholderCursor(object):
         self._guess_input_sizes(formatted)
         try:
             return self.cursor.executemany(query,
-                                [self._param_generator(p) for p in formatted])
+                                           [self._param_generator(p) for p in formatted])
         except Database.IntegrityError, e:
             raise utils.IntegrityError, utils.IntegrityError(*tuple(e)), sys.exc_info()[2]
         except Database.DatabaseError, e:
@@ -572,7 +574,6 @@ class FormatStylePlaceholderCursor(object):
 
 
 class CursorIterator(object):
-
     """Cursor iterator wrapper that invokes our custom row factory."""
 
     def __init__(self, cursor):

@@ -6,11 +6,13 @@ _standard_context_processors = None
 # We need the CSRF processor no matter what the user has in their settings,
 # because otherwise it is a security vulnerability, and we can't afford to leave
 # this to human error or failure to read migration instructions.
-_builtin_context_processors =  ('django.core.context_processors.csrf',)
+_builtin_context_processors = ('django.core.context_processors.csrf',)
+
 
 class ContextPopException(Exception):
     "pop() has been called more times than push()"
     pass
+
 
 class BaseContext(object):
     def __init__(self, dict_=None):
@@ -64,8 +66,10 @@ class BaseContext(object):
                 return d[key]
         return otherwise
 
+
 class Context(BaseContext):
     "A stack container for variable context"
+
     def __init__(self, dict_=None, autoescape=True, current_app=None):
         self.autoescape = autoescape
         self.current_app = current_app
@@ -78,6 +82,7 @@ class Context(BaseContext):
             raise TypeError('other_dict must be a mapping (dictionary-like) object.')
         self.dicts.append(other_dict)
         return other_dict
+
 
 class RenderContext(BaseContext):
     """
@@ -94,6 +99,7 @@ class RenderContext(BaseContext):
     rendering of other templates as they would if they were stored in the normal
     template context.
     """
+
     def __iter__(self):
         for d in self.dicts[-1]:
             yield d
@@ -111,6 +117,7 @@ class RenderContext(BaseContext):
 # want it to execute if somebody uses RequestContext.
 def get_standard_processors():
     from django.conf import settings
+
     global _standard_context_processors
     if _standard_context_processors is None:
         processors = []
@@ -119,7 +126,7 @@ def get_standard_processors():
         collect.extend(settings.TEMPLATE_CONTEXT_PROCESSORS)
         for path in collect:
             i = path.rfind('.')
-            module, attr = path[:i], path[i+1:]
+            module, attr = path[:i], path[i + 1:]
             try:
                 mod = import_module(module)
             except ImportError, e:
@@ -127,10 +134,12 @@ def get_standard_processors():
             try:
                 func = getattr(mod, attr)
             except AttributeError:
-                raise ImproperlyConfigured('Module "%s" does not define a "%s" callable request processor' % (module, attr))
+                raise ImproperlyConfigured(
+                    'Module "%s" does not define a "%s" callable request processor' % (module, attr))
             processors.append(func)
         _standard_context_processors = tuple(processors)
     return _standard_context_processors
+
 
 class RequestContext(Context):
     """
@@ -139,6 +148,7 @@ class RequestContext(Context):
     Additional processors can be specified as a list of callables
     using the "processors" keyword argument.
     """
+
     def __init__(self, request, dict=None, processors=None, current_app=None):
         Context.__init__(self, dict, current_app=current_app)
         if processors is None:

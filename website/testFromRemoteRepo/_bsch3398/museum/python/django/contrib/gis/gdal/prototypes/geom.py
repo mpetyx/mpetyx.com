@@ -1,6 +1,4 @@
-import re
-from datetime import date
-from ctypes import c_char, c_char_p, c_double, c_int, c_ubyte, c_void_p, POINTER
+from ctypes import c_char_p, c_double, c_int, c_void_p, POINTER
 from django.contrib.gis.gdal.envelope import OGREnvelope
 from django.contrib.gis.gdal.libgdal import lgdal, GEOJSON
 from django.contrib.gis.gdal.prototypes.errcheck import check_bool, check_envelope
@@ -16,9 +14,11 @@ def env_func(f, argtypes):
     f.errcheck = check_envelope
     return f
 
+
 def pnt_func(f):
     "For accessing point information."
     return double_output(f, [c_void_p, c_int])
+
 
 def topology_func(f):
     f.argtypes = [c_void_p, c_void_p]
@@ -32,7 +32,7 @@ def topology_func(f):
 if GEOJSON:
     from_json = geom_output(lgdal.OGR_G_CreateGeometryFromJson, [c_char_p])
     to_json = string_output(lgdal.OGR_G_ExportToJson, [c_void_p], str_result=True)
-    to_kml = string_output(lgdal.OGR_G_ExportToKML, [c_void_p, c_char_p], str_result=True) 
+    to_kml = string_output(lgdal.OGR_G_ExportToKML, [c_void_p, c_char_p], str_result=True)
 else:
     from_json = False
     to_json = False
@@ -42,7 +42,7 @@ else:
 getx = pnt_func(lgdal.OGR_G_GetX)
 gety = pnt_func(lgdal.OGR_G_GetY)
 getz = pnt_func(lgdal.OGR_G_GetZ)
-    
+
 # Geometry creation routines.
 from_wkb = geom_output(lgdal.OGR_G_CreateFromWkb, [c_char_p, c_void_p, POINTER(c_void_p), c_int], offset=-2)
 from_wkt = geom_output(lgdal.OGR_G_CreateFromWkt, [POINTER(c_char_p), c_void_p, POINTER(c_void_p)], offset=-1)
@@ -84,7 +84,8 @@ get_geom_count = int_output(lgdal.OGR_G_GetGeometryCount, [c_void_p])
 get_geom_name = const_string_output(lgdal.OGR_G_GetGeometryName, [c_void_p])
 get_geom_type = int_output(lgdal.OGR_G_GetGeometryType, [c_void_p])
 get_point_count = int_output(lgdal.OGR_G_GetPointCount, [c_void_p])
-get_point = void_output(lgdal.OGR_G_GetPoint, [c_void_p, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double)], errcheck=False)
+get_point = void_output(lgdal.OGR_G_GetPoint,
+                        [c_void_p, c_int, POINTER(c_double), POINTER(c_double), POINTER(c_double)], errcheck=False)
 geom_close_rings = void_output(lgdal.OGR_G_CloseRings, [c_void_p], errcheck=False)
 
 # Topology routines.

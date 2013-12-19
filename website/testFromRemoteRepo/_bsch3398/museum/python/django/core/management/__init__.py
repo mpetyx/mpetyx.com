@@ -3,9 +3,11 @@ import sys
 from optparse import OptionParser, NO_DEFAULT
 import imp
 
-import django
 from django.core.management.base import BaseCommand, CommandError, handle_default_options
 from django.utils.importlib import import_module
+
+import django
+
 
 # For backwards compatibility: get_version() used to be in this module.
 get_version = django.get_version
@@ -13,6 +15,7 @@ get_version = django.get_version
 # A cache of loaded commands, so that call_command
 # doesn't have to reload every time it's called.
 _commands = None
+
 
 def find_commands(management_dir):
     """
@@ -27,6 +30,7 @@ def find_commands(management_dir):
                 if not f.startswith('_') and f.endswith('.py')]
     except OSError:
         return []
+
 
 def find_management_module(app_name):
     """
@@ -48,8 +52,8 @@ def find_management_module(app_name):
     # module, we need look for the case where the project name is part
     # of the app_name but the project directory itself isn't on the path.
     try:
-        f, path, descr = imp.find_module(part,path)
-    except ImportError,e:
+        f, path, descr = imp.find_module(part, path)
+    except ImportError, e:
         if os.path.basename(os.getcwd()) != part:
             raise e
 
@@ -57,6 +61,7 @@ def find_management_module(app_name):
         part = parts.pop()
         f, path, descr = imp.find_module(part, path and [path] or None)
     return path
+
 
 def load_command_class(app_name, name):
     """
@@ -66,6 +71,7 @@ def load_command_class(app_name, name):
     """
     module = import_module('%s.management.commands.%s' % (app_name, name))
     return module.Command()
+
 
 def get_commands():
     """
@@ -98,6 +104,7 @@ def get_commands():
         # Find the installed apps
         try:
             from django.conf import settings
+
             apps = settings.INSTALLED_APPS
         except (AttributeError, EnvironmentError, ImportError):
             apps = []
@@ -105,6 +112,7 @@ def get_commands():
         # Find the project directory
         try:
             from django.conf import settings
+
             module = import_module(settings.SETTINGS_MODULE)
             project_directory = setup_environ(module, settings.SETTINGS_MODULE)
         except (AttributeError, EnvironmentError, ImportError, KeyError):
@@ -128,9 +136,11 @@ def get_commands():
             # project_directory, not the current working directory
             # (which is default).
             from django.core.management.commands.startapp import ProjectCommand
+
             _commands['startapp'] = ProjectCommand(project_directory)
 
     return _commands
+
 
 def call_command(name, *args, **options):
     """
@@ -165,6 +175,7 @@ def call_command(name, *args, **options):
 
     return klass.execute(*args, **defaults)
 
+
 class LaxOptionParser(OptionParser):
     """
     An option parser that doesn't raise any errors on unknown options.
@@ -172,6 +183,7 @@ class LaxOptionParser(OptionParser):
     This is needed because the --settings and --pythonpath options affect
     the commands (and thus the options) that are available to the user.
     """
+
     def error(self, msg):
         pass
 
@@ -219,6 +231,7 @@ class LaxOptionParser(OptionParser):
             except:
                 largs.append(arg)
 
+
 class ManagementUtility(object):
     """
     Encapsulates the logic of the django-admin.py and manage.py utilities.
@@ -226,6 +239,7 @@ class ManagementUtility(object):
     A ManagementUtility has a number of commands, which can be manipulated
     by editing the self.commands dictionary.
     """
+
     def __init__(self, argv=None):
         self.argv = argv or sys.argv[:]
         self.prog_name = os.path.basename(self.argv[0])
@@ -234,7 +248,7 @@ class ManagementUtility(object):
         """
         Returns the script's main help text, as a string.
         """
-        usage = ['',"Type '%s help <subcommand>' for help on a specific subcommand." % self.prog_name,'']
+        usage = ['', "Type '%s help <subcommand>' for help on a specific subcommand." % self.prog_name, '']
         usage.append('Available subcommands:')
         commands = get_commands().keys()
         commands.sort()
@@ -257,7 +271,7 @@ class ManagementUtility(object):
                 klass = load_command_class(app_name, subcommand)
         except KeyError:
             sys.stderr.write("Unknown command: %r\nType '%s help' for usage.\n" % \
-                (subcommand, self.prog_name))
+                             (subcommand, self.prog_name))
             sys.exit(1)
         return klass
 
@@ -290,7 +304,7 @@ class ManagementUtility(object):
         cword = int(os.environ['COMP_CWORD'])
 
         try:
-            curr = cwords[cword-1]
+            curr = cwords[cword - 1]
         except IndexError:
             curr = ''
 
@@ -308,6 +322,7 @@ class ManagementUtility(object):
             # 'key=value' pairs
             if cwords[0] == 'runfcgi':
                 from django.core.servers.fastcgi import FASTCGI_OPTIONS
+
                 options += [(k, 1) for k in FASTCGI_OPTIONS]
             # special case: add the names of installed apps to options
             elif cwords[0] in ('dumpdata', 'reset', 'sql', 'sqlall',
@@ -324,7 +339,7 @@ class ManagementUtility(object):
             options += [(s_opt.get_opt_string(), s_opt.nargs) for s_opt in
                         subcommand_cls.option_list]
             # filter out previously specified options from available options
-            prev_opts = [x.split('=')[0] for x in cwords[1:cword-1]]
+            prev_opts = [x.split('=')[0] for x in cwords[1:cword - 1]]
             options = filter(lambda (x, v): x not in prev_opts, options)
 
             # filter options by current input
@@ -378,6 +393,7 @@ class ManagementUtility(object):
         else:
             self.fetch_command(subcommand).run_from_argv(self.argv)
 
+
 def setup_environ(settings_mod, original_settings_path=None):
     """
     Configures the runtime environment. This can also be used by external
@@ -421,12 +437,14 @@ def setup_environ(settings_mod, original_settings_path=None):
 
     return project_directory
 
+
 def execute_from_command_line(argv=None):
     """
     A simple method that runs a ManagementUtility.
     """
     utility = ManagementUtility(argv)
     utility.execute()
+
 
 def execute_manager(settings_mod, argv=None):
     """

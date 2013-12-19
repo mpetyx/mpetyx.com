@@ -1,11 +1,13 @@
 import decimal
 import datetime
 
-from django.conf import settings
 from django.utils.translation import get_language, to_locale, check_for_language
 from django.utils.importlib import import_module
 from django.utils.encoding import smart_str
 from django.utils import dateformat, numberformat, datetime_safe
+
+from django.conf import settings
+
 
 def get_format_modules(reverse=False):
     """
@@ -34,6 +36,7 @@ def get_format_modules(reverse=False):
         modules.reverse()
     return modules
 
+
 def get_format(format_type):
     """
     For a specific format type, returns the format for the current
@@ -49,6 +52,7 @@ def get_format(format_type):
                 pass
     return getattr(settings, format_type)
 
+
 def date_format(value, format=None):
     """
     Formats a datetime.date or datetime.datetime object using a
@@ -56,11 +60,13 @@ def date_format(value, format=None):
     """
     return dateformat.format(value, get_format(format or 'DATE_FORMAT'))
 
+
 def time_format(value, format=None):
     """
     Formats a datetime.time object using a localizable format
     """
     return dateformat.time_format(value, get_format(format or 'TIME_FORMAT'))
+
 
 def number_format(value, decimal_pos=None):
     """
@@ -73,6 +79,7 @@ def number_format(value, decimal_pos=None):
         get_format('NUMBER_GROUPING'),
         get_format('THOUSAND_SEPARATOR'),
     )
+
 
 def localize(value):
     """
@@ -89,6 +96,7 @@ def localize(value):
         elif isinstance(value, datetime.time):
             return time_format(value, 'TIME_FORMAT')
     return value
+
 
 def localize_input(value, default=None):
     """
@@ -109,6 +117,7 @@ def localize_input(value, default=None):
         format = smart_str(default or get_format('TIME_INPUT_FORMATS')[0])
         return value.strftime(format)
     return value
+
 
 def sanitize_separators(value):
     """

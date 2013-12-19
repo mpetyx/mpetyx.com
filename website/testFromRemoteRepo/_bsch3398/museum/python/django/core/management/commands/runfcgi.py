@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 
+
 class Command(BaseCommand):
     help = "Runs this project as a FastCGI application. Requires flup."
     args = '[various KEY=val options, use `runfcgi help` for help]'
@@ -13,8 +14,10 @@ class Command(BaseCommand):
         except AttributeError:
             pass
         from django.core.servers.fastcgi import runfastcgi
+
         runfastcgi(args)
-        
+
     def usage(self, subcommand):
         from django.core.servers.fastcgi import FASTCGI_HELP
+
         return FASTCGI_HELP

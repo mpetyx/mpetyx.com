@@ -5,11 +5,13 @@ import sys
 import struct
 
 from django.utils.simplejson.scanner import make_scanner
+
 c_scanstring = None
 
 __all__ = ['JSONDecoder']
 
 FLAGS = re.VERBOSE | re.MULTILINE | re.DOTALL
+
 
 def _floatconstants():
     _BYTES = '7FF80000000000007FF0000000000000'.decode('hex')
@@ -17,6 +19,7 @@ def _floatconstants():
         _BYTES = _BYTES[:8][::-1] + _BYTES[8:][::-1]
     nan, inf = struct.unpack('dd', _BYTES)
     return nan, inf, -inf
+
 
 NaN, PosInf, NegInf = _floatconstants()
 
@@ -54,6 +57,7 @@ BACKSLASH = {
 
 DEFAULT_ENCODING = "utf-8"
 
+
 def py_scanstring(s, end, encoding=None, strict=True, _b=BACKSLASH, _m=STRINGCHUNK.match):
     """Scan the string s for a JSON string. End is the index of the
     character in s after the quote that started the JSON string.
@@ -80,7 +84,7 @@ def py_scanstring(s, end, encoding=None, strict=True, _b=BACKSLASH, _m=STRINGCHU
             if not isinstance(content, unicode):
                 content = unicode(content, encoding)
             _append(content)
-        # Terminator is the end of string, a literal control character,
+            # Terminator is the end of string, a literal control character,
         # or a backslash denoting that an escape sequence follows
         if terminator == '"':
             break
@@ -96,7 +100,7 @@ def py_scanstring(s, end, encoding=None, strict=True, _b=BACKSLASH, _m=STRINGCHU
         except IndexError:
             raise ValueError(
                 errmsg("Unterminated string starting at", s, begin))
-        # If not a unicode escape sequence, must be in the lookup table
+            # If not a unicode escape sequence, must be in the lookup table
         if esc != 'u':
             try:
                 char = _b[esc]
@@ -125,7 +129,7 @@ def py_scanstring(s, end, encoding=None, strict=True, _b=BACKSLASH, _m=STRINGCHU
                 next_end += 6
             char = unichr(uni)
             end = next_end
-        # Append the unescaped character
+            # Append the unescaped character
         _append(char)
     return u''.join(chunks), end
 
@@ -135,6 +139,7 @@ scanstring = c_scanstring or py_scanstring
 
 WHITESPACE = re.compile(r'[ \t\n\r]*', FLAGS)
 WHITESPACE_STR = ' \t\n\r'
+
 
 def JSONObject((s, end), encoding, strict, scan_once, object_hook, _w=WHITESPACE.match, _ws=WHITESPACE_STR):
     pairs = {}
@@ -146,7 +151,7 @@ def JSONObject((s, end), encoding, strict, scan_once, object_hook, _w=WHITESPACE
         if nextchar in _ws:
             end = _w(s, end).end()
             nextchar = s[end:end + 1]
-        # Trivial empty object
+            # Trivial empty object
         if nextchar == '}':
             return pairs, end + 1
         elif nextchar != '"':
@@ -211,13 +216,14 @@ def JSONObject((s, end), encoding, strict, scan_once, object_hook, _w=WHITESPACE
         pairs = object_hook(pairs)
     return pairs, end
 
+
 def JSONArray((s, end), scan_once, _w=WHITESPACE.match, _ws=WHITESPACE_STR):
     values = []
     nextchar = s[end:end + 1]
     if nextchar in _ws:
         end = _w(s, end + 1).end()
         nextchar = s[end:end + 1]
-    # Look-ahead for trivial empty array
+        # Look-ahead for trivial empty array
     if nextchar == ']':
         return values, end + 1
     _append = values.append
@@ -246,6 +252,7 @@ def JSONArray((s, end), scan_once, _w=WHITESPACE.match, _ws=WHITESPACE_STR):
             pass
 
     return values, end
+
 
 class JSONDecoder(object):
     """Simple JSON <http://json.org> decoder
@@ -278,7 +285,7 @@ class JSONDecoder(object):
     """
 
     def __init__(self, encoding=None, object_hook=None, parse_float=None,
-            parse_int=None, parse_constant=None, strict=True):
+                 parse_int=None, parse_constant=None, strict=True):
         """``encoding`` determines the encoding used to interpret any ``str``
         objects decoded by this instance (utf-8 by default).  It has no
         effect when decoding ``unicode`` objects.

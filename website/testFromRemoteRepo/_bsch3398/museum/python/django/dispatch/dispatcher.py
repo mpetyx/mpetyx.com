@@ -4,10 +4,12 @@ from django.dispatch import saferef
 
 WEAKREF_TYPES = (weakref.ReferenceType, saferef.BoundMethodWeakref)
 
+
 def _make_id(target):
     if hasattr(target, 'im_func'):
         return (id(target.im_self), id(target.im_func))
     return id(target)
+
 
 class Signal(object):
     """
@@ -18,7 +20,7 @@ class Signal(object):
         receivers
             { receriverkey (id) : weakref(receiver) }
     """
-    
+
     def __init__(self, providing_args=None):
         """
         Create a new signal.
@@ -67,12 +69,13 @@ class Signal(object):
                 anything hashable.
         """
         from django.conf import settings
-        
+
         # If DEBUG is on, check that we got a good receiver
         if settings.DEBUG:
             import inspect
+
             assert callable(receiver), "Signal receivers must be callable."
-            
+
             # Check for **kwargs
             # Not all callables are inspectable with getargspec, so we'll
             # try a couple different ways but in the end fall back on assuming
@@ -88,7 +91,7 @@ class Signal(object):
             if argspec:
                 assert argspec[2] is not None, \
                     "Signal receivers must accept keyword arguments (**kwargs)."
-        
+
         if dispatch_uid:
             lookup_key = (dispatch_uid, _make_id(sender))
         else:
@@ -129,7 +132,7 @@ class Signal(object):
             lookup_key = (dispatch_uid, _make_id(sender))
         else:
             lookup_key = (_make_id(receiver), _make_id(sender))
-        
+
         for index in xrange(len(self.receivers)):
             (r_key, _) = self.receivers[index]
             if r_key == lookup_key:

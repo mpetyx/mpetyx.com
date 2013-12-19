@@ -2,6 +2,7 @@ from django.db import connection
 
 if hasattr(connection.ops, 'spatial_version'):
     from warnings import warn
+
     warn('The `django.contrib.gis.db.backend` module was refactored and '
          'renamed to `django.contrib.gis.db.backends` in 1.2.  '
          'All functionality of `SpatialBackend` '

@@ -1,49 +1,49 @@
 <html>
-	<title>Dave, Dave &amp; Ben: Museum Database</title>
+<title>Dave, Dave &amp; Ben: Museum Database</title>
 
-	
+
 <!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/results.html by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 10:46:22 GMT -->
 <body>
-		<h1>Dave, Dave &amp; Ben: Museum Database</h1>
-		<h4>Search Results</h2>
-		<p><a href=serverf00a.html?pagetype=user&amp;method=logout>Logout</p></a>
+<h1>Dave, Dave &amp; Ben: Museum Database</h1>
+<h4>Search Results</h2>
+    <p><a href=serverf00a.html?pagetype=user&amp;method=logout>Logout</p></a>
 
-		<div id="searchbox">
-			<form action="http://www.ug.it.usyd.edu.au/~bsch3398/museum/python/server.cgi?pagetype=search" method="get">
-				<label for="query">Search: </label>
-					<input type="text" id="query" name="query">
-				<input type="hidden" name="pagetype" value="search">
-				<input type="submit" value="Search">
-			</form>
-		</div>
-		<div id="related">
-			<h3>Related Terms</h3>
-			<ul>
-				{% for r in related %}
-				<li>{{r.WORD}}</li>
-				{% endfor %}
-			</ul>
-
-
-		<div id="results">
-			<h2>Results</h2>
-			{% for object in results %}
-				<div>
-					<p><b>{{object.ID}}: {{object.TITLE}}</b></p>
-				</div>
-			{% empty %}
-			<p>No results, perhaps you should consider a new career, or maybe a term below:</p>
-				<ul>
-					{% for object in bktree %}
-						<li>{{object}}</li>
-					{% endfor %}
-				</ul>
-			{% endfor %}
-			
-		</div>
+    <div id="searchbox">
+        <form action="http://www.ug.it.usyd.edu.au/~bsch3398/museum/python/server.cgi?pagetype=search" method="get">
+            <label for="query">Search: </label>
+            <input type="text" id="query" name="query">
+            <input type="hidden" name="pagetype" value="search">
+            <input type="submit" value="Search">
+        </form>
+    </div>
+    <div id="related">
+        <h3>Related Terms</h3>
+        <ul>
+            {% for r in related %}
+            <li>{{r.WORD}}</li>
+            {% endfor %}
+        </ul>
 
 
-	</body>
+        <div id="results">
+            <h2>Results</h2>
+            {% for object in results %}
+            <div>
+                <p><b>{{object.ID}}: {{object.TITLE}}</b></p>
+            </div>
+            {% empty %}
+            <p>No results, perhaps you should consider a new career, or maybe a term below:</p>
+            <ul>
+                {% for object in bktree %}
+                <li>{{object}}</li>
+                {% endfor %}
+            </ul>
+            {% endfor %}
+
+        </div>
+
+
+</body>
 
 <!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/results.html by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 10:46:22 GMT -->
 </html>

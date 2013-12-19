@@ -1,5 +1,5 @@
 import re
-from django import http, template
+
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin import actions
 from django.contrib.auth import authenticate, login
@@ -13,16 +13,22 @@ from django.utils.safestring import mark_safe
 from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy, ugettext as _
 from django.views.decorators.cache import never_cache
+
+from django import http, template
 from django.conf import settings
+
 
 ERROR_MESSAGE = ugettext_lazy("Please enter a correct username and password. Note that both fields are case-sensitive.")
 LOGIN_FORM_KEY = 'this_is_the_login_form'
 
+
 class AlreadyRegistered(Exception):
     pass
 
+
 class NotRegistered(Exception):
     pass
+
 
 class AdminSite(object):
     """
@@ -131,6 +137,7 @@ class AdminSite(object):
         Get all the enabled actions as an iterable of (name, func).
         """
         return self._actions.iteritems()
+
     actions = property(actions)
 
     def has_permission(self, request):
@@ -152,14 +159,14 @@ class AdminSite(object):
 
         if not LogEntry._meta.installed:
             raise ImproperlyConfigured("Put 'django.contrib.admin' in your "
-                "INSTALLED_APPS setting in order to use the admin application.")
+                                       "INSTALLED_APPS setting in order to use the admin application.")
         if not ContentType._meta.installed:
             raise ImproperlyConfigured("Put 'django.contrib.contenttypes' in "
-                "your INSTALLED_APPS setting in order to use the admin application.")
+                                       "your INSTALLED_APPS setting in order to use the admin application.")
         if not ('django.contrib.auth.context_processors.auth' in settings.TEMPLATE_CONTEXT_PROCESSORS or
-            'django.core.context_processors.auth' in settings.TEMPLATE_CONTEXT_PROCESSORS):
+                        'django.core.context_processors.auth' in settings.TEMPLATE_CONTEXT_PROCESSORS):
             raise ImproperlyConfigured("Put 'django.contrib.auth.context_processors.auth' "
-                "in your TEMPLATE_CONTEXT_PROCESSORS setting in order to use the admin application.")
+                                       "in your TEMPLATE_CONTEXT_PROCESSORS setting in order to use the admin application.")
 
     def admin_view(self, view, cacheable=False):
         """
@@ -184,13 +191,15 @@ class AdminSite(object):
         ``never_cache`` decorator. If the view can be safely cached, set
         cacheable=True.
         """
+
         def inner(request, *args, **kwargs):
             if not self.has_permission(request):
                 return self.login(request)
             return view(request, *args, **kwargs)
+
         if not cacheable:
             inner = never_cache(inner)
-        # We add csrf_protect here so this function can be used as a utility
+            # We add csrf_protect here so this function can be used as a utility
         # function for any view, without having to repeat 'csrf_protect'.
         if not getattr(view, 'csrf_exempt', False):
             inner = csrf_protect(inner)
@@ -205,42 +214,44 @@ class AdminSite(object):
         def wrap(view, cacheable=False):
             def wrapper(*args, **kwargs):
                 return self.admin_view(view, cacheable)(*args, **kwargs)
+
             return update_wrapper(wrapper, view)
 
         # Admin-site-wide views.
         urlpatterns = patterns('',
-            url(r'^$',
-                wrap(self.index),
-                name='index'),
-            url(r'^logout/$',
-                wrap(self.logout),
-                name='logout'),
-            url(r'^password_change/$',
-                wrap(self.password_change, cacheable=True),
-                name='password_change'),
-            url(r'^password_change/done/$',
-                wrap(self.password_change_done, cacheable=True),
-                name='password_change_done'),
-            url(r'^jsi18n/$',
-                wrap(self.i18n_javascript, cacheable=True),
-                name='jsi18n'),
-            url(r'^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$',
-                'django.views.defaults.shortcut'),
-            url(r'^(?P<app_label>\w+)/$',
-                wrap(self.app_index),
-                name='app_list')
+                               url(r'^$',
+                                   wrap(self.index),
+                                   name='index'),
+                               url(r'^logout/$',
+                                   wrap(self.logout),
+                                   name='logout'),
+                               url(r'^password_change/$',
+                                   wrap(self.password_change, cacheable=True),
+                                   name='password_change'),
+                               url(r'^password_change/done/$',
+                                   wrap(self.password_change_done, cacheable=True),
+                                   name='password_change_done'),
+                               url(r'^jsi18n/$',
+                                   wrap(self.i18n_javascript, cacheable=True),
+                                   name='jsi18n'),
+                               url(r'^r/(?P<content_type_id>\d+)/(?P<object_id>.+)/$',
+                                   'django.views.defaults.shortcut'),
+                               url(r'^(?P<app_label>\w+)/$',
+                                   wrap(self.app_index),
+                                   name='app_list')
         )
 
         # Add in each model's views.
         for model, model_admin in self._registry.iteritems():
             urlpatterns += patterns('',
-                url(r'^%s/%s/' % (model._meta.app_label, model._meta.module_name),
-                    include(model_admin.urls))
+                                    url(r'^%s/%s/' % (model._meta.app_label, model._meta.module_name),
+                                        include(model_admin.urls))
             )
         return urlpatterns
 
     def urls(self):
         return self.get_urls(), self.app_name, self.name
+
     urls = property(urls)
 
     def password_change(self, request):
@@ -248,6 +259,7 @@ class AdminSite(object):
         Handles the "change password" task -- both form display and validation.
         """
         from django.contrib.auth.views import password_change
+
         if self.root_path is not None:
             url = '%spassword_change/done/' % self.root_path
         else:
@@ -264,6 +276,7 @@ class AdminSite(object):
         Displays the "success" page after a password change.
         """
         from django.contrib.auth.views import password_change_done
+
         defaults = {}
         if self.password_change_done_template is not None:
             defaults['template_name'] = self.password_change_done_template
@@ -289,10 +302,12 @@ class AdminSite(object):
         This should *not* assume the user is already logged in.
         """
         from django.contrib.auth.views import logout
+
         defaults = {}
         if self.logout_template is not None:
             defaults['template_name'] = self.logout_template
         return logout(request, **defaults)
+
     logout = never_cache(logout)
 
     def login(self, request):
@@ -311,7 +326,8 @@ class AdminSite(object):
 
         # Check that the user accepts cookies.
         if not request.session.test_cookie_worked():
-            message = _("Looks like your browser isn't configured to accept cookies. Please enable cookies, reload this page, and try again.")
+            message = _(
+                "Looks like your browser isn't configured to accept cookies. Please enable cookies, reload this page, and try again.")
             return self.display_login_form(request, message)
         else:
             request.session.delete_test_cookie()
@@ -343,6 +359,7 @@ class AdminSite(object):
                 return http.HttpResponseRedirect(request.get_full_path())
             else:
                 return self.display_login_form(request, ERROR_MESSAGE)
+
     login = never_cache(login)
 
     def index(self, request, extra_context=None):
@@ -393,8 +410,9 @@ class AdminSite(object):
         context.update(extra_context or {})
         context_instance = template.RequestContext(request, current_app=self.name)
         return render_to_response(self.index_template or 'admin/index.html', context,
-            context_instance=context_instance
+                                  context_instance=context_instance
         )
+
     index = never_cache(index)
 
     def display_login_form(self, request, error_message='', extra_context=None):
@@ -408,7 +426,7 @@ class AdminSite(object):
         context.update(extra_context or {})
         context_instance = template.RequestContext(request, current_app=self.name)
         return render_to_response(self.login_template or 'admin/login.html', context,
-            context_instance=context_instance
+                                  context_instance=context_instance
         )
 
     def app_index(self, request, app_label, extra_context=None):
@@ -442,7 +460,7 @@ class AdminSite(object):
                             }
         if not app_dict:
             raise http.Http404('The requested admin page does not exist.')
-        # Sort the models alphabetically within each app.
+            # Sort the models alphabetically within each app.
         app_dict['models'].sort(lambda x, y: cmp(x['name'], y['name']))
         context = {
             'title': _('%s administration') % capfirst(app_label),
@@ -452,8 +470,8 @@ class AdminSite(object):
         context.update(extra_context or {})
         context_instance = template.RequestContext(request, current_app=self.name)
         return render_to_response(self.app_index_template or ('admin/%s/app_index.html' % app_label,
-            'admin/app_index.html'), context,
-            context_instance=context_instance
+                                                              'admin/app_index.html'), context,
+                                  context_instance=context_instance
         )
 
     def root(self, request, url):
@@ -465,6 +483,7 @@ class AdminSite(object):
         removed in Django 1.3.
         """
         import warnings
+
         warnings.warn(
             "AdminSite.root() is deprecated; use include(admin.site.urls) instead.",
             DeprecationWarning
@@ -506,6 +525,7 @@ class AdminSite(object):
         # URLs starting with 'r/' are for the "View on site" links.
         elif url.startswith('r/'):
             from django.contrib.contenttypes.views import shortcut
+
             return shortcut(request, *url.split('/')[1:])
         else:
             if '/' in url:
@@ -521,6 +541,7 @@ class AdminSite(object):
         site; the new views should use get_urls(), above.
         """
         from django.db import models
+
         model = models.get_model(app_label, model_name)
         if model is None:
             raise http.Http404("App %r, model %r, not found." % (app_label, model_name))
@@ -529,6 +550,7 @@ class AdminSite(object):
         except KeyError:
             raise http.Http404("This model exists but has not been registered with the admin site.")
         return admin_obj(request, rest_of_url)
+
     model_page = never_cache(model_page)
 
 # This global object represents the default admin site, for the common case.

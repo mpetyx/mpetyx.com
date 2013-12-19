@@ -6,8 +6,8 @@ from django.db.models.sql.query import get_proxied_model
 
 SQLCompiler = compiler.SQLCompiler
 
-class GeoSQLCompiler(compiler.SQLCompiler):
 
+class GeoSQLCompiler(compiler.SQLCompiler):
     def get_columns(self, with_aliases=False):
         """
         Return the list of columns to use in the select statement. If no
@@ -56,26 +56,26 @@ class GeoSQLCompiler(compiler.SQLCompiler):
                         col_aliases.add(col[1])
                 else:
                     result.append(col.as_sql(qn, self.connection))
-                    
+
                     if hasattr(col, 'alias'):
                         aliases.add(col.alias)
                         col_aliases.add(col.alias)
 
         elif self.query.default_cols:
             cols, new_aliases = self.get_default_columns(with_aliases,
-                    col_aliases)
+                                                         col_aliases)
             result.extend(cols)
             aliases.update(new_aliases)
 
         max_name_length = self.connection.ops.max_name_length()
         result.extend([
-                '%s%s' % (
-                    self.get_extra_select_format(alias) % aggregate.as_sql(qn, self.connection),
-                    alias is not None
-                        and ' AS %s' % qn(truncate_name(alias, max_name_length))
-                        or ''
-                    )
-                for alias, aggregate in self.query.aggregate_select.items()
+            '%s%s' % (
+                self.get_extra_select_format(alias) % aggregate.as_sql(qn, self.connection),
+                alias is not None
+                and ' AS %s' % qn(truncate_name(alias, max_name_length))
+                or ''
+            )
+            for alias, aggregate in self.query.aggregate_select.items()
         ])
 
         # This loop customized for GeoQuery.
@@ -130,7 +130,7 @@ class GeoSQLCompiler(compiler.SQLCompiler):
                     else:
                         link_field = opts.get_ancestor_link(model)
                         alias = self.query.join((start_alias, model._meta.db_table,
-                                link_field.column, model._meta.pk.column))
+                                                 link_field.column, model._meta.pk.column))
                     seen[model] = alias
             else:
                 # If we're starting from the base model of the queryset, the
@@ -144,7 +144,7 @@ class GeoSQLCompiler(compiler.SQLCompiler):
                 result.append((alias, field.column))
                 aliases.add(alias)
                 continue
-            # This part of the function is customized for GeoQuery. We
+                # This part of the function is customized for GeoQuery. We
             # see if there was any custom selection specified in the
             # dictionary, and set up the selection format appropriately.
             field_sel = self.get_field_select(field, alias)
@@ -185,8 +185,8 @@ class GeoSQLCompiler(compiler.SQLCompiler):
         # Converting any extra selection values (e.g., geometries and
         # distance objects added by GeoQuerySet methods).
         values = [self.query.convert_values(v,
-                               self.query.extra_select_fields.get(a, None),
-                               self.connection)
+                                            self.query.extra_select_fields.get(a, None),
+                                            self.connection)
                   for v, a in izip(row[rn_offset:index_start], aliases)]
         if self.connection.ops.oracle or getattr(self.query, 'geo_values', False):
             # We resolve the rest of the columns if we're on Oracle or if
@@ -240,7 +240,7 @@ class GeoSQLCompiler(compiler.SQLCompiler):
             # field -- this is only used by `transform` for Oracle and
             # SpatiaLite backends.
             if self.query.transformed_srid and ( self.connection.ops.oracle or
-                                                 self.connection.ops.spatialite ):
+                                                     self.connection.ops.spatialite ):
                 sel_fmt = "'SRID=%d;'||%s" % (self.query.transformed_srid, sel_fmt)
         else:
             sel_fmt = '%s'
@@ -260,17 +260,22 @@ class GeoSQLCompiler(compiler.SQLCompiler):
         return "%s.%s" % (self.quote_name_unless_alias(table_alias),
                           self.connection.ops.quote_name(column or field.column))
 
+
 class SQLInsertCompiler(compiler.SQLInsertCompiler, GeoSQLCompiler):
     pass
+
 
 class SQLDeleteCompiler(compiler.SQLDeleteCompiler, GeoSQLCompiler):
     pass
 
+
 class SQLUpdateCompiler(compiler.SQLUpdateCompiler, GeoSQLCompiler):
     pass
 
+
 class SQLAggregateCompiler(compiler.SQLAggregateCompiler, GeoSQLCompiler):
     pass
+
 
 class SQLDateCompiler(compiler.SQLDateCompiler, GeoSQLCompiler):
     pass

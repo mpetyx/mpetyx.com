@@ -4,20 +4,24 @@ import sys
 import re
 from itertools import groupby, cycle as itertools_cycle
 
+from django.template.smartif import IfParser, Literal
+from django.utils.encoding import smart_str, smart_unicode
+from django.utils.safestring import mark_safe
+
 from django.template import Node, NodeList, Template, Context, Variable
 from django.template import TemplateSyntaxError, VariableDoesNotExist, BLOCK_TAG_START, BLOCK_TAG_END, VARIABLE_TAG_START, VARIABLE_TAG_END, SINGLE_BRACE_START, SINGLE_BRACE_END, COMMENT_TAG_START, COMMENT_TAG_END
 from django.template import get_library, Library, InvalidTemplateLibrary
-from django.template.smartif import IfParser, Literal
 from django.conf import settings
-from django.utils.encoding import smart_str, smart_unicode
-from django.utils.safestring import mark_safe
+
 
 register = Library()
 # Regex for token keyword arguments
 kwarg_re = re.compile(r"(?:(\w+)=)?(.+)")
 
+
 class AutoEscapeControlNode(Node):
     """Implements the actions of the autoescape tag."""
+
     def __init__(self, setting, nodelist):
         self.setting, self.nodelist = setting, nodelist
 
@@ -31,9 +35,11 @@ class AutoEscapeControlNode(Node):
         else:
             return output
 
+
 class CommentNode(Node):
     def render(self, context):
         return ''
+
 
 class CsrfTokenNode(Node):
     def render(self, context):
@@ -42,15 +48,21 @@ class CsrfTokenNode(Node):
             if csrf_token == 'NOTPROVIDED':
                 return mark_safe(u"")
             else:
-                return mark_safe(u"<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='%s' /></div>" % (csrf_token))
+                return mark_safe(
+                    u"<div style='display:none'><input type='hidden' name='csrfmiddlewaretoken' value='%s' /></div>" % (
+                    csrf_token))
         else:
             # It's very probable that the token is missing because of
             # misconfiguration, so we raise a warning
             from django.conf import settings
+
             if settings.DEBUG:
                 import warnings
-                warnings.warn("A {% csrf_token %} was used in a template, but the context did not provide the value.  This is usually caused by not using RequestContext.")
+
+                warnings.warn(
+                    "A {% csrf_token %} was used in a template, but the context did not provide the value.  This is usually caused by not using RequestContext.")
             return u''
+
 
 class CycleNode(Node):
     def __init__(self, cyclevars, variable_name=None):
@@ -66,13 +78,16 @@ class CycleNode(Node):
             context[self.variable_name] = value
         return value
 
+
 class DebugNode(Node):
     def render(self, context):
         from pprint import pformat
+
         output = [pformat(val) for val in context]
         output.append('\n\n')
         output.append(pformat(sys.modules))
         return ''.join(output)
+
 
 class FilterNode(Node):
     def __init__(self, filter_expr, nodelist):
@@ -86,6 +101,7 @@ class FilterNode(Node):
         context.pop()
         return filtered
 
+
 class FirstOfNode(Node):
     def __init__(self, vars):
         self.vars = vars
@@ -96,6 +112,7 @@ class FirstOfNode(Node):
             if value:
                 return smart_unicode(value)
         return u''
+
 
 class ForNode(Node):
     child_nodelists = ('nodelist_loop', 'nodelist_empty')
@@ -112,8 +129,8 @@ class ForNode(Node):
     def __repr__(self):
         reversed_text = self.is_reversed and ' reversed' or ''
         return "<For Node: for %s in %s, tail_len: %d%s>" % \
-            (', '.join(self.loopvars), self.sequence, len(self.nodelist_loop),
-             reversed_text)
+               (', '.join(self.loopvars), self.sequence, len(self.nodelist_loop),
+                reversed_text)
 
     def __iter__(self):
         for node in self.nodelist_loop:
@@ -149,7 +166,7 @@ class ForNode(Node):
         for i, item in enumerate(values):
             # Shortcuts for current loop iteration number.
             loop_dict['counter0'] = i
-            loop_dict['counter'] = i+1
+            loop_dict['counter'] = i + 1
             # Reverse counter iteration numbers.
             loop_dict['revcounter'] = len_values - i
             loop_dict['revcounter0'] = len_values - i - 1
@@ -174,6 +191,7 @@ class ForNode(Node):
                 context.pop()
         context.pop()
         return nodelist.render(context)
+
 
 class IfChangedNode(Node):
     child_nodelists = ('nodelist_true', 'nodelist_false')
@@ -207,6 +225,7 @@ class IfChangedNode(Node):
             return self.nodelist_false.render(context)
         return ''
 
+
 class IfEqualNode(Node):
     child_nodelists = ('nodelist_true', 'nodelist_false')
 
@@ -224,6 +243,7 @@ class IfEqualNode(Node):
         if (self.negate and val1 != val2) or (not self.negate and val1 == val2):
             return self.nodelist_true.render(context)
         return self.nodelist_false.render(context)
+
 
 class IfNode(Node):
     child_nodelists = ('nodelist_true', 'nodelist_false')
@@ -252,6 +272,7 @@ class IfNode(Node):
         else:
             return self.nodelist_false.render(context)
 
+
 class RegroupNode(Node):
     def __init__(self, target, expression, var_name):
         self.target, self.expression = target, expression
@@ -263,7 +284,7 @@ class RegroupNode(Node):
             # target variable wasn't found in context; fail silently.
             context[self.var_name] = []
             return ''
-        # List of dictionaries in the format:
+            # List of dictionaries in the format:
         # {'grouper': 'key', 'list': [list of contents]}.
         context[self.var_name] = [
             {'grouper': key, 'list': list(val)}
@@ -272,11 +293,13 @@ class RegroupNode(Node):
         ]
         return ''
 
+
 def include_is_allowed(filepath):
     for root in settings.ALLOWED_INCLUDE_ROOTS:
         if filepath.startswith(root):
             return True
     return False
+
 
 class SsiNode(Node):
     def __init__(self, filepath, parsed):
@@ -305,9 +328,11 @@ class SsiNode(Node):
                     return '' # Fail silently for invalid included templates.
         return output
 
+
 class LoadNode(Node):
     def render(self, context):
         return ''
+
 
 class NowNode(Node):
     def __init__(self, format_string):
@@ -316,8 +341,10 @@ class NowNode(Node):
     def render(self, context):
         from datetime import datetime
         from django.utils.dateformat import DateFormat
+
         df = DateFormat(datetime.now())
         return df.format(self.format_string)
+
 
 class SpacelessNode(Node):
     def __init__(self, nodelist):
@@ -325,7 +352,9 @@ class SpacelessNode(Node):
 
     def render(self, context):
         from django.utils.html import strip_spaces_between_tags
+
         return strip_spaces_between_tags(self.nodelist.render(context).strip())
+
 
 class TemplateTagNode(Node):
     mapping = {'openblock': BLOCK_TAG_START,
@@ -336,13 +365,14 @@ class TemplateTagNode(Node):
                'closebrace': SINGLE_BRACE_END,
                'opencomment': COMMENT_TAG_START,
                'closecomment': COMMENT_TAG_END,
-               }
+    }
 
     def __init__(self, tagtype):
         self.tagtype = tagtype
 
     def render(self, context):
         return self.mapping.get(self.tagtype, '')
+
 
 class URLNode(Node):
     def __init__(self, view_name, args, kwargs, asvar):
@@ -353,8 +383,9 @@ class URLNode(Node):
 
     def render(self, context):
         from django.core.urlresolvers import reverse, NoReverseMatch
+
         args = [arg.resolve(context) for arg in self.args]
-        kwargs = dict([(smart_str(k,'ascii'), v.resolve(context))
+        kwargs = dict([(smart_str(k, 'ascii'), v.resolve(context))
                        for k, v in self.kwargs.items()])
 
         # Try to look up the URL twice: once given the view name, and again
@@ -369,7 +400,7 @@ class URLNode(Node):
                 project_name = settings.SETTINGS_MODULE.split('.')[0]
                 try:
                     url = reverse(project_name + '.' + self.view_name,
-                              args=args, kwargs=kwargs, current_app=context.current_app)
+                                  args=args, kwargs=kwargs, current_app=context.current_app)
                 except NoReverseMatch:
                     if self.asvar is None:
                         # Re-raise the original exception, not the one with
@@ -385,6 +416,7 @@ class URLNode(Node):
             return ''
         else:
             return url
+
 
 class WidthRatioNode(Node):
     def __init__(self, val_expr, max_expr, max_width):
@@ -408,6 +440,7 @@ class WidthRatioNode(Node):
         except (ValueError, ZeroDivisionError):
             return ''
         return str(int(round(ratio)))
+
 
 class WithNode(Node):
     def __init__(self, var, name, nodelist):
@@ -440,6 +473,8 @@ def autoescape(parser, token):
     nodelist = parser.parse(('endautoescape',))
     parser.delete_first_token()
     return AutoEscapeControlNode((arg == 'on'), nodelist)
+
+
 autoescape = register.tag(autoescape)
 
 #@register.tag
@@ -449,6 +484,8 @@ def comment(parser, token):
     """
     parser.skip_past('endcomment')
     return CommentNode()
+
+
 comment = register.tag(comment)
 
 #@register.tag
@@ -517,11 +554,17 @@ def cycle(parser, token):
         values = [parser.compile_filter(arg) for arg in args[1:]]
         node = CycleNode(values)
     return node
+
+
 cycle = register.tag(cycle)
+
 
 def csrf_token(parser, token):
     return CsrfTokenNode()
+
+
 register.tag(csrf_token)
+
 
 def debug(parser, token):
     """
@@ -535,6 +578,8 @@ def debug(parser, token):
         </pre>
     """
     return DebugNode()
+
+
 debug = register.tag(debug)
 
 #@register.tag(name="filter")
@@ -555,10 +600,13 @@ def do_filter(parser, token):
     filter_expr = parser.compile_filter("var|%s" % (rest))
     for func, unused in filter_expr.filters:
         if getattr(func, '_decorated_function', func).__name__ in ('escape', 'safe'):
-            raise TemplateSyntaxError('"filter %s" is not permitted.  Use the "autoescape" tag instead.' % func.__name__)
+            raise TemplateSyntaxError(
+                '"filter %s" is not permitted.  Use the "autoescape" tag instead.' % func.__name__)
     nodelist = parser.parse(('endfilter',))
     parser.delete_first_token()
     return FilterNode(filter_expr, nodelist)
+
+
 do_filter = register.tag("filter", do_filter)
 
 #@register.tag
@@ -600,6 +648,8 @@ def firstof(parser, token):
     if len(bits) < 1:
         raise TemplateSyntaxError("'firstof' statement requires at least one argument")
     return FirstOfNode([parser.compile_filter(bit) for bit in bits])
+
+
 firstof = register.tag(firstof)
 
 #@register.tag(name="for")
@@ -683,7 +733,7 @@ def do_for(parser, token):
             raise TemplateSyntaxError("'for' tag received an invalid argument:"
                                       " %s" % token.contents)
 
-    sequence = parser.compile_filter(bits[in_index+1])
+    sequence = parser.compile_filter(bits[in_index + 1])
     nodelist_loop = parser.parse(('empty', 'endfor',))
     token = parser.next_token()
     if token.contents == 'empty':
@@ -692,7 +742,10 @@ def do_for(parser, token):
     else:
         nodelist_empty = None
     return ForNode(loopvars, sequence, is_reversed, nodelist_loop, nodelist_empty)
+
+
 do_for = register.tag("for", do_for)
+
 
 def do_ifequal(parser, token, negate):
     bits = list(token.split_contents())
@@ -728,6 +781,8 @@ def ifequal(parser, token):
         {% endifnotequal %}
     """
     return do_ifequal(parser, token, False)
+
+
 ifequal = register.tag(ifequal)
 
 #@register.tag
@@ -737,7 +792,10 @@ def ifnotequal(parser, token):
     See ifequal.
     """
     return do_ifequal(parser, token, True)
+
+
 ifnotequal = register.tag(ifnotequal)
+
 
 class TemplateLiteral(Literal):
     def __init__(self, value, text):
@@ -749,6 +807,7 @@ class TemplateLiteral(Literal):
 
     def eval(self, context):
         return self.value.resolve(context, ignore_failures=True)
+
 
 class TemplateIfParser(IfParser):
     error_class = TemplateSyntaxError
@@ -827,6 +886,8 @@ def do_if(parser, token):
     else:
         nodelist_false = NodeList()
     return IfNode(var, nodelist_true, nodelist_false)
+
+
 do_if = register.tag("if", do_if)
 
 #@register.tag
@@ -868,6 +929,8 @@ def ifchanged(parser, token):
         nodelist_false = NodeList()
     values = [parser.compile_filter(bit) for bit in bits[1:]]
     return IfChangedNode(nodelist_true, nodelist_false, *values)
+
+
 ifchanged = register.tag(ifchanged)
 
 #@register.tag
@@ -898,6 +961,8 @@ def ssi(parser, token):
             raise TemplateSyntaxError("Second (optional) argument to %s tag"
                                       " must be 'parsed'" % bits[0])
     return SsiNode(bits[1], parsed)
+
+
 ssi = register.tag(ssi)
 
 #@register.tag
@@ -920,6 +985,8 @@ def load(parser, token):
             raise TemplateSyntaxError("'%s' is not a valid tag library: %s" %
                                       (taglib, e))
     return LoadNode()
+
+
 load = register.tag(load)
 
 #@register.tag
@@ -939,6 +1006,8 @@ def now(parser, token):
         raise TemplateSyntaxError("'now' statement takes one argument")
     format_string = bits[1]
     return NowNode(format_string)
+
+
 now = register.tag(now)
 
 #@register.tag
@@ -1003,7 +1072,10 @@ def regroup(parser, token):
 
     var_name = lastbits_reversed[0][::-1]
     return RegroupNode(target, expression, var_name)
+
+
 regroup = register.tag(regroup)
+
 
 def spaceless(parser, token):
     """
@@ -1033,6 +1105,8 @@ def spaceless(parser, token):
     nodelist = parser.parse(('endspaceless',))
     parser.delete_first_token()
     return SpacelessNode(nodelist)
+
+
 spaceless = register.tag(spaceless)
 
 #@register.tag
@@ -1067,7 +1141,10 @@ def templatetag(parser, token):
                                   " Must be one of: %s" %
                                   (tag, TemplateTagNode.mapping.keys()))
     return TemplateTagNode(tag)
+
+
 templatetag = register.tag(templatetag)
+
 
 def url(parser, token):
     """
@@ -1161,6 +1238,8 @@ def url(parser, token):
                 args.append(parser.compile_filter(value))
 
     return URLNode(viewname, args, kwargs, asvar)
+
+
 url = register.tag(url)
 
 #@register.tag
@@ -1185,6 +1264,8 @@ def widthratio(parser, token):
     return WidthRatioNode(parser.compile_filter(this_value_expr),
                           parser.compile_filter(max_value_expr),
                           parser.compile_filter(max_width))
+
+
 widthratio = register.tag(widthratio)
 
 #@register.tag
@@ -1208,4 +1289,6 @@ def do_with(parser, token):
     nodelist = parser.parse(('endwith',))
     parser.delete_first_token()
     return WithNode(var, name, nodelist)
+
+
 do_with = register.tag('with', do_with)

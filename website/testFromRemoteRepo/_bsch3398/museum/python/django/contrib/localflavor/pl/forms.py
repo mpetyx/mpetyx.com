@@ -8,21 +8,28 @@ from django.forms import ValidationError
 from django.forms.fields import Select, RegexField
 from django.utils.translation import ugettext_lazy as _
 
+
 class PLProvinceSelect(Select):
     """
     A select widget with list of Polish administrative provinces as choices.
     """
+
     def __init__(self, attrs=None):
         from pl_voivodeships import VOIVODESHIP_CHOICES
+
         super(PLProvinceSelect, self).__init__(attrs, choices=VOIVODESHIP_CHOICES)
+
 
 class PLCountySelect(Select):
     """
     A select widget with list of Polish administrative units as choices.
     """
+
     def __init__(self, attrs=None):
         from pl_administrativeunits import ADMINISTRATIVE_UNIT_CHOICES
+
         super(PLCountySelect, self).__init__(attrs, choices=ADMINISTRATIVE_UNIT_CHOICES)
+
 
 class PLPESELField(RegexField):
     """
@@ -41,9 +48,9 @@ class PLPESELField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(PLPESELField, self).__init__(r'^\d{11}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                           max_length=None, min_length=None, *args, **kwargs)
 
-    def clean(self,value):
+    def clean(self, value):
         super(PLPESELField, self).clean(value)
         if not self.has_valid_checksum(value):
             raise ValidationError(self.error_messages['checksum'])
@@ -58,6 +65,7 @@ class PLPESELField(RegexField):
         for i in range(len(number)):
             result += int(number[i]) * multiple_table[i]
         return result % 10 == 0
+
 
 class PLNIPField(RegexField):
     """
@@ -74,9 +82,9 @@ class PLNIPField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(PLNIPField, self).__init__(r'^\d{3}-\d{3}-\d{2}-\d{2}$|^\d{2}-\d{2}-\d{3}-\d{3}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                         max_length=None, min_length=None, *args, **kwargs)
 
-    def clean(self,value):
+    def clean(self, value):
         super(PLNIPField, self).clean(value)
         value = re.sub("[-]", "", value)
         if not self.has_valid_checksum(value):
@@ -89,7 +97,7 @@ class PLNIPField(RegexField):
         """
         multiple_table = (6, 5, 7, 2, 3, 4, 5, 6, 7)
         result = 0
-        for i in range(len(number)-1):
+        for i in range(len(number) - 1):
             result += int(number[i]) * multiple_table[i]
 
         result %= 11
@@ -97,6 +105,7 @@ class PLNIPField(RegexField):
             return True
         else:
             return False
+
 
 class PLREGONField(RegexField):
     """
@@ -112,9 +121,9 @@ class PLREGONField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(PLREGONField, self).__init__(r'^\d{9,14}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                           max_length=None, min_length=None, *args, **kwargs)
 
-    def clean(self,value):
+    def clean(self, value):
         super(PLREGONField, self).clean(value)
         if not self.has_valid_checksum(value):
             raise ValidationError(self.error_messages['checksum'])
@@ -139,6 +148,7 @@ class PLREGONField(RegexField):
 
         return bool(weights)
 
+
 class PLPostalCodeField(RegexField):
     """
     A form field that validates as Polish postal code.
@@ -150,4 +160,4 @@ class PLPostalCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(PLPostalCodeField, self).__init__(r'^\d{2}-\d{3}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                                max_length=None, min_length=None, *args, **kwargs)

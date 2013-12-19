@@ -3,6 +3,7 @@ A collection of utility routines and classes used by the spatial
 backends.
 """
 
+
 def getstatusoutput(cmd):
     """
     Executes a shell command on the platform using subprocess.Popen and
@@ -17,6 +18,7 @@ def getstatusoutput(cmd):
     stdout, stderr = p.communicate()
     return p.returncode, stdout.strip()
 
+
 def gqn(val):
     """
     The geographic quote name function; used for quoting tables and
@@ -28,6 +30,7 @@ def gqn(val):
         return "'%s'" % val
     else:
         return str(val)
+
 
 class SpatialOperation(object):
     """
@@ -45,14 +48,15 @@ class SpatialOperation(object):
         return self.sql_template % self.params(geo_col, geometry)
 
     def params(self, geo_col, geometry):
-        params = {'function' : self.function,
-                  'geo_col' : geo_col,
-                  'geometry' : geometry,
-                  'operator' : self.operator,
-                  'result' : self.result,
-                  }
+        params = {'function': self.function,
+                  'geo_col': geo_col,
+                  'geometry': geometry,
+                  'operator': self.operator,
+                  'result': self.result,
+        }
         params.update(self.extra)
         return params
+
 
 class SpatialFunction(SpatialOperation):
     """
@@ -62,9 +66,9 @@ class SpatialFunction(SpatialOperation):
 
     def __init__(self, func, result='', operator='', **kwargs):
         # Getting the function prefix.
-        default = {'function' : func,
-                   'operator' : operator,
-                   'result' : result
-                   }
+        default = {'function': func,
+                   'operator': operator,
+                   'result': result
+        }
         kwargs.update(default)
         super(SpatialFunction, self).__init__(**kwargs)

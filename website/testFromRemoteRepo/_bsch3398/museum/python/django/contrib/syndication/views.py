@@ -1,12 +1,15 @@
 import datetime
-from django.conf import settings
+
 from django.contrib.sites.models import Site, RequestSite
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.http import HttpResponse, Http404
-from django.template import loader, Template, TemplateDoesNotExist, RequestContext
 from django.utils import feedgenerator, tzinfo
 from django.utils.encoding import force_unicode, iri_to_uri, smart_unicode
 from django.utils.html import escape
+
+from django.conf import settings
+from django.template import loader, Template, TemplateDoesNotExist, RequestContext
+
 
 def add_domain(domain, url):
     if not (url.startswith('http://')
@@ -16,6 +19,7 @@ def add_domain(domain, url):
         # conversions here.
         url = iri_to_uri(u'http://%s%s' % (domain, url))
     return url
+
 
 class FeedDoesNotExist(ObjectDoesNotExist):
     pass
@@ -47,7 +51,8 @@ class Feed(object):
         try:
             return item.get_absolute_url()
         except AttributeError:
-            raise ImproperlyConfigured('Give your %s class a get_absolute_url() method, or define an item_link() method in your Feed class.' % item.__class__.__name__)
+            raise ImproperlyConfigured(
+                'Give your %s class a get_absolute_url() method, or define an item_link() method in your Feed class.' % item.__class__.__name__)
 
     def __get_dynamic_attr(self, attname, obj, default=None):
         try:
@@ -100,20 +105,20 @@ class Feed(object):
         link = add_domain(current_site.domain, link)
 
         feed = self.feed_type(
-            title = self.__get_dynamic_attr('title', obj),
-            subtitle = self.__get_dynamic_attr('subtitle', obj),
-            link = link,
-            description = self.__get_dynamic_attr('description', obj),
-            language = settings.LANGUAGE_CODE.decode(),
-            feed_url = add_domain(current_site.domain,
-                    self.__get_dynamic_attr('feed_url', obj) or request.path),
-            author_name = self.__get_dynamic_attr('author_name', obj),
-            author_link = self.__get_dynamic_attr('author_link', obj),
-            author_email = self.__get_dynamic_attr('author_email', obj),
-            categories = self.__get_dynamic_attr('categories', obj),
-            feed_copyright = self.__get_dynamic_attr('feed_copyright', obj),
-            feed_guid = self.__get_dynamic_attr('feed_guid', obj),
-            ttl = self.__get_dynamic_attr('ttl', obj),
+            title=self.__get_dynamic_attr('title', obj),
+            subtitle=self.__get_dynamic_attr('subtitle', obj),
+            link=link,
+            description=self.__get_dynamic_attr('description', obj),
+            language=settings.LANGUAGE_CODE.decode(),
+            feed_url=add_domain(current_site.domain,
+                                self.__get_dynamic_attr('feed_url', obj) or request.path),
+            author_name=self.__get_dynamic_attr('author_name', obj),
+            author_link=self.__get_dynamic_attr('author_link', obj),
+            author_email=self.__get_dynamic_attr('author_email', obj),
+            categories=self.__get_dynamic_attr('categories', obj),
+            feed_copyright=self.__get_dynamic_attr('feed_copyright', obj),
+            feed_guid=self.__get_dynamic_attr('feed_guid', obj),
+            ttl=self.__get_dynamic_attr('ttl', obj),
             **self.feed_extra_kwargs(obj)
         )
 
@@ -145,9 +150,9 @@ class Feed(object):
             enc_url = self.__get_dynamic_attr('item_enclosure_url', item)
             if enc_url:
                 enc = feedgenerator.Enclosure(
-                    url = smart_unicode(enc_url),
-                    length = smart_unicode(self.__get_dynamic_attr('item_enclosure_length', item)),
-                    mime_type = smart_unicode(self.__get_dynamic_attr('item_enclosure_mime_type', item))
+                    url=smart_unicode(enc_url),
+                    length=smart_unicode(self.__get_dynamic_attr('item_enclosure_length', item)),
+                    mime_type=smart_unicode(self.__get_dynamic_attr('item_enclosure_mime_type', item))
                 )
             author_name = self.__get_dynamic_attr('item_author_name', item)
             if author_name is not None:
@@ -162,17 +167,17 @@ class Feed(object):
                 pubdate = pubdate.replace(tzinfo=ltz)
 
             feed.add_item(
-                title = title,
-                link = link,
-                description = description,
-                unique_id = self.__get_dynamic_attr('item_guid', item, link),
-                enclosure = enc,
-                pubdate = pubdate,
-                author_name = author_name,
-                author_email = author_email,
-                author_link = author_link,
-                categories = self.__get_dynamic_attr('item_categories', item),
-                item_copyright = self.__get_dynamic_attr('item_copyright', item),
+                title=title,
+                link=link,
+                description=description,
+                unique_id=self.__get_dynamic_attr('item_guid', item, link),
+                enclosure=enc,
+                pubdate=pubdate,
+                author_name=author_name,
+                author_email=author_email,
+                author_link=author_link,
+                categories=self.__get_dynamic_attr('item_categories', item),
+                item_copyright=self.__get_dynamic_attr('item_copyright', item),
                 **self.item_extra_kwargs(item)
             )
         return feed
@@ -181,6 +186,7 @@ class Feed(object):
 def feed(request, url, feed_dict=None):
     """Provided for backwards compatibility."""
     import warnings
+
     warnings.warn('The syndication feed() view is deprecated. Please use the '
                   'new class based view API.',
                   category=PendingDeprecationWarning)
@@ -201,7 +207,8 @@ def feed(request, url, feed_dict=None):
     try:
         feedgen = f(slug, request).get_feed(param)
     except FeedDoesNotExist:
-        raise Http404("Invalid feed parameters. Slug %r is valid, but other parameters, or lack thereof, are not." % slug)
+        raise Http404(
+            "Invalid feed parameters. Slug %r is valid, but other parameters, or lack thereof, are not." % slug)
 
     response = HttpResponse(mimetype=feedgen.mime_type)
     feedgen.write(response, 'utf-8')

@@ -1,5 +1,6 @@
 from django.conf import settings
 
+
 def format(number, decimal_sep, decimal_pos, grouping=0, thousand_sep=''):
     """
     Gets a number (as a number or string), and returns it as a string,
@@ -16,7 +17,7 @@ def format(number, decimal_sep, decimal_pos, grouping=0, thousand_sep=''):
         sign = '-'
     else:
         sign = ''
-    # decimal part
+        # decimal part
     str_number = unicode(number)
     if str_number[0] == '-':
         str_number = str_number[1:]

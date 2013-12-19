@@ -6,14 +6,19 @@
  This module also houses GEOS Pointer utilities, including
  get_pointer_arr(), and GEOM_PTR.
 """
-import os, re, sys
+import os
+import re
+import sys
 from ctypes import c_char_p, Structure, CDLL, CFUNCTYPE, POINTER
 from ctypes.util import find_library
+
 from django.contrib.gis.geos.error import GEOSException
+
 
 # Custom library path set?
 try:
     from django.conf import settings
+
     lib_path = settings.GEOS_LIBRARY_PATH
 except (AttributeError, EnvironmentError, ImportError):
     lib_path = None
@@ -41,8 +46,8 @@ if lib_names:
 # No GEOS library could be found.
 if lib_path is None:
     raise ImportError('Could not find the GEOS library (tried "%s"). '
-                        'Try setting GEOS_LIBRARY_PATH in your settings.' %
-                        '", "'.join(lib_names))
+                      'Try setting GEOS_LIBRARY_PATH in your settings.' %
+                      '", "'.join(lib_names))
 
 # Getting the GEOS C library.  The C interface (CDLL) is used for
 # both *NIX and Windows.
@@ -54,36 +59,50 @@ lgeos = CDLL(lib_path)
 # Supposed to mimic the GEOS message handler (C below):
 #  typedef void (*GEOSMessageHandler)(const char *fmt, ...);
 NOTICEFUNC = CFUNCTYPE(None, c_char_p, c_char_p)
+
+
 def notice_h(fmt, lst, output_h=sys.stdout):
     try:
         warn_msg = fmt % lst
     except:
         warn_msg = fmt
     output_h.write('GEOS_NOTICE: %s\n' % warn_msg)
+
+
 notice_h = NOTICEFUNC(notice_h)
 
 ERRORFUNC = CFUNCTYPE(None, c_char_p, c_char_p)
+
+
 def error_h(fmt, lst, output_h=sys.stderr):
     try:
         err_msg = fmt % lst
     except:
         err_msg = fmt
     output_h.write('GEOS_ERROR: %s\n' % err_msg)
+
+
 error_h = ERRORFUNC(error_h)
 
 #### GEOS Geometry C data structures, and utility functions. ####
 
 # Opaque GEOS geometry structures, used for GEOM_PTR and CS_PTR
 class GEOSGeom_t(Structure): pass
+
+
 class GEOSPrepGeom_t(Structure): pass
+
+
 class GEOSCoordSeq_t(Structure): pass
+
+
 class GEOSContextHandle_t(Structure): pass
 
 # Pointers to opaque GEOS geometry structures.
 GEOM_PTR = POINTER(GEOSGeom_t)
 PREPGEOM_PTR = POINTER(GEOSPrepGeom_t)
 CS_PTR = POINTER(GEOSCoordSeq_t)
-CONTEXT_PTR  = POINTER(GEOSContextHandle_t)
+CONTEXT_PTR = POINTER(GEOSContextHandle_t)
 
 # Used specifically by the GEOSGeom_createPolygon and GEOSGeom_createCollection
 #  GEOS routines
@@ -100,7 +119,10 @@ geos_version.restype = c_char_p
 
 # Regular expression should be able to parse version strings such as
 # '3.0.0rc4-CAPI-1.3.3', or '3.0.0-CAPI-1.4.1'
-version_regex = re.compile(r'^(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<subminor>\d+))(rc(?P<release_candidate>\d+))?-CAPI-(?P<capi_version>\d+\.\d+\.\d+)$')
+version_regex = re.compile(
+    r'^(?P<version>(?P<major>\d+)\.(?P<minor>\d+)\.(?P<subminor>\d+))(rc(?P<release_candidate>\d+))?-CAPI-(?P<capi_version>\d+\.\d+\.\d+)$')
+
+
 def geos_version_info():
     """
     Returns a dictionary containing the various version metadata parsed from
@@ -111,7 +133,8 @@ def geos_version_info():
     ver = geos_version()
     m = version_regex.match(ver)
     if not m: raise GEOSException('Could not parse version info string "%s"' % ver)
-    return dict((key, m.group(key)) for key in ('version', 'release_candidate', 'capi_version', 'major', 'minor', 'subminor'))
+    return dict(
+        (key, m.group(key)) for key in ('version', 'release_candidate', 'capi_version', 'major', 'minor', 'subminor'))
 
 # Version numbers and whether or not prepared geometry support is available.
 _verinfo = geos_version_info()
@@ -138,4 +161,5 @@ else:
     lgeos.initGEOS(notice_h, error_h)
     # Calling finishGEOS() upon exit of the interpreter.
     import atexit
+
     atexit.register(lgeos.finishGEOS)

@@ -13,6 +13,7 @@ from django.utils.text import get_text_list
 pythonize_re = re.compile(r'(?:^|\n)\s*//')
 plural_forms_re = re.compile(r'^(?P<value>"Plural-Forms.+?\\n")\s*$', re.MULTILINE | re.DOTALL)
 
+
 def handle_extensions(extensions=('html',)):
     """
     organizes multiple extensions that are separated with commas or passed by
@@ -28,7 +29,7 @@ def handle_extensions(extensions=('html',)):
     """
     ext_list = []
     for ext in extensions:
-        ext_list.extend(ext.replace(' ','').split(','))
+        ext_list.extend(ext.replace(' ', '').split(','))
     for i, ext in enumerate(ext_list):
         if not ext.startswith('.'):
             ext_list[i] = '.%s' % ext_list[i]
@@ -38,12 +39,14 @@ def handle_extensions(extensions=('html',)):
     # trick xgettext to parse them as Python files)
     return set([x for x in ext_list if x != '.py'])
 
+
 def _popen(cmd):
     """
     Friendly wrapper around Popen for Windows
     """
     p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE, close_fds=os.name != 'nt', universal_newlines=True)
     return p.communicate()
+
 
 def walk(root, topdown=True, onerror=None, followlinks=False):
     """
@@ -58,6 +61,7 @@ def walk(root, topdown=True, onerror=None, followlinks=False):
                     for link_dirpath, link_dirnames, link_filenames in walk(p):
                         yield (link_dirpath, link_dirnames, link_filenames)
 
+
 def is_ignored(path, ignore_patterns):
     """
     Helper function to check if the given path should be ignored or not.
@@ -66,6 +70,7 @@ def is_ignored(path, ignore_patterns):
         if fnmatch.fnmatchcase(path, pattern):
             return True
     return False
+
 
 def find_files(root, ignore_patterns, verbosity, symlinks=False):
     """
@@ -83,6 +88,7 @@ def find_files(root, ignore_patterns, verbosity, symlinks=False):
     all_files.sort()
     return all_files
 
+
 def copy_plural_forms(msgs, locale, domain, verbosity):
     """
     Copies plural forms header contents from a Django catalog of locale to
@@ -90,6 +96,7 @@ def copy_plural_forms(msgs, locale, domain, verbosity):
     contents of a newly created .po file.
     """
     import django
+
     django_dir = os.path.normpath(os.path.join(os.path.dirname(django.__file__)))
     if domain == 'djangojs':
         domains = ('djangojs', 'django')
@@ -115,17 +122,18 @@ def copy_plural_forms(msgs, locale, domain, verbosity):
 
 
 def make_messages(locale=None, domain='django', verbosity='1', all=False,
-        extensions=None, symlinks=False, ignore_patterns=[]):
+                  extensions=None, symlinks=False, ignore_patterns=[]):
     """
     Uses the locale directory from the Django SVN tree or an application/
     project to process all
     """
     # Need to ensure that the i18n framework is enabled
     from django.conf import settings
+
     if settings.configured:
         settings.USE_I18N = True
     else:
-        settings.configure(USE_I18N = True)
+        settings.configure(USE_I18N=True)
 
     from django.utils.translation import templatize
 
@@ -136,7 +144,8 @@ def make_messages(locale=None, domain='django', verbosity='1', all=False,
     elif os.path.isdir('locale'):
         localedir = os.path.abspath('locale')
     else:
-        raise CommandError("This script should be run from the Django SVN tree or your project or app tree. If you did indeed run it from the SVN checkout or your project or application, maybe you are just missing the conf/locale (in the django tree) or locale (for project and application) directory? It is not created automatically, you have to create it by hand if you want to enable i18n for your project or application.")
+        raise CommandError(
+            "This script should be run from the Django SVN tree or your project or app tree. If you did indeed run it from the SVN checkout or your project or application, maybe you are just missing the conf/locale (in the django tree) or locale (for project and application) directory? It is not created automatically, you have to create it by hand if you want to enable i18n for your project or application.")
 
     if domain not in ('django', 'djangojs'):
         raise CommandError("currently makemessages only supports domains 'django' and 'djangojs'")
@@ -155,7 +164,8 @@ def make_messages(locale=None, domain='django', verbosity='1', all=False,
     if match:
         xversion = (int(match.group('major')), int(match.group('minor')))
         if xversion < (0, 15):
-            raise CommandError("Django internationalization requires GNU gettext 0.15 or newer. You are using version %s, please upgrade your gettext toolset." % match.group())
+            raise CommandError(
+                "Django internationalization requires GNU gettext 0.15 or newer. You are using version %s, please upgrade your gettext toolset." % match.group())
 
     languages = []
     if locale is not None:
@@ -190,12 +200,13 @@ def make_messages(locale=None, domain='django', verbosity='1', all=False,
                     f.write(src)
                 finally:
                     f.close()
-                cmd = 'xgettext -d %s -L Perl --keyword=gettext_noop --keyword=gettext_lazy --keyword=ngettext_lazy:1,2 --from-code UTF-8 -o - "%s"' % (domain, os.path.join(dirpath, thefile))
+                cmd = 'xgettext -d %s -L Perl --keyword=gettext_noop --keyword=gettext_lazy --keyword=ngettext_lazy:1,2 --from-code UTF-8 -o - "%s"' % (
+                domain, os.path.join(dirpath, thefile))
                 msgs, errors = _popen(cmd)
                 if errors:
                     raise CommandError("errors happened while running xgettext on %s\n%s" % (file, errors))
-                old = '#: '+os.path.join(dirpath, thefile)[2:]
-                new = '#: '+os.path.join(dirpath, file)[2:]
+                old = '#: ' + os.path.join(dirpath, thefile)[2:]
+                new = '#: ' + os.path.join(dirpath, file)[2:]
                 msgs = msgs.replace(old, new)
                 if os.path.exists(potfile):
                     # Strip the header
@@ -232,8 +243,8 @@ def make_messages(locale=None, domain='django', verbosity='1', all=False,
                     raise CommandError("errors happened while running xgettext on %s\n%s" % (file, errors))
 
                 if thefile != file:
-                    old = '#: '+os.path.join(dirpath, thefile)[2:]
-                    new = '#: '+os.path.join(dirpath, file)[2:]
+                    old = '#: ' + os.path.join(dirpath, thefile)[2:]
+                    new = '#: ' + os.path.join(dirpath, file)[2:]
                     msgs = msgs.replace(old, new)
                 if os.path.exists(potfile):
                     # Strip the header
@@ -275,20 +286,23 @@ def make_messages(locale=None, domain='django', verbosity='1', all=False,
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--locale', '-l', default=None, dest='locale',
-            help='Creates or updates the message files only for the given locale (e.g. pt_BR).'),
+                    help='Creates or updates the message files only for the given locale (e.g. pt_BR).'),
         make_option('--domain', '-d', default='django', dest='domain',
-            help='The domain of the message files (default: "django").'),
+                    help='The domain of the message files (default: "django").'),
         make_option('--all', '-a', action='store_true', dest='all',
-            default=False, help='Reexamines all source code and templates for new translation strings and updates all message files for all available languages.'),
+                    default=False,
+                    help='Reexamines all source code and templates for new translation strings and updates all message files for all available languages.'),
         make_option('--extension', '-e', dest='extensions',
-            help='The file extension(s) to examine (default: ".html", separate multiple extensions with commas, or use -e multiple times)',
-            action='append'),
+                    help='The file extension(s) to examine (default: ".html", separate multiple extensions with commas, or use -e multiple times)',
+                    action='append'),
         make_option('--symlinks', '-s', action='store_true', dest='symlinks',
-            default=False, help='Follows symlinks to directories when examining source code and templates for translation strings.'),
+                    default=False,
+                    help='Follows symlinks to directories when examining source code and templates for translation strings.'),
         make_option('--ignore', '-i', action='append', dest='ignore_patterns',
-            default=[], metavar='PATTERN', help='Ignore files or directories matching this glob-style pattern. Use multiple times to ignore more.'),
+                    default=[], metavar='PATTERN',
+                    help='Ignore files or directories matching this glob-style pattern. Use multiple times to ignore more.'),
         make_option('--no-default-ignore', action='store_false', dest='use_default_ignore_patterns',
-            default=True, help="Don't ignore the common glob-style patterns 'CVS', '.*' and '*~'."),
+                    default=True, help="Don't ignore the common glob-style patterns 'CVS', '.*' and '*~'."),
     )
     help = "Runs over the entire source tree of the current directory and pulls out all strings marked for translation. It creates (or updates) a message file in the conf/locale (in the django tree) or locale (for project and application) directory."
 

@@ -5,7 +5,7 @@ QUERY_TERMS = dict([(x, None) for x in (
     'exact', 'iexact', 'contains', 'icontains', 'gt', 'gte', 'lt', 'lte', 'in',
     'startswith', 'istartswith', 'endswith', 'iendswith', 'range', 'year',
     'month', 'day', 'week_day', 'isnull', 'search', 'regex', 'iregex',
-    )])
+)])
 
 # Size of each "chunk" for get_iterator calls.
 # Larger values are slightly faster at the expense of more storage space.

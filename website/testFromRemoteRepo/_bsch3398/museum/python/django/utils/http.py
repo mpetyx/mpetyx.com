@@ -1,11 +1,14 @@
 import re
 import urllib
-from email.Utils import formatdate
 
 from django.utils.encoding import smart_str, force_unicode
 from django.utils.functional import allow_lazy
 
+from email.Utils import formatdate
+
+
 ETAG_MATCH = re.compile(r'(?:W/)?"((?:\\.|[^"])*)"')
+
 
 def urlquote(url, safe='/'):
     """
@@ -16,7 +19,9 @@ def urlquote(url, safe='/'):
     """
     return force_unicode(urllib.quote(smart_str(url), safe))
 
+
 urlquote = allow_lazy(urlquote, unicode)
+
 
 def urlquote_plus(url, safe=''):
     """
@@ -26,7 +31,10 @@ def urlquote_plus(url, safe=''):
     iri_to_uri() call without double-quoting occurring.
     """
     return force_unicode(urllib.quote_plus(smart_str(url), safe))
+
+
 urlquote_plus = allow_lazy(urlquote_plus, unicode)
+
 
 def urlencode(query, doseq=0):
     """
@@ -38,9 +46,10 @@ def urlencode(query, doseq=0):
         query = query.items()
     return urllib.urlencode(
         [(smart_str(k),
-         isinstance(v, (list,tuple)) and [smart_str(i) for i in v] or smart_str(v))
-            for k, v in query],
+          isinstance(v, (list, tuple)) and [smart_str(i) for i in v] or smart_str(v))
+         for k, v in query],
         doseq)
+
 
 def cookie_date(epoch_seconds=None):
     """
@@ -54,6 +63,7 @@ def cookie_date(epoch_seconds=None):
     """
     rfcdate = formatdate(epoch_seconds)
     return '%s-%s-%s GMT' % (rfcdate[:7], rfcdate[8:11], rfcdate[12:25])
+
 
 def http_date(epoch_seconds=None):
     """
@@ -77,6 +87,7 @@ def base36_to_int(s):
     """
     return int(s, 36)
 
+
 def int_to_base36(i):
     """
     Converts an integer to a base36 string
@@ -98,6 +109,7 @@ def int_to_base36(i):
         factor -= 1
     return ''.join(base36)
 
+
 def parse_etags(etag_str):
     """
     Parses a string with one or several etags passed in If-None-Match and
@@ -110,6 +122,7 @@ def parse_etags(etag_str):
         return [etag_str]
     etags = [e.decode('string_escape') for e in etags]
     return etags
+
 
 def quote_etag(etag):
     """

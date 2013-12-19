@@ -1,9 +1,9 @@
-import inspect
 import os
 
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
+
+from django.conf import settings
 
 DEFAULT_DB_ALIAS = 'default'
 
@@ -13,6 +13,7 @@ DEFAULT_DB_ALIAS = 'default'
 class DatabaseError(Exception):
     pass
 
+
 class IntegrityError(DatabaseError):
     pass
 
@@ -21,6 +22,7 @@ def load_backend(backend_name):
     try:
         module = import_module('.base', 'django.db.backends.%s' % backend_name)
         import warnings
+
         warnings.warn(
             "Short names for DATABASE_ENGINE are deprecated; prepend with 'django.db.backends.'",
             PendingDeprecationWarning
@@ -36,16 +38,16 @@ def load_backend(backend_name):
             backend_dir = os.path.join(os.path.dirname(__file__), 'backends')
             try:
                 available_backends = [f for f in os.listdir(backend_dir)
-                        if os.path.isdir(os.path.join(backend_dir, f))
-                        and not f.startswith('.')]
+                                      if os.path.isdir(os.path.join(backend_dir, f))
+                    and not f.startswith('.')]
             except EnvironmentError:
                 available_backends = []
             available_backends.sort()
             if backend_name not in available_backends:
                 error_msg = ("%r isn't an available database backend. \n" +
-                    "Try using django.db.backends.XXX, where XXX is one of:\n    %s\n" +
-                    "Error was: %s") % \
-                    (backend_name, ", ".join(map(repr, available_backends)), e_user)
+                             "Try using django.db.backends.XXX, where XXX is one of:\n    %s\n" +
+                             "Error was: %s") % \
+                            (backend_name, ", ".join(map(repr, available_backends)), e_user)
                 raise ImproperlyConfigured(error_msg)
             else:
                 raise # If there's some other error, this must be an error in Django itself.
@@ -113,7 +115,8 @@ class ConnectionRouter(object):
                 try:
                     router = getattr(module, klass_name)()
                 except AttributeError:
-                    raise ImproperlyConfigured('Module "%s" does not define a database router name "%s"' % (module, klass_name))
+                    raise ImproperlyConfigured(
+                        'Module "%s" does not define a database router name "%s"' % (module, klass_name))
             else:
                 router = r
             self.routers.append(router)
@@ -133,6 +136,7 @@ class ConnectionRouter(object):
                 return hints['instance']._state.db or DEFAULT_DB_ALIAS
             except KeyError:
                 return DEFAULT_DB_ALIAS
+
         return _route_db
 
     db_for_read = _router_func('db_for_read')

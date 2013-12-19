@@ -1,5 +1,7 @@
-from django.contrib.syndication.feeds import Feed as BaseFeed, FeedDoesNotExist
 from django.utils.feedgenerator import Atom1Feed, Rss201rev2Feed
+
+from django.contrib.syndication.feeds import Feed as BaseFeed, FeedDoesNotExist
+
 
 class GeoFeedMixin(object):
     """
@@ -54,7 +56,7 @@ class GeoFeedMixin(object):
                         box_coords = (geom[:2], geom[2:])
                     else:
                         raise ValueError('Only should be 2 or 4 numeric elements.')
-                # If a GeoRSS box was given via tuple.
+                    # If a GeoRSS box was given via tuple.
                 if not box_coords is None:
                     if w3c_geo: raise ValueError('Cannot use simple GeoRSS box in W3C Geo feeds.')
                     handler.addQuickElement(u'georss:box', self.georss_coords(box_coords))
@@ -62,7 +64,7 @@ class GeoFeedMixin(object):
                 # Getting the lower-case geometry type.
                 gtype = str(geom.geom_type).lower()
                 if gtype == 'point':
-                    self.add_georss_point(handler, geom.coords, w3c_geo=w3c_geo) 
+                    self.add_georss_point(handler, geom.coords, w3c_geo=w3c_geo)
                 else:
                     if w3c_geo: raise ValueError('W3C Geo only supports Point geometries.')
                     # For formatting consistent w/the GeoRSS simple standard:
@@ -90,6 +92,7 @@ class GeoRSSFeed(Rss201rev2Feed, GeoFeedMixin):
         super(GeoRSSFeed, self).add_root_elements(handler)
         self.add_georss_element(handler, self.feed)
 
+
 class GeoAtom1Feed(Atom1Feed, GeoFeedMixin):
     def root_attributes(self):
         attrs = super(GeoAtom1Feed, self).root_attributes()
@@ -103,6 +106,7 @@ class GeoAtom1Feed(Atom1Feed, GeoFeedMixin):
     def add_root_elements(self, handler):
         super(GeoAtom1Feed, self).add_root_elements(handler)
         self.add_georss_element(handler, self.feed)
+
 
 class W3CGeoFeed(Rss201rev2Feed, GeoFeedMixin):
     def rss_attributes(self):
@@ -129,7 +133,7 @@ class Feed(BaseFeed):
     feed_type = GeoRSSFeed
 
     def feed_extra_kwargs(self, obj):
-        return {'geometry' : self.__get_dynamic_attr('geometry', obj)}
+        return {'geometry': self.__get_dynamic_attr('geometry', obj)}
 
     def item_extra_kwargs(self, item):
-        return {'geometry' : self.__get_dynamic_attr('item_geometry', item)}
+        return {'geometry': self.__get_dynamic_attr('item_geometry', item)}

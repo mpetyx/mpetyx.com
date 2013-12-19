@@ -1,18 +1,20 @@
 "Utilities for loading models and the modules that contain them."
 
-from django.conf import settings
+import sys
+import os
+import threading
+
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
-import imp
-import sys
-import os
-import threading
+from django.conf import settings
+
 
 __all__ = ('get_apps', 'get_app', 'get_models', 'get_model', 'register_models',
-        'load_app', 'app_cache_ready')
+           'load_app', 'app_cache_ready')
+
 
 class AppCache(object):
     """
@@ -23,21 +25,21 @@ class AppCache(object):
     # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/66531.
     __shared_state = dict(
         # Keys of app_store are the model modules for each application.
-        app_store = SortedDict(),
+        app_store=SortedDict(),
 
         # Mapping of app_labels to a dictionary of model names to model code.
-        app_models = SortedDict(),
+        app_models=SortedDict(),
 
         # Mapping of app_labels to errors raised when trying to import the app.
-        app_errors = {},
+        app_errors={},
 
         # -- Everything below here is only used when populating the cache --
-        loaded = False,
-        handled = {},
-        postponed = [],
-        nesting_level = 0,
-        write_lock = threading.RLock(),
-        _get_models_cache = {},
+        loaded=False,
+        handled={},
+        postponed=[],
+        nesting_level=0,
+        write_lock=threading.RLock(),
+        _get_models_cache={},
     )
 
     def __init__(self):
@@ -212,6 +214,7 @@ class AppCache(object):
                     continue
             model_dict[model_name] = model
         self._get_models_cache.clear()
+
 
 cache = AppCache()
 

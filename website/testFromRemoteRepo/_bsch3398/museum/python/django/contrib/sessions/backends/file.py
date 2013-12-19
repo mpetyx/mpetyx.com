@@ -2,15 +2,17 @@ import errno
 import os
 import tempfile
 
-from django.conf import settings
 from django.contrib.sessions.backends.base import SessionBase, CreateError
 from django.core.exceptions import SuspiciousOperation, ImproperlyConfigured
+
+from django.conf import settings
 
 
 class SessionStore(SessionBase):
     """
     Implements a file based session store.
     """
+
     def __init__(self, session_key=None):
         self.storage_path = getattr(settings, "SESSION_FILE_PATH", None)
         if not self.storage_path:
@@ -112,7 +114,7 @@ class SessionStore(SessionBase):
 
         try:
             output_file_fd, output_file_name = tempfile.mkstemp(dir=dir,
-                prefix=prefix + '_out_')
+                                                                prefix=prefix + '_out_')
             renamed = False
             try:
                 try:

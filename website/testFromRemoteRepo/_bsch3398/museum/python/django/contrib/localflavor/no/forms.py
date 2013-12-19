@@ -2,11 +2,14 @@
 Norwegian-specific Form helpers
 """
 
-import re, datetime
+import re
+import datetime
+
 from django.core.validators import EMPTY_VALUES
 from django.forms import ValidationError
 from django.forms.fields import Field, RegexField, Select
 from django.utils.translation import ugettext_lazy as _
+
 
 class NOZipCodeField(RegexField):
     default_error_messages = {
@@ -15,16 +18,20 @@ class NOZipCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(NOZipCodeField, self).__init__(r'^\d{4}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                             max_length=None, min_length=None, *args, **kwargs)
+
 
 class NOMunicipalitySelect(Select):
     """
     A Select widget that uses a list of Norwegian municipalities (fylker)
     as its choices.
     """
+
     def __init__(self, attrs=None):
         from no_municipalities import MUNICIPALITY_CHOICES
+
         super(NOMunicipalitySelect, self).__init__(attrs, choices=MUNICIPALITY_CHOICES)
+
 
 class NOSocialSecurityNumber(Field):
     """
@@ -50,13 +57,13 @@ class NOSocialSecurityNumber(Field):
         self.birthday = None
         try:
             if 000 <= inum < 500:
-                self.birthday = datetime.date(1900+year2, month, day)
+                self.birthday = datetime.date(1900 + year2, month, day)
             if 500 <= inum < 750 and year2 > 54:
-                self.birthday = datetime.date(1800+year2, month, day)
+                self.birthday = datetime.date(1800 + year2, month, day)
             if 500 <= inum < 1000 and year2 < 40:
-                self.birthday = datetime.date(2000+year2, month, day)
+                self.birthday = datetime.date(2000 + year2, month, day)
             if 900 <= inum < 1000 and year2 > 39:
-                self.birthday = datetime.date(1900+year2, month, day)
+                self.birthday = datetime.date(1900 + year2, month, day)
         except ValueError:
             raise ValidationError(self.error_messages['invalid'])
 

@@ -4,6 +4,7 @@
 from django.db import models
 from django.contrib.gis.db.backends.base import SpatialRefSysMixin
 
+
 class GeometryColumns(models.Model):
     """
     The 'geometry_columns' table from SpatiaLite.
@@ -40,6 +41,7 @@ class GeometryColumns(models.Model):
                (self.f_table_name, self.f_geometry_column,
                 self.coord_dimension, self.type, self.srid)
 
+
 class SpatialRefSys(models.Model, SpatialRefSysMixin):
     """
     The 'spatial_ref_sys' table from SpatiaLite.
@@ -53,6 +55,7 @@ class SpatialRefSys(models.Model, SpatialRefSysMixin):
     @property
     def wkt(self):
         from django.contrib.gis.gdal import SpatialReference
+
         return SpatialReference(self.proj4text).wkt
 
     class Meta:

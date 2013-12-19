@@ -56,13 +56,15 @@ class.
 
 import datetime
 
-from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.comments import signals
 from django.db.models.base import ModelBase
-from django.template import Context, loader
 from django.contrib import comments
 from django.contrib.sites.models import Site
+
+from django.conf import settings
+from django.template import Context, loader
+
 
 class AlreadyModerated(Exception):
     """
@@ -72,6 +74,7 @@ class AlreadyModerated(Exception):
     """
     pass
 
+
 class NotModerated(Exception):
     """
     Raised when a model which is not registered for moderation is
@@ -79,6 +82,7 @@ class NotModerated(Exception):
 
     """
     pass
+
 
 class CommentModerator(object):
     """
@@ -206,7 +210,8 @@ class CommentModerator(object):
             if not getattr(content_object, self.enable_field):
                 return False
         if self.auto_close_field and self.close_after:
-            if self._get_delta(datetime.datetime.now(), getattr(content_object, self.auto_close_field)).days >= self.close_after:
+            if self._get_delta(datetime.datetime.now(),
+                               getattr(content_object, self.auto_close_field)).days >= self.close_after:
                 return False
         return True
 
@@ -221,7 +226,8 @@ class CommentModerator(object):
 
         """
         if self.auto_moderate_field and self.moderate_after:
-            if self._get_delta(datetime.datetime.now(), getattr(content_object, self.auto_moderate_field)).days >= self.moderate_after:
+            if self._get_delta(datetime.datetime.now(),
+                               getattr(content_object, self.auto_moderate_field)).days >= self.moderate_after:
                 return True
         return False
 
@@ -235,12 +241,13 @@ class CommentModerator(object):
             return
         recipient_list = [manager_tuple[1] for manager_tuple in settings.MANAGERS]
         t = loader.get_template('comments/comment_notification_email.txt')
-        c = Context({ 'comment': comment,
-                      'content_object': content_object })
+        c = Context({'comment': comment,
+                     'content_object': content_object})
         subject = '[%s] New comment posted on "%s"' % (Site.objects.get_current().name,
-                                                          content_object)
+                                                       content_object)
         message = t.render(c)
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, fail_silently=True)
+
 
 class Moderator(object):
     """
@@ -273,6 +280,7 @@ class Moderator(object):
     around, will send any notification emails the comment generated.
 
     """
+
     def __init__(self):
         self._registry = {}
         self.connect()
@@ -331,7 +339,7 @@ class Moderator(object):
         moderation_class = self._registry[model]
 
         # Comment will be disallowed outright (HTTP 403 response)
-        if not moderation_class.allow(comment, content_object, request): 
+        if not moderation_class.allow(comment, content_object, request):
             return False
 
         if moderation_class.moderate(comment, content_object, request):

@@ -1,7 +1,7 @@
 from django.db.backends.postgresql.introspection import DatabaseIntrospection as PostgresDatabaseIntrospection
 
-class DatabaseIntrospection(PostgresDatabaseIntrospection):
 
+class DatabaseIntrospection(PostgresDatabaseIntrospection):
     def get_relations(self, cursor, table_name):
         """
         Returns a dictionary of {field_index: (field_index_other_table, other_table)}

@@ -3,18 +3,23 @@
 Swedish specific Form helpers
 """
 import re
-from django import forms
+
 from django.utils.translation import ugettext_lazy as _
 from django.core.validators import EMPTY_VALUES
+
+from django import forms
 from django.contrib.localflavor.se.utils import (id_number_checksum,
-    validate_id_birthday, format_personal_id_number, valid_organisation,
-    format_organisation_number)
+                                                 validate_id_birthday, format_personal_id_number, valid_organisation,
+                                                 format_organisation_number)
+
 
 __all__ = ('SECountySelect', 'SEOrganisationNumberField',
-    'SEPersonalIdentityNumberField', 'SEPostalCodeField')
+           'SEPersonalIdentityNumberField', 'SEPostalCodeField')
 
-SWEDISH_ID_NUMBER = re.compile(r'^(?P<century>\d{2})?(?P<year>\d{2})(?P<month>\d{2})(?P<day>\d{2})(?P<sign>[\-+])?(?P<serial>\d{3})(?P<checksum>\d)$')
+SWEDISH_ID_NUMBER = re.compile(
+    r'^(?P<century>\d{2})?(?P<year>\d{2})(?P<month>\d{2})(?P<day>\d{2})(?P<sign>[\-+])?(?P<serial>\d{3})(?P<checksum>\d)$')
 SE_POSTAL_CODE = re.compile(r'^[1-9]\d{2} ?\d{2}$')
+
 
 class SECountySelect(forms.Select):
     """
@@ -27,8 +32,10 @@ class SECountySelect(forms.Select):
 
     def __init__(self, attrs=None):
         from se_counties import COUNTY_CHOICES
+
         super(SECountySelect, self).__init__(attrs=attrs,
                                              choices=COUNTY_CHOICES)
+
 
 class SEOrganisationNumberField(forms.CharField):
     """
@@ -52,20 +59,20 @@ class SEOrganisationNumberField(forms.CharField):
 
     def clean(self, value):
         value = super(SEOrganisationNumberField, self).clean(value)
-        
+
         if value in EMPTY_VALUES:
             return u''
-        
+
         match = SWEDISH_ID_NUMBER.match(value)
         if not match:
             raise forms.ValidationError(self.error_messages['invalid'])
 
         gd = match.groupdict()
-        
+
         # Compare the calculated value with the checksum 
         if id_number_checksum(gd) != int(gd['checksum']):
             raise forms.ValidationError(self.error_messages['invalid'])
-        
+
         # First: check if this is a real organisation_number
         if valid_organisation(gd):
             return format_organisation_number(gd)
@@ -113,13 +120,13 @@ class SEPersonalIdentityNumberField(forms.CharField):
 
         if value in EMPTY_VALUES:
             return u''
- 
+
         match = SWEDISH_ID_NUMBER.match(value)
         if match is None:
             raise forms.ValidationError(self.error_messages['invalid'])
 
         gd = match.groupdict()
- 
+
         # compare the calculated value with the checksum 
         if id_number_checksum(gd) != int(gd['checksum']):
             raise forms.ValidationError(self.error_messages['invalid'])
@@ -133,7 +140,7 @@ class SEPersonalIdentityNumberField(forms.CharField):
         # make sure that co-ordination numbers do not pass if not allowed 
         if not self.coordination_number and int(gd['day']) > 60:
             raise forms.ValidationError(self.error_messages['coordination_number'])
-  
+
         return format_personal_id_number(birth_day, gd)
 
 

@@ -3,11 +3,12 @@
 import time
 
 from django.core.cache.backends.base import BaseCache, InvalidCacheBackendError
-from django.utils.encoding import smart_unicode, smart_str
+from django.utils.encoding import smart_str
 
 try:
     import cmemcache as memcache
     import warnings
+
     warnings.warn(
         "Support for the 'cmemcache' library has been deprecated. Please use python-memcached instead.",
         PendingDeprecationWarning
@@ -17,6 +18,7 @@ except ImportError:
         import memcache
     except:
         raise InvalidCacheBackendError("Memcached cache backend requires either the 'memcache' or 'cmemcache' library")
+
 
 class CacheClass(BaseCache):
     def __init__(self, server, params):
@@ -57,7 +59,7 @@ class CacheClass(BaseCache):
         self._cache.delete(smart_str(key))
 
     def get_many(self, keys):
-        return self._cache.get_multi(map(smart_str,keys))
+        return self._cache.get_multi(map(smart_str, keys))
 
     def close(self, **kwargs):
         self._cache.disconnect_all()

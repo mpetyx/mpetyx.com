@@ -13,6 +13,7 @@ from django.forms.models import BaseModelFormSet, modelformset_factory, save_ins
 from django.contrib.admin.options import InlineModelAdmin, flatten_fieldsets
 from django.utils.encoding import smart_unicode
 
+
 class GenericForeignKey(object):
     """
     Provides a generic relation to any object through content-type/object-id
@@ -50,9 +51,9 @@ class GenericForeignKey(object):
         # using this model
         ContentType = get_model("contenttypes", "contenttype")
         if obj:
-             return ContentType.objects.db_manager(obj._state.db).get_for_model(obj)
+            return ContentType.objects.db_manager(obj._state.db).get_for_model(obj)
         elif id:
-             return ContentType.objects.db_manager(using).get_for_id(id)
+            return ContentType.objects.db_manager(using).get_for_id(id)
         else:
             # This should never happen. I love comments like this, don't you?
             raise Exception("Impossible arguments to GFK.get_content_type!")
@@ -95,15 +96,16 @@ class GenericForeignKey(object):
         setattr(instance, self.fk_field, fk)
         setattr(instance, self.cache_attr, value)
 
+
 class GenericRelation(RelatedField, Field):
     """Provides an accessor to generic related objects (e.g. comments)"""
 
     def __init__(self, to, **kwargs):
         kwargs['verbose_name'] = kwargs.get('verbose_name', None)
         kwargs['rel'] = GenericRel(to,
-                            related_name=kwargs.pop('related_name', None),
-                            limit_choices_to=kwargs.pop('limit_choices_to', None),
-                            symmetrical=kwargs.pop('symmetrical', True))
+                                   related_name=kwargs.pop('related_name', None),
+                                   limit_choices_to=kwargs.pop('limit_choices_to', None),
+                                   symmetrical=kwargs.pop('symmetrical', True))
 
 
         # Override content-type/object-id field names on the related class
@@ -165,7 +167,8 @@ class GenericRelation(RelatedField, Field):
         content_type = ContentType.objects.get_for_model(self.model)
         prefix = "__".join(pieces[:pos + 1])
         return [("%s__%s" % (prefix, self.content_type_field_name),
-            content_type)]
+                 content_type)]
+
 
 class ReverseGenericRelatedObjectsDescriptor(object):
     """
@@ -176,6 +179,7 @@ class ReverseGenericRelatedObjectsDescriptor(object):
     "article.publications", the publications attribute is a
     ReverseGenericRelatedObjectsDescriptor instance.
     """
+
     def __init__(self, field):
         self.field = field
 
@@ -195,15 +199,15 @@ class ReverseGenericRelatedObjectsDescriptor(object):
         qn = connection.ops.quote_name
 
         manager = RelatedManager(
-            model = rel_model,
-            instance = instance,
-            symmetrical = (self.field.rel.symmetrical and instance.__class__ == rel_model),
-            join_table = qn(self.field.m2m_db_table()),
-            source_col_name = qn(self.field.m2m_column_name()),
-            target_col_name = qn(self.field.m2m_reverse_name()),
-            content_type = ContentType.objects.db_manager(instance._state.db).get_for_model(instance),
-            content_type_field_name = self.field.content_type_field_name,
-            object_id_field_name = self.field.object_id_field_name
+            model=rel_model,
+            instance=instance,
+            symmetrical=(self.field.rel.symmetrical and instance.__class__ == rel_model),
+            join_table=qn(self.field.m2m_db_table()),
+            source_col_name=qn(self.field.m2m_column_name()),
+            target_col_name=qn(self.field.m2m_reverse_name()),
+            content_type=ContentType.objects.db_manager(instance._state.db).get_for_model(instance),
+            content_type_field_name=self.field.content_type_field_name,
+            object_id_field_name=self.field.object_id_field_name
         )
 
         return manager
@@ -216,6 +220,7 @@ class ReverseGenericRelatedObjectsDescriptor(object):
         manager.clear()
         for obj in value:
             manager.add(obj)
+
 
 def create_generic_related_manager(superclass):
     """
@@ -245,8 +250,8 @@ def create_generic_related_manager(superclass):
         def get_query_set(self):
             db = self._db or router.db_for_read(self.model, instance=self.instance)
             query = {
-                '%s__pk' % self.content_type_field_name : self.content_type.id,
-                '%s__exact' % self.object_id_field_name : self.pk_val,
+                '%s__pk' % self.content_type_field_name: self.content_type.id,
+                '%s__exact' % self.object_id_field_name: self.pk_val,
             }
             return superclass.get_query_set(self).using(db).filter(**query)
 
@@ -257,18 +262,21 @@ def create_generic_related_manager(superclass):
                 setattr(obj, self.content_type_field_name, self.content_type)
                 setattr(obj, self.object_id_field_name, self.pk_val)
                 obj.save()
+
         add.alters_data = True
 
         def remove(self, *objs):
             db = router.db_for_write(self.model, instance=self.instance)
             for obj in objs:
                 obj.delete(using=db)
+
         remove.alters_data = True
 
         def clear(self):
             db = router.db_for_write(self.model, instance=self.instance)
             for obj in self.all():
                 obj.delete(using=db)
+
         clear.alters_data = True
 
         def create(self, **kwargs):
@@ -276,9 +284,11 @@ def create_generic_related_manager(superclass):
             kwargs[self.object_id_field_name] = self.pk_val
             db = router.db_for_write(self.model, instance=self.instance)
             return super(GenericRelatedObjectManager, self).using(db).create(**kwargs)
+
         create.alters_data = True
 
     return GenericRelatedObjectManager
+
 
 class GenericRel(ManyToManyRel):
     def __init__(self, to, related_name=None, limit_choices_to=None, symmetrical=True):
@@ -289,6 +299,7 @@ class GenericRel(ManyToManyRel):
         self.multiple = True
         self.through = None
 
+
 class BaseGenericInlineFormSet(BaseModelFormSet):
     """
     A formset for generic inline objects to a parent.
@@ -298,6 +309,7 @@ class BaseGenericInlineFormSet(BaseModelFormSet):
                  prefix=None, queryset=None):
         # Avoid a circular import.
         from django.contrib.contenttypes.models import ContentType
+
         opts = self.model._meta
         self.instance = instance
         self.rel_name = '-'.join((
@@ -322,19 +334,22 @@ class BaseGenericInlineFormSet(BaseModelFormSet):
     def get_default_prefix(cls):
         opts = cls.model._meta
         return '-'.join((opts.app_label, opts.object_name.lower(),
-                        cls.ct_field.name, cls.ct_fk_field.name,
+                         cls.ct_field.name, cls.ct_fk_field.name,
         ))
+
     get_default_prefix = classmethod(get_default_prefix)
 
     def save_new(self, form, commit=True):
         # Avoid a circular import.
         from django.contrib.contenttypes.models import ContentType
+
         kwargs = {
             self.ct_field.get_attname(): ContentType.objects.get_for_model(self.instance).pk,
             self.ct_fk_field.get_attname(): self.instance.pk,
         }
         new_obj = self.model(**kwargs)
         return save_instance(form, new_obj, commit=commit)
+
 
 def generic_inlineformset_factory(model, form=ModelForm,
                                   formset=BaseGenericInlineFormSet,
@@ -371,6 +386,7 @@ def generic_inlineformset_factory(model, form=ModelForm,
     FormSet.ct_fk_field = fk_field
     return FormSet
 
+
 class GenericInlineModelAdmin(InlineModelAdmin):
     ct_field = "content_type"
     ct_fk_field = "object_id"
@@ -402,8 +418,10 @@ class GenericInlineModelAdmin(InlineModelAdmin):
         }
         return generic_inlineformset_factory(self.model, **defaults)
 
+
 class GenericStackedInline(GenericInlineModelAdmin):
     template = 'admin/edit_inline/stacked.html'
+
 
 class GenericTabularInline(GenericInlineModelAdmin):
     template = 'admin/edit_inline/tabular.html'

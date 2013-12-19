@@ -1,13 +1,15 @@
-from django.contrib.admin.filterspecs import FilterSpec
+import operator
+
 from django.contrib.admin.options import IncorrectLookupParameters
 from django.contrib.admin.util import quote
 from django.core.paginator import Paginator, InvalidPage
 from django.db import models
-from django.db.models.query import QuerySet
 from django.utils.encoding import force_unicode, smart_str
 from django.utils.translation import ugettext
 from django.utils.http import urlencode
-import operator
+
+from django.contrib.admin.filterspecs import FilterSpec
+
 
 # The system will display a "Show all" link on the change list only if the
 # total result count is less than or equal to this setting.
@@ -26,8 +28,10 @@ ERROR_FLAG = 'e'
 # Text to display within change-list table cells if the value is blank.
 EMPTY_CHANGELIST_VALUE = '(None)'
 
+
 class ChangeList(object):
-    def __init__(self, request, model, list_display, list_display_links, list_filter, date_hierarchy, search_fields, list_select_related, list_per_page, list_editable, model_admin):
+    def __init__(self, request, model, list_display, list_display_links, list_filter, date_hierarchy, search_fields,
+                 list_select_related, list_per_page, list_editable, model_admin):
         self.model = model
         self.opts = model._meta
         self.lookup_opts = self.opts
@@ -62,7 +66,8 @@ class ChangeList(object):
         self.query = request.GET.get(SEARCH_VAR, '')
         self.query_set = self.get_query_set()
         self.get_results(request)
-        self.title = (self.is_popup and ugettext('Select %s') % force_unicode(self.opts.verbose_name) or ugettext('Select %s to change') % force_unicode(self.opts.verbose_name))
+        self.title = (self.is_popup and ugettext('Select %s') % force_unicode(self.opts.verbose_name) or ugettext(
+            'Select %s to change') % force_unicode(self.opts.verbose_name))
         self.filter_specs, self.has_filters = self.get_filters(request)
         self.pk_attname = self.lookup_opts.pk.attname
 
@@ -114,7 +119,7 @@ class ChangeList(object):
             result_list = self.query_set._clone()
         else:
             try:
-                result_list = paginator.page(self.page_num+1).object_list
+                result_list = paginator.page(self.page_num + 1).object_list
             except InvalidPage:
                 result_list = ()
 

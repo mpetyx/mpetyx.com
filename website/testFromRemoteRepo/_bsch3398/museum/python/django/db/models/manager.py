@@ -1,5 +1,4 @@
 from django.utils import copycompat as copy
-from django.conf import settings
 from django.db import router
 from django.db.models.query import QuerySet, EmptyQuerySet, insert_query, RawQuerySet
 from django.db.models import signals
@@ -20,7 +19,8 @@ def ensure_default_manager(sender, **kwargs):
         # Create the default manager, if needed.
         try:
             cls._meta.get_field('objects')
-            raise ValueError("Model %s must specify a custom Manager, because it has a field named 'objects'" % cls.__name__)
+            raise ValueError(
+                "Model %s must specify a custom Manager, because it has a field named 'objects'" % cls.__name__)
         except FieldDoesNotExist:
             pass
         cls.add_to_class('objects', Manager())
@@ -39,9 +39,12 @@ def ensure_default_manager(sender, **kwargs):
                         getattr(base_class, "use_for_related_fields", False)):
                     cls.add_to_class('_base_manager', base_class())
                     return
-            raise AssertionError("Should never get here. Please report a bug, including your model and model manager setup.")
+            raise AssertionError(
+                "Should never get here. Please report a bug, including your model and model manager setup.")
+
 
 signals.class_prepared.connect(ensure_default_manager)
+
 
 class Manager(object):
     # Tracks each time a Manager instance is created. Used to retain order.
@@ -58,14 +61,15 @@ class Manager(object):
         # TODO: Use weakref because of possible memory leak / circular reference.
         self.model = model
         setattr(model, name, ManagerDescriptor(self))
-        if not getattr(model, '_default_manager', None) or self.creation_counter < model._default_manager.creation_counter:
+        if not getattr(model, '_default_manager',
+                       None) or self.creation_counter < model._default_manager.creation_counter:
             model._default_manager = self
         if model._meta.abstract or (self._inherited and not self.model._meta.proxy):
             model._meta.abstract_managers.append((self.creation_counter, name,
-                    self))
+                                                  self))
         else:
             model._meta.concrete_managers.append((self.creation_counter, name,
-                self))
+                                                  self))
 
     def _set_creation_counter(self):
         """
@@ -200,6 +204,7 @@ class Manager(object):
     def raw(self, raw_query, params=None, *args, **kwargs):
         return RawQuerySet(raw_query=raw_query, model=self.model, params=params, using=self._db, *args, **kwargs)
 
+
 class ManagerDescriptor(object):
     # This class ensures managers aren't accessible via model instances.
     # For example, Poll.objects works, but poll_obj.objects raises AttributeError.
@@ -210,6 +215,7 @@ class ManagerDescriptor(object):
         if instance != None:
             raise AttributeError("Manager isn't accessible via %s instances" % type.__name__)
         return self.manager
+
 
 class EmptyManager(Manager):
     def get_query_set(self):

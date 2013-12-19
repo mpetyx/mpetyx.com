@@ -1,7 +1,8 @@
-from MySQLdb.constants import FIELD_TYPE
-
 from django.contrib.gis.gdal import OGRGeomType
 from django.db.backends.mysql.introspection import DatabaseIntrospection
+
+from MySQLdb.constants import FIELD_TYPE
+
 
 class MySQLIntrospection(DatabaseIntrospection):
     # Updating the data_types_reverse dictionary with the appropriate

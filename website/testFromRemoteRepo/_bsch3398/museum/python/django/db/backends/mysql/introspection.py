@@ -1,9 +1,13 @@
-from django.db.backends import BaseDatabaseIntrospection
-from MySQLdb import ProgrammingError, OperationalError
-from MySQLdb.constants import FIELD_TYPE
 import re
 
+from django.db.backends import BaseDatabaseIntrospection
+
+from MySQLdb import ProgrammingError, OperationalError
+from MySQLdb.constants import FIELD_TYPE
+
+
 foreign_key_re = re.compile(r"\sCONSTRAINT `[^`]*` FOREIGN KEY \(`([^`]*)`\) REFERENCES `([^`]*)` \(`([^`]*)`\)")
+
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
     data_types_reverse = {

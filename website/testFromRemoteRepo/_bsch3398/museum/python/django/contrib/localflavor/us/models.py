@@ -1,10 +1,9 @@
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.db.models.fields import CharField
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
 
-class USStateField(CharField):
 
+class USStateField(CharField):
     description = _("U.S. state (two uppercase letters)")
 
     def __init__(self, *args, **kwargs):
@@ -12,8 +11,8 @@ class USStateField(CharField):
         kwargs['max_length'] = 2
         super(USStateField, self).__init__(*args, **kwargs)
 
-class PhoneNumberField(CharField):
 
+class PhoneNumberField(CharField):
     description = _("Phone number")
 
     def __init__(self, *args, **kwargs):
@@ -22,6 +21,7 @@ class PhoneNumberField(CharField):
 
     def formfield(self, **kwargs):
         from django.contrib.localflavor.us.forms import USPhoneNumberField
+
         defaults = {'form_class': USPhoneNumberField}
         defaults.update(kwargs)
         return super(PhoneNumberField, self).formfield(**defaults)

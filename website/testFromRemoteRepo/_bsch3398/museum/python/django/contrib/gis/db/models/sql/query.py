@@ -10,16 +10,17 @@ from django.contrib.gis.measure import Area, Distance
 
 
 ALL_TERMS = dict([(x, None) for x in (
-            'bbcontains', 'bboverlaps', 'contained', 'contains',
-            'contains_properly', 'coveredby', 'covers', 'crosses', 'disjoint',
-            'distance_gt', 'distance_gte', 'distance_lt', 'distance_lte',
-            'dwithin', 'equals', 'exact',
-            'intersects', 'overlaps', 'relate', 'same_as', 'touches', 'within',
-            'left', 'right', 'overlaps_left', 'overlaps_right',
-            'overlaps_above', 'overlaps_below',
-            'strictly_above', 'strictly_below'
-            )])
+    'bbcontains', 'bboverlaps', 'contained', 'contains',
+    'contains_properly', 'coveredby', 'covers', 'crosses', 'disjoint',
+    'distance_gt', 'distance_gte', 'distance_lt', 'distance_lte',
+    'dwithin', 'equals', 'exact',
+    'intersects', 'overlaps', 'relate', 'same_as', 'touches', 'within',
+    'left', 'right', 'overlaps_left', 'overlaps_right',
+    'overlaps_above', 'overlaps_below',
+    'strictly_above', 'strictly_below'
+)])
 ALL_TERMS.update(sql.constants.QUERY_TERMS)
+
 
 class GeoQuery(sql.Query):
     """
@@ -67,9 +68,9 @@ class GeoQuery(sql.Query):
         elif isinstance(field, DistanceField):
             # Using the field's distance attribute, can instantiate
             # `Distance` with the right context.
-            value = Distance(**{field.distance_att : value})
+            value = Distance(**{field.distance_att: value})
         elif isinstance(field, AreaField):
-            value = Area(**{field.area_att : value})
+            value = Area(**{field.area_att: value})
         elif isinstance(field, (GeomField, GeometryField)) and value:
             value = Geometry(value)
         return value

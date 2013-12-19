@@ -7,7 +7,6 @@ from django.forms import ValidationError
 from django.forms.fields import Field, RegexField, Select
 from django.utils.encoding import smart_unicode
 from django.utils.translation import gettext
-import re
 
 
 class INZipCodeField(RegexField):
@@ -17,7 +16,8 @@ class INZipCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(INZipCodeField, self).__init__(r'^\d{6}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                             max_length=None, min_length=None, *args, **kwargs)
+
 
 class INStateField(Field):
     """
@@ -31,6 +31,7 @@ class INStateField(Field):
 
     def clean(self, value):
         from in_states import STATES_NORMALIZED
+
         super(INStateField, self).clean(value)
         if value in EMPTY_VALUES:
             return u''
@@ -45,12 +46,15 @@ class INStateField(Field):
                 pass
         raise ValidationError(self.error_messages['invalid'])
 
+
 class INStateSelect(Select):
     """
     A Select widget that uses a list of Indian states/territories as its
     choices.
     """
+
     def __init__(self, attrs=None):
         from in_states import STATE_CHOICES
+
         super(INStateSelect, self).__init__(attrs, choices=STATE_CHOICES)
 

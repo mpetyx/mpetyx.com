@@ -24,8 +24,8 @@ def add_message(request, level, message, extra_tags='', fail_silently=False):
         return request.user.message_set.create(message=message)
     if not fail_silently:
         raise MessageFailure('Without the django.contrib.messages '
-                                'middleware, messages can only be added to '
-                                'authenticated users.')
+                             'middleware, messages can only be added to '
+                             'authenticated users.')
 
 
 def get_messages(request):
@@ -41,6 +41,7 @@ def get_messages(request):
             return request.user
         else:
             from django.contrib.auth.models import AnonymousUser
+
             return AnonymousUser()
 
     return lazy(memoize(get_user().get_and_delete_messages, {}, 0), list)()

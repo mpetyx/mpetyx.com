@@ -3,7 +3,6 @@ import unittest
 from urlparse import urlsplit, urlunsplit
 from xml.dom.minidom import parseString, Node
 
-from django.conf import settings
 from django.core import mail
 from django.core.management import call_command
 from django.core.urlresolvers import clear_url_caches
@@ -14,6 +13,9 @@ from django.test.client import Client
 from django.utils import simplejson
 from django.utils.encoding import smart_str
 
+from django.conf import settings
+
+
 try:
     all
 except NameError:
@@ -21,6 +23,7 @@ except NameError:
 
 normalize_long_ints = lambda s: re.sub(r'(?<![\w])(\d+)L(?![\w])', '\\1', s)
 normalize_decimals = lambda s: re.sub(r"Decimal\('(\d+(\.\d*)?)'\)", lambda m: "Decimal(\"%s\")" % m.groups()[0], s)
+
 
 def to_list(value):
     """
@@ -33,6 +36,7 @@ def to_list(value):
         value = [value]
     return value
 
+
 real_commit = transaction.commit
 real_rollback = transaction.rollback
 real_enter_transaction_management = transaction.enter_transaction_management
@@ -41,8 +45,10 @@ real_savepoint_commit = transaction.savepoint_commit
 real_savepoint_rollback = transaction.savepoint_rollback
 real_managed = transaction.managed
 
+
 def nop(*args, **kwargs):
     return
+
 
 def disable_transaction_methods():
     transaction.commit = nop
@@ -53,6 +59,7 @@ def disable_transaction_methods():
     transaction.leave_transaction_management = nop
     transaction.managed = nop
 
+
 def restore_transaction_methods():
     transaction.commit = real_commit
     transaction.rollback = real_rollback
@@ -61,6 +68,7 @@ def restore_transaction_methods():
     transaction.enter_transaction_management = real_enter_transaction_management
     transaction.leave_transaction_management = real_leave_transaction_management
     transaction.managed = real_managed
+
 
 class OutputChecker(doctest.OutputChecker):
     def check_output(self, want, got, optionflags):
@@ -86,9 +94,9 @@ class OutputChecker(doctest.OutputChecker):
            made to __repr__ in Python 2.6.
         """
         return doctest.OutputChecker.check_output(self,
-            normalize_decimals(normalize_long_ints(want)),
-            normalize_decimals(normalize_long_ints(got)),
-            optionflags)
+                                                  normalize_decimals(normalize_long_ints(want)),
+                                                  normalize_decimals(normalize_long_ints(got)),
+                                                  optionflags)
 
     def check_output_xml(self, want, got, optionsflags):
         """Tries to do a 'xml-comparision' of want and got.  Plain string
@@ -98,6 +106,7 @@ class OutputChecker(doctest.OutputChecker):
         Based on http://codespeak.net/svn/lxml/trunk/src/lxml/doctestcompare.py
         """
         _norm_whitespace_re = re.compile(r'[ \t\n][ \t\n]+')
+
         def norm_whitespace(v):
             return _norm_whitespace_re.sub(' ', v)
 
@@ -132,8 +141,8 @@ class OutputChecker(doctest.OutputChecker):
             return True
 
         want, got = self._strip_quotes(want, got)
-        want = want.replace('\\n','\n')
-        got = got.replace('\\n','\n')
+        want = want.replace('\\n', '\n')
+        got = got.replace('\\n', '\n')
 
         # If the string is not a complete xml document, we may need to add a
         # root element. This allow us to compare fragments, like "<foo/><bar/>"
@@ -174,6 +183,7 @@ class OutputChecker(doctest.OutputChecker):
         >>> o._strip_quotes('u"foo"')
         "foo"
         """
+
         def is_quoted_string(s):
             s = s.strip()
             return (len(s) >= 2
@@ -208,6 +218,7 @@ class DocTestRunner(doctest.DocTestRunner):
         # side effects on other tests.
         for conn in connections:
             transaction.rollback_unless_managed(using=conn)
+
 
 class TransactionTestCase(unittest.TestCase):
     def _pre_setup(self):
@@ -258,6 +269,7 @@ class TransactionTestCase(unittest.TestCase):
             raise
         except Exception:
             import sys
+
             result.addError(self, sys.exc_info())
             return
         super(TransactionTestCase, self).__call__(result)
@@ -267,6 +279,7 @@ class TransactionTestCase(unittest.TestCase):
             raise
         except Exception:
             import sys
+
             result.addError(self, sys.exc_info())
             return
 
@@ -300,28 +313,28 @@ class TransactionTestCase(unittest.TestCase):
         if hasattr(response, 'redirect_chain'):
             # The request was a followed redirect
             self.failUnless(len(response.redirect_chain) > 0,
-                msg_prefix + "Response didn't redirect as expected: Response"
-                " code was %d (expected %d)" %
-                    (response.status_code, status_code))
+                            msg_prefix + "Response didn't redirect as expected: Response"
+                                         " code was %d (expected %d)" %
+                            (response.status_code, status_code))
 
             self.assertEqual(response.redirect_chain[0][1], status_code,
-                msg_prefix + "Initial response didn't redirect as expected:"
-                " Response code was %d (expected %d)" %
-                    (response.redirect_chain[0][1], status_code))
+                             msg_prefix + "Initial response didn't redirect as expected:"
+                                          " Response code was %d (expected %d)" %
+                             (response.redirect_chain[0][1], status_code))
 
             url, status_code = response.redirect_chain[-1]
 
             self.assertEqual(response.status_code, target_status_code,
-                msg_prefix + "Response didn't redirect as expected: Final"
-                " Response code was %d (expected %d)" %
-                    (response.status_code, target_status_code))
+                             msg_prefix + "Response didn't redirect as expected: Final"
+                                          " Response code was %d (expected %d)" %
+                             (response.status_code, target_status_code))
 
         else:
             # Not a followed redirect
             self.assertEqual(response.status_code, status_code,
-                msg_prefix + "Response didn't redirect as expected: Response"
-                " code was %d (expected %d)" %
-                    (response.status_code, status_code))
+                             msg_prefix + "Response didn't redirect as expected: Response"
+                                          " code was %d (expected %d)" %
+                             (response.status_code, status_code))
 
             url = response['Location']
             scheme, netloc, path, query, fragment = urlsplit(url)
@@ -331,18 +344,18 @@ class TransactionTestCase(unittest.TestCase):
             # Get the redirection page, using the same client that was used
             # to obtain the original response.
             self.assertEqual(redirect_response.status_code, target_status_code,
-                msg_prefix + "Couldn't retrieve redirection page '%s':"
-                " response code was %d (expected %d)" %
-                    (path, redirect_response.status_code, target_status_code))
+                             msg_prefix + "Couldn't retrieve redirection page '%s':"
+                                          " response code was %d (expected %d)" %
+                             (path, redirect_response.status_code, target_status_code))
 
         e_scheme, e_netloc, e_path, e_query, e_fragment = urlsplit(expected_url)
         if not (e_scheme or e_netloc):
             expected_url = urlunsplit(('http', host or 'testserver', e_path,
-                e_query, e_fragment))
+                                       e_query, e_fragment))
 
         self.assertEqual(url, expected_url,
-            msg_prefix + "Response redirected to '%s', expected '%s'" %
-                (url, expected_url))
+                         msg_prefix + "Response redirected to '%s', expected '%s'" %
+                         (url, expected_url))
 
     def assertContains(self, response, text, count=None, status_code=200,
                        msg_prefix=''):
@@ -357,17 +370,17 @@ class TransactionTestCase(unittest.TestCase):
             msg_prefix += ": "
 
         self.assertEqual(response.status_code, status_code,
-            msg_prefix + "Couldn't retrieve page: Response code was %d"
-            " (expected %d)" % (response.status_code, status_code))
+                         msg_prefix + "Couldn't retrieve page: Response code was %d"
+                                      " (expected %d)" % (response.status_code, status_code))
         text = smart_str(text, response._charset)
         real_count = response.content.count(text)
         if count is not None:
             self.assertEqual(real_count, count,
-                msg_prefix + "Found %d instances of '%s' in response"
-                " (expected %d)" % (real_count, text, count))
+                             msg_prefix + "Found %d instances of '%s' in response"
+                                          " (expected %d)" % (real_count, text, count))
         else:
             self.failUnless(real_count != 0,
-                msg_prefix + "Couldn't find '%s' in response" % text)
+                            msg_prefix + "Couldn't find '%s' in response" % text)
 
     def assertNotContains(self, response, text, status_code=200,
                           msg_prefix=''):
@@ -380,11 +393,11 @@ class TransactionTestCase(unittest.TestCase):
             msg_prefix += ": "
 
         self.assertEqual(response.status_code, status_code,
-            msg_prefix + "Couldn't retrieve page: Response code was %d"
-            " (expected %d)" % (response.status_code, status_code))
+                         msg_prefix + "Couldn't retrieve page: Response code was %d"
+                                      " (expected %d)" % (response.status_code, status_code))
         text = smart_str(text, response._charset)
         self.assertEqual(response.content.count(text), 0,
-            msg_prefix + "Response should not contain '%s'" % text)
+                         msg_prefix + "Response should not contain '%s'" % text)
 
     def assertFormError(self, response, form, field, errors, msg_prefix=''):
         """
@@ -398,14 +411,14 @@ class TransactionTestCase(unittest.TestCase):
         contexts = to_list(response.context)
         if not contexts:
             self.fail(msg_prefix + "Response did not use any contexts to "
-                      "render the response")
+                                   "render the response")
 
         # Put error(s) into a list to simplify processing.
         errors = to_list(errors)
 
         # Search all contexts for the error.
         found_form = False
-        for i,context in enumerate(contexts):
+        for i, context in enumerate(contexts):
             if form not in context:
                 continue
             found_form = True
@@ -414,28 +427,28 @@ class TransactionTestCase(unittest.TestCase):
                     if field in context[form].errors:
                         field_errors = context[form].errors[field]
                         self.failUnless(err in field_errors,
-                            msg_prefix + "The field '%s' on form '%s' in"
-                            " context %d does not contain the error '%s'"
-                            " (actual errors: %s)" %
-                                (field, form, i, err, repr(field_errors)))
+                                        msg_prefix + "The field '%s' on form '%s' in"
+                                                     " context %d does not contain the error '%s'"
+                                                     " (actual errors: %s)" %
+                                        (field, form, i, err, repr(field_errors)))
                     elif field in context[form].fields:
                         self.fail(msg_prefix + "The field '%s' on form '%s'"
-                                  " in context %d contains no errors" %
-                                      (field, form, i))
+                                               " in context %d contains no errors" %
+                                  (field, form, i))
                     else:
                         self.fail(msg_prefix + "The form '%s' in context %d"
-                                  " does not contain the field '%s'" %
-                                      (form, i, field))
+                                               " does not contain the field '%s'" %
+                                  (form, i, field))
                 else:
                     non_field_errors = context[form].non_field_errors()
                     self.failUnless(err in non_field_errors,
-                        msg_prefix + "The form '%s' in context %d does not"
-                        " contain the non-field error '%s'"
-                        " (actual errors: %s)" %
-                            (form, i, err, non_field_errors))
+                                    msg_prefix + "The form '%s' in context %d does not"
+                                                 " contain the non-field error '%s'"
+                                                 " (actual errors: %s)" %
+                                    (form, i, err, non_field_errors))
         if not found_form:
             self.fail(msg_prefix + "The form '%s' was not used to render the"
-                      " response" % form)
+                                   " response" % form)
 
     def assertTemplateUsed(self, response, template_name, msg_prefix=''):
         """
@@ -449,9 +462,9 @@ class TransactionTestCase(unittest.TestCase):
         if not template_names:
             self.fail(msg_prefix + "No templates used to render the response")
         self.failUnless(template_name in template_names,
-            msg_prefix + "Template '%s' was not a template used to render"
-            " the response. Actual template(s) used: %s" %
-                (template_name, u', '.join(template_names)))
+                        msg_prefix + "Template '%s' was not a template used to render"
+                                     " the response. Actual template(s) used: %s" %
+                        (template_name, u', '.join(template_names)))
 
     def assertTemplateNotUsed(self, response, template_name, msg_prefix=''):
         """
@@ -463,8 +476,9 @@ class TransactionTestCase(unittest.TestCase):
 
         template_names = [t.name for t in to_list(response.template)]
         self.failIf(template_name in template_names,
-            msg_prefix + "Template '%s' was used unexpectedly in rendering"
-            " the response" % template_name)
+                    msg_prefix + "Template '%s' was used unexpectedly in rendering"
+                                 " the response" % template_name)
+
 
 def connections_support_transactions():
     """
@@ -472,7 +486,8 @@ def connections_support_transactions():
     because 2.4 doesn't support any or all.
     """
     return all(conn.settings_dict['SUPPORTS_TRANSACTIONS']
-        for conn in connections.all())
+               for conn in connections.all())
+
 
 class TestCase(TransactionTestCase):
     """
@@ -499,15 +514,16 @@ class TestCase(TransactionTestCase):
         disable_transaction_methods()
 
         from django.contrib.sites.models import Site
+
         Site.objects.clear_cache()
 
         for db in databases:
             if hasattr(self, 'fixtures'):
                 call_command('loaddata', *self.fixtures, **{
-                                                            'verbosity': 0,
-                                                            'commit': False,
-                                                            'database': db
-                                                            })
+                    'verbosity': 0,
+                    'commit': False,
+                    'database': db
+                })
 
     def _fixture_teardown(self):
         if not connections_support_transactions():

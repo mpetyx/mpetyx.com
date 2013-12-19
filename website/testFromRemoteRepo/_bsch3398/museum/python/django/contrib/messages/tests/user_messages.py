@@ -1,14 +1,14 @@
-from django import http
 from django.contrib.auth.models import User
-from django.contrib.messages.storage.user_messages import UserMessagesStorage,\
+from django.test import TestCase
+
+from django import http
+from django.contrib.messages.storage.user_messages import UserMessagesStorage, \
     LegacyFallbackStorage
 from django.contrib.messages.tests.cookie import set_cookie_data
 from django.contrib.messages.tests.fallback import FallbackTest
-from django.test import TestCase
 
 
 class UserMessagesTest(TestCase):
-
     def setUp(self):
         self.user = User.objects.create(username='tester')
 

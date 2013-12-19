@@ -1,10 +1,12 @@
 from django.core import urlresolvers
 from django.contrib.sitemaps import Sitemap
 
+
 class GeoRSSSitemap(Sitemap):
     """
     A minimal hook to produce sitemaps for GeoRSS feeds.
     """
+
     def __init__(self, feed_dict, slug_dict=None):
         """
         This sitemap object initializes on a feed dictionary (as would be passed
@@ -35,7 +37,7 @@ class GeoRSSSitemap(Sitemap):
                     self.locations.append('%s/%s' % (section, slug))
             else:
                 self.locations.append(section)
- 
+
     def get_urls(self, page=1):
         """
         This method is overrridden so the appropriate `geo_format` attribute

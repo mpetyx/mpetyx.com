@@ -3,6 +3,7 @@ from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.geos.geometry import GEOSGeometry
 from django.contrib.gis.geos import prototypes as capi
 
+
 class Point(GEOSGeometry):
     _minlength = 2
     _maxlength = 3
@@ -73,8 +74,10 @@ class Point(GEOSGeometry):
     def __len__(self):
         "Returns the number of dimensions for this Point (either 0, 2 or 3)."
         if self.empty: return 0
-        if self.hasz: return 3
-        else: return 2
+        if self.hasz:
+            return 3
+        else:
+            return 2
 
     def _get_single_external(self, index):
         if index == 0:

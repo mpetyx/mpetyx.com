@@ -1,22 +1,23 @@
 import datetime
-from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.contrib.sessions.backends.base import SessionBase, CreateError
 from django.core.exceptions import SuspiciousOperation
 from django.db import IntegrityError, transaction, router
 from django.utils.encoding import force_unicode
 
+
 class SessionStore(SessionBase):
     """
     Implements database session store.
     """
+
     def __init__(self, session_key=None):
         super(SessionStore, self).__init__(session_key)
 
     def load(self):
         try:
             s = Session.objects.get(
-                session_key = self.session_key,
+                session_key=self.session_key,
                 expire_date__gt=datetime.datetime.now()
             )
             return self.decode(force_unicode(s.session_data))
@@ -53,9 +54,9 @@ class SessionStore(SessionBase):
         entry).
         """
         obj = Session(
-            session_key = self.session_key,
-            session_data = self.encode(self._get_session(no_load=must_create)),
-            expire_date = self.get_expiry_date()
+            session_key=self.session_key,
+            session_data=self.encode(self._get_session(no_load=must_create)),
+            expire_date=self.get_expiry_date()
         )
         using = router.db_for_write(Session, instance=obj)
         sid = transaction.savepoint(using=using)

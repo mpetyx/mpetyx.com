@@ -12,13 +12,13 @@ class Driver(GDALBase):
     "Wraps an OGR Data Source Driver."
 
     # Case-insensitive aliases for OGR Drivers.
-    _alias = {'esri' : 'ESRI Shapefile',
-              'shp' : 'ESRI Shapefile',
-              'shape' : 'ESRI Shapefile',
-              'tiger' : 'TIGER',
-              'tiger/line' : 'TIGER',
-              }
-                
+    _alias = {'esri': 'ESRI Shapefile',
+              'shp': 'ESRI Shapefile',
+              'shape': 'ESRI Shapefile',
+              'tiger': 'TIGER',
+              'tiger/line': 'TIGER',
+    }
+
     def __init__(self, dr_input):
         "Initializes an OGR driver on either a string or integer input."
 
@@ -57,7 +57,7 @@ class Driver(GDALBase):
         # Only register all if the driver count is 0 (or else all drivers
         # will be registered over and over again)
         if not self.driver_count: capi.register_all()
-                    
+
     # Driver properties
     @property
     def driver_count(self):

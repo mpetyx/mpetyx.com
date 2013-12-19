@@ -11,6 +11,7 @@ class MergeDict(object):
     If a key appears in more than one of the given dictionaries, only the
     first occurrence will be used.
     """
+
     def __init__(self, *dicts):
         self.dicts = dicts
 
@@ -77,10 +78,12 @@ class MergeDict(object):
         """Returns a copy of this object."""
         return self.__copy__()
 
+
 class SortedDict(dict):
     """
     A dictionary that keeps its keys in the order in which they're inserted.
     """
+
     def __new__(cls, *args, **kwargs):
         instance = super(SortedDict, cls).__new__(cls, *args, **kwargs)
         instance.keyOrder = []
@@ -194,8 +197,10 @@ class SortedDict(dict):
         super(SortedDict, self).clear()
         self.keyOrder = []
 
+
 class MultiValueDictKeyError(KeyError):
     pass
+
 
 class MultiValueDict(dict):
     """
@@ -215,6 +220,7 @@ class MultiValueDict(dict):
     which returns a list for every key, even though most Web forms submit
     single name-value pairs.
     """
+
     def __init__(self, key_to_list_mapping=()):
         super(MultiValueDict, self).__init__(key_to_list_mapping)
 
@@ -244,6 +250,7 @@ class MultiValueDict(dict):
 
     def __deepcopy__(self, memo=None):
         import django.utils.copycompat as copy
+
         if memo is None:
             memo = {}
         result = self.__class__()
@@ -362,6 +369,7 @@ class MultiValueDict(dict):
         for key, value in kwargs.iteritems():
             self.setlistdefault(key, []).append(value)
 
+
 class DotExpandedDict(dict):
     """
     A special dictionary constructor that takes a dictionary in which the keys
@@ -383,17 +391,19 @@ class DotExpandedDict(dict):
     >>> DotExpandedDict({'c.1': 2, 'c.2': 3, 'c': 1})
     {'c': 1}
     """
+
     def __init__(self, key_to_list_mapping):
         for k, v in key_to_list_mapping.items():
             current = self
             bits = k.split('.')
             for bit in bits[:-1]:
                 current = current.setdefault(bit, {})
-            # Now assign value to current position
+                # Now assign value to current position
             try:
                 current[bits[-1]] = v
             except TypeError: # Special-case if current isn't a dict.
                 current = {bits[-1]: v}
+
 
 class ImmutableList(tuple):
     """
@@ -425,19 +435,20 @@ class ImmutableList(tuple):
             raise AttributeError(self.warning)
 
     # All list mutation functions complain.
-    __delitem__  = complain
+    __delitem__ = complain
     __delslice__ = complain
-    __iadd__     = complain
-    __imul__     = complain
-    __setitem__  = complain
+    __iadd__ = complain
+    __imul__ = complain
+    __setitem__ = complain
     __setslice__ = complain
-    append       = complain
-    extend       = complain
-    insert       = complain
-    pop          = complain
-    remove       = complain
-    sort         = complain
-    reverse      = complain
+    append = complain
+    extend = complain
+    insert = complain
+    pop = complain
+    remove = complain
+    sort = complain
+    reverse = complain
+
 
 class DictWrapper(dict):
     """
@@ -448,6 +459,7 @@ class DictWrapper(dict):
     Used by the SQL construction code to ensure that values are correctly
     quoted before being used.
     """
+
     def __init__(self, data, func, prefix):
         super(DictWrapper, self).__init__(data)
         self.func = func

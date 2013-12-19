@@ -7,7 +7,6 @@ databases). The abstraction barrier only works one way: this module has to know
 all about the internals of models in order to get the information it needs.
 """
 
-from django.utils.copycompat import deepcopy
 from django.utils.tree import Node
 from django.utils.datastructures import SortedDict
 from django.utils.encoding import force_unicode
@@ -20,10 +19,14 @@ from django.db.models.sql.constants import *
 from django.db.models.sql.datastructures import EmptyResultSet, Empty, MultiJoin
 from django.db.models.sql.expressions import SQLEvaluator
 from django.db.models.sql.where import (WhereNode, Constraint, EverythingNode,
-    ExtraWhere, AND, OR)
+                                        ExtraWhere, AND, OR)
 from django.core.exceptions import FieldError
 
+from django.utils.copycompat import deepcopy
+
+
 __all__ = ['Query', 'RawQuery']
+
 
 class RawQuery(object):
     """
@@ -266,7 +269,7 @@ class Query(object):
             obj.aggregate_select_mask = None
         else:
             obj.aggregate_select_mask = self.aggregate_select_mask.copy()
-        # _aggregate_select_cache cannot be copied, as doing so breaks the
+            # _aggregate_select_cache cannot be copied, as doing so breaks the
         # (necessary) state in which both aggregates and
         # _aggregate_select_cache point to the same underlying objects.
         # It will get re-populated in the cloned queryset the next time it's
@@ -314,7 +317,7 @@ class Query(object):
         if value is None:
             if aggregate.is_ordinal:
                 return 0
-            # Return None as-is
+                # Return None as-is
             return value
         elif aggregate.is_ordinal:
             # Any ordinal aggregate (e.g., count) returns an int
@@ -338,6 +341,7 @@ class Query(object):
         # over the subquery instead.
         if self.group_by is not None:
             from subqueries import AggregateQuery
+
             query = AggregateQuery(self.model)
 
             obj = self.clone()
@@ -383,6 +387,7 @@ class Query(object):
             # specify the columns that are to be returned.
             # In this case, we need to use a subquery to evaluate the count.
             from subqueries import AggregateQuery
+
             subquery = obj
             subquery.clear_ordering(True)
             subquery.clear_limits()
@@ -426,9 +431,9 @@ class Query(object):
         'rhs' query.
         """
         assert self.model == rhs.model, \
-                "Cannot combine queries on two different base models."
+            "Cannot combine queries on two different base models."
         assert self.can_filter(), \
-                "Cannot combine queries once a slice has been taken."
+            "Cannot combine queries once a slice has been taken."
         assert self.distinct == rhs.distinct, \
             "Cannot combine a unique query with a non-unique query."
 
@@ -444,7 +449,7 @@ class Query(object):
                 continue
             promote = (rhs.alias_map[alias][JOIN_TYPE] == self.LOUTER)
             new_alias = self.join(rhs.rev_join_map[alias],
-                    (conjunction and not first), used, promote, not conjunction)
+                                  (conjunction and not first), used, promote, not conjunction)
             used.add(new_alias)
             change_map[alias] = new_alias
             first = False
@@ -493,7 +498,7 @@ class Query(object):
             # the extra complexity when you can write a real query instead.
             if self.extra and rhs.extra:
                 raise ValueError("When merging querysets using 'or', you "
-                        "cannot have extra(select=...) on both sides.")
+                                 "cannot have extra(select=...) on both sides.")
         self.extra.update(rhs.extra)
         extra_select_mask = set()
         if self.extra_select_mask is not None:
@@ -578,7 +583,7 @@ class Query(object):
                     # included any fields, we have to make sure it's mentioned
                     # so that only the "must include" fields are pulled in.
                     seen[model] = values
-            # Now ensure that every model in the inheritance chain is mentioned
+                # Now ensure that every model in the inheritance chain is mentioned
             # in the parent list. Again, it must be mentioned to ensure that
             # only "must include" fields are pulled in.
             for model in orig_opts.get_parent_list():
@@ -644,7 +649,7 @@ class Query(object):
         Returns True if the join was promoted.
         """
         if ((unconditional or self.alias_map[alias][NULLABLE]) and
-                self.alias_map[alias][JOIN_TYPE] != self.LOUTER):
+                    self.alias_map[alias][JOIN_TYPE] != self.LOUTER):
             data = list(self.alias_map[alias])
             data[JOIN_TYPE] = self.LOUTER
             self.alias_map[alias] = tuple(data)
@@ -677,7 +682,7 @@ class Query(object):
             if alias not in used_aliases:
                 continue
             if (alias not in initial_refcounts or
-                    self.alias_refcount[alias] == initial_refcounts[alias]):
+                        self.alias_refcount[alias] == initial_refcounts[alias]):
                 parent = self.alias_map[alias][LHS_ALIAS]
                 must_promote = considered.get(parent, False)
                 promoted = self.promote_alias(alias, must_promote)
@@ -786,7 +791,7 @@ class Query(object):
         return len([1 for count in self.alias_refcount.itervalues() if count])
 
     def join(self, connection, always_create=False, exclusions=(),
-            promote=False, outer_if_first=False, nullable=False, reuse=None):
+             promote=False, outer_if_first=False, nullable=False, reuse=None):
         """
         Returns an alias for the join in 'connection', either reusing an
         existing alias for that join or creating a new one. 'connection' is a
@@ -889,7 +894,7 @@ class Query(object):
                 else:
                     link_field = opts.get_ancestor_link(model)
                     seen[model] = self.join((root_alias, model._meta.db_table,
-                            link_field.column, model._meta.pk.column))
+                                             link_field.column, model._meta.pk.column))
         self.included_inherited_models = seen
 
     def remove_inherited_models(self):
@@ -910,7 +915,7 @@ class Query(object):
         opts = model._meta
         field_list = aggregate.lookup.split(LOOKUP_SEP)
         if (len(field_list) == 1 and
-            aggregate.lookup in self.aggregates.keys()):
+                    aggregate.lookup in self.aggregates.keys()):
             # Aggregate is over an annotation
             field_name = field_list[0]
             col = field_name
@@ -919,9 +924,9 @@ class Query(object):
                 raise FieldError("Cannot compute %s('%s'): '%s' is an aggregate" % (
                     aggregate.name, field_name, field_name))
         elif ((len(field_list) > 1) or
-            (field_list[0] not in [i.name for i in opts.fields]) or
-            self.group_by is None or
-            not is_summary):
+                  (field_list[0] not in [i.name for i in opts.fields]) or
+                      self.group_by is None or
+                  not is_summary):
             # If:
             #   - the field descriptor has more than one part (foo__bar), or
             #   - the field descriptor is referencing an m2m/m2o field, or
@@ -953,7 +958,7 @@ class Query(object):
         aggregate.add_to_query(self, alias, col=col, source=source, is_summary=is_summary)
 
     def add_filter(self, filter_expr, connector=AND, negate=False, trim=False,
-            can_reuse=None, process_extras=True):
+                   can_reuse=None, process_extras=True):
         """
         Add a single filter to the query. The 'filter_expr' is a pair:
         (filter_string, value). E.g. ('name__contains', 'fred')
@@ -1022,15 +1027,15 @@ class Query(object):
 
         try:
             field, target, opts, join_list, last, extra_filters = self.setup_joins(
-                    parts, opts, alias, True, allow_many, can_reuse=can_reuse,
-                    negate=negate, process_extras=process_extras)
+                parts, opts, alias, True, allow_many, can_reuse=can_reuse,
+                negate=negate, process_extras=process_extras)
         except MultiJoin, e:
             self.split_exclude(filter_expr, LOOKUP_SEP.join(parts[:e.level]),
-                    can_reuse)
+                               can_reuse)
             return
 
         if (lookup_type == 'isnull' and value is True and not negate and
-                len(join_list) > 1):
+                    len(join_list) > 1):
             # If the comparison is against NULL, we may need to use some left
             # outer joins when creating the join chain. This is only done when
             # needed, as it's less efficient at the database level.
@@ -1062,13 +1067,12 @@ class Query(object):
             self.promote_alias_chain(join_it, join_promote)
             self.promote_alias_chain(table_it, table_promote)
 
-
         if having_clause:
             self.having.add((Constraint(alias, col, field), lookup_type, value),
-                connector)
+                            connector)
         else:
             self.where.add((Constraint(alias, col, field), lookup_type, value),
-                connector)
+                           connector)
 
         if negate:
             self.promote_alias_chain(join_list)
@@ -1083,9 +1087,9 @@ class Query(object):
                             self.where.add(entry, AND)
                             break
                 elif not (lookup_type == 'in'
-                            and not hasattr(value, 'as_sql')
-                            and not hasattr(value, '_as_sql')
-                            and not value) and field.null:
+                          and not hasattr(value, 'as_sql')
+                          and not hasattr(value, '_as_sql')
+                          and not value) and field.null:
                     # Leaky abstraction artifact: We have to specifically
                     # exclude the "foo__in=[]" case from this handling, because
                     # it's short-circuited in the Where class.
@@ -1100,7 +1104,7 @@ class Query(object):
         if process_extras:
             for filter in extra_filters:
                 self.add_filter(filter, negate=negate, can_reuse=can_reuse,
-                        process_extras=False)
+                                process_extras=False)
 
     def add_q(self, q_object, used_aliases=None):
         """
@@ -1128,7 +1132,7 @@ class Query(object):
                     self.add_q(child, used_aliases)
                 else:
                     self.add_filter(child, connector, q_object.negated,
-                            can_reuse=used_aliases)
+                                    can_reuse=used_aliases)
                 self.where.end_subtree()
                 if connector == OR:
                     # Aliases that were newly added or not used at all need to
@@ -1145,8 +1149,8 @@ class Query(object):
             self.used_aliases = used_aliases
 
     def setup_joins(self, names, opts, alias, dupe_multis, allow_many=True,
-            allow_explicit_fk=False, can_reuse=None, negate=False,
-            process_extras=True):
+                    allow_explicit_fk=False, can_reuse=None, negate=False,
+                    process_extras=True):
         """
         Compute the necessary table joins for the passage through the fields
         given in 'names'. 'opts' is the Options class for the current model
@@ -1191,7 +1195,7 @@ class Query(object):
                 else:
                     names = opts.get_all_field_names() + self.aggregate_select.keys()
                     raise FieldError("Cannot resolve keyword %r into field. "
-                            "Choices are: %s" % (name, ", ".join(names)))
+                                     "Choices are: %s" % (name, ", ".join(names)))
 
             if not allow_many and (m2m or not direct):
                 for alias in joins:
@@ -1210,16 +1214,16 @@ class Query(object):
                         dedupe = lhs_col in opts.duplicate_targets
                         if dedupe:
                             exclusions.update(self.dupe_avoidance.get(
-                                    (id(opts), lhs_col), ()))
+                                (id(opts), lhs_col), ()))
                             dupe_set.add((opts, lhs_col))
                         opts = int_model._meta
                         alias = self.join((alias, opts.db_table, lhs_col,
-                                opts.pk.column), exclusions=exclusions)
+                                           opts.pk.column), exclusions=exclusions)
                         joins.append(alias)
                         exclusions.add(alias)
                         for (dupe_opts, dupe_col) in dupe_set:
                             self.update_dupe_avoidance(dupe_opts, dupe_col,
-                                    alias)
+                                                       alias)
             cached_data = opts._join_cache.get(name)
             orig_opts = opts
             dupe_col = direct and field.column or field.field.column
@@ -1228,7 +1232,7 @@ class Query(object):
                 if dedupe:
                     dupe_set.add((opts, dupe_col))
                 exclusions.update(self.dupe_avoidance.get((id(opts), dupe_col),
-                        ()))
+                    ()))
 
             if process_extras and hasattr(field, 'extra_filters'):
                 extra_filters.extend(field.extra_filters(names, pos, negate))
@@ -1237,7 +1241,7 @@ class Query(object):
                     # Many-to-many field defined on the current model.
                     if cached_data:
                         (table1, from_col1, to_col1, table2, from_col2,
-                                to_col2, opts, target) = cached_data
+                         to_col2, opts, target) = cached_data
                     else:
                         table1 = field.m2m_db_table()
                         from_col1 = opts.pk.column
@@ -1248,20 +1252,20 @@ class Query(object):
                         to_col2 = opts.pk.column
                         target = opts.pk
                         orig_opts._join_cache[name] = (table1, from_col1,
-                                to_col1, table2, from_col2, to_col2, opts,
-                                target)
+                                                       to_col1, table2, from_col2, to_col2, opts,
+                                                       target)
 
                     int_alias = self.join((alias, table1, from_col1, to_col1),
-                            dupe_multis, exclusions, nullable=True,
-                            reuse=can_reuse)
+                                          dupe_multis, exclusions, nullable=True,
+                                          reuse=can_reuse)
                     if int_alias == table2 and from_col2 == to_col2:
                         joins.append(int_alias)
                         alias = int_alias
                     else:
                         alias = self.join(
-                                (int_alias, table2, from_col2, to_col2),
-                                dupe_multis, exclusions, nullable=True,
-                                reuse=can_reuse)
+                            (int_alias, table2, from_col2, to_col2),
+                            dupe_multis, exclusions, nullable=True,
+                            reuse=can_reuse)
                         joins.extend([int_alias, alias])
                 elif field.rel:
                     # One-to-one or many-to-one field
@@ -1274,10 +1278,10 @@ class Query(object):
                         from_col = field.column
                         to_col = target.column
                         orig_opts._join_cache[name] = (table, from_col, to_col,
-                                opts, target)
+                                                       opts, target)
 
                     alias = self.join((alias, table, from_col, to_col),
-                            exclusions=exclusions, nullable=field.null)
+                                      exclusions=exclusions, nullable=field.null)
                     joins.append(alias)
                 else:
                     # Non-relation fields.
@@ -1290,7 +1294,7 @@ class Query(object):
                     # Many-to-many field defined on the target model.
                     if cached_data:
                         (table1, from_col1, to_col1, table2, from_col2,
-                                to_col2, opts, target) = cached_data
+                         to_col2, opts, target) = cached_data
                     else:
                         table1 = field.m2m_db_table()
                         from_col1 = opts.pk.column
@@ -1301,15 +1305,15 @@ class Query(object):
                         to_col2 = opts.pk.column
                         target = opts.pk
                         orig_opts._join_cache[name] = (table1, from_col1,
-                                to_col1, table2, from_col2, to_col2, opts,
-                                target)
+                                                       to_col1, table2, from_col2, to_col2, opts,
+                                                       target)
 
                     int_alias = self.join((alias, table1, from_col1, to_col1),
-                            dupe_multis, exclusions, nullable=True,
-                            reuse=can_reuse)
+                                          dupe_multis, exclusions, nullable=True,
+                                          reuse=can_reuse)
                     alias = self.join((int_alias, table2, from_col2, to_col2),
-                            dupe_multis, exclusions, nullable=True,
-                            reuse=can_reuse)
+                                      dupe_multis, exclusions, nullable=True,
+                                      reuse=can_reuse)
                     joins.extend([int_alias, alias])
                 else:
                     # One-to-many field (ForeignKey defined on the target model)
@@ -1317,18 +1321,18 @@ class Query(object):
                         (table, from_col, to_col, opts, target) = cached_data
                     else:
                         local_field = opts.get_field_by_name(
-                                field.rel.field_name)[0]
+                            field.rel.field_name)[0]
                         opts = orig_field.opts
                         table = opts.db_table
                         from_col = local_field.column
                         to_col = field.column
                         target = opts.pk
                         orig_opts._join_cache[name] = (table, from_col, to_col,
-                                opts, target)
+                                                       opts, target)
 
                     alias = self.join((alias, table, from_col, to_col),
-                            dupe_multis, exclusions, nullable=True,
-                            reuse=can_reuse)
+                                      dupe_multis, exclusions, nullable=True,
+                                      reuse=can_reuse)
                     joins.append(alias)
 
             for (dupe_opts, dupe_col) in dupe_set:
@@ -1339,7 +1343,8 @@ class Query(object):
 
         if pos != len(names) - 1:
             if pos == len(names) - 2:
-                raise FieldError("Join on field %r not permitted. Did you misspell %r for the lookup type?" % (name, names[pos + 1]))
+                raise FieldError(
+                    "Join on field %r not permitted. Did you misspell %r for the lookup type?" % (name, names[pos + 1]))
             else:
                 raise FieldError("Join on field %r not permitted." % name)
 
@@ -1423,7 +1428,7 @@ class Query(object):
         query.clear_ordering(True)
         query.set_start(prefix)
         self.add_filter(('%s__in' % prefix, query), negate=True, trim=True,
-                can_reuse=can_reuse)
+                        can_reuse=can_reuse)
 
         # If there's more than one join in the inner query (before any initial
         # bits were trimmed -- which means the last active table is more than
@@ -1433,10 +1438,10 @@ class Query(object):
         # Tag.objects.exclude(parent__parent__name='t1'), a tag with no parent
         # would otherwise be overlooked).
         active_positions = [pos for (pos, count) in
-                enumerate(query.alias_refcount.itervalues()) if count]
+                            enumerate(query.alias_refcount.itervalues()) if count]
         if active_positions[-1] > 1:
             self.add_filter(('%s__isnull' % prefix, False), negate=True,
-                    trim=True, can_reuse=can_reuse)
+                            trim=True, can_reuse=can_reuse)
 
     def set_limits(self, low=None, high=None):
         """
@@ -1493,8 +1498,8 @@ class Query(object):
         try:
             for name in field_names:
                 field, target, u2, joins, u3, u4 = self.setup_joins(
-                        name.split(LOOKUP_SEP), opts, alias, False, allow_m2m,
-                        True)
+                    name.split(LOOKUP_SEP), opts, alias, False, allow_m2m,
+                    True)
                 final_alias = joins[-1]
                 col = target.column
                 if len(joins) > 1:
@@ -1513,7 +1518,7 @@ class Query(object):
             names = opts.get_all_field_names() + self.extra.keys() + self.aggregate_select.keys()
             names.sort()
             raise FieldError("Cannot resolve keyword %r into field. "
-                    "Choices are: %s" % (name, ", ".join(names)))
+                             "Choices are: %s" % (name, ", ".join(names)))
         self.remove_inherited_models()
 
     def add_ordering(self, *ordering):
@@ -1570,21 +1575,21 @@ class Query(object):
                 count = self.aggregates_module.Count('*', is_summary=True)
             else:
                 assert len(self.select) == 1, \
-                        "Cannot add count col with multiple cols in 'select': %r" % self.select
+                    "Cannot add count col with multiple cols in 'select': %r" % self.select
                 count = self.aggregates_module.Count(self.select[0])
         else:
             opts = self.model._meta
             if not self.select:
                 count = self.aggregates_module.Count((self.join((None, opts.db_table, None, None)), opts.pk.column),
-                                         is_summary=True, distinct=True)
+                                                     is_summary=True, distinct=True)
             else:
                 # Because of SQL portability issues, multi-column, distinct
                 # counts need a sub-query -- see get_count() for details.
                 assert len(self.select) == 1, \
-                        "Cannot add count col with multiple cols in 'select'."
+                    "Cannot add count col with multiple cols in 'select'."
 
                 count = self.aggregates_module.Count(self.select[0], distinct=True)
-            # Distinct handling is done in Count(), so don't do it at this
+                # Distinct handling is done in Count(), so don't do it at this
             # level.
             self.distinct = False
 
@@ -1632,7 +1637,7 @@ class Query(object):
                     entry_params.append(param_iter.next())
                     pos = entry.find("%s", pos + 2)
                 select_pairs[name] = (entry, entry_params)
-            # This is order preserving, since self.extra_select is a SortedDict.
+                # This is order preserving, since self.extra_select is a SortedDict.
             self.extra.update(select_pairs)
         if where or params:
             self.where.add(ExtraWhere(where, params), AND)
@@ -1735,12 +1740,13 @@ class Query(object):
             return self._aggregate_select_cache
         elif self.aggregate_select_mask is not None:
             self._aggregate_select_cache = SortedDict([
-                (k,v) for k,v in self.aggregates.items()
+                (k, v) for k, v in self.aggregates.items()
                 if k in self.aggregate_select_mask
             ])
             return self._aggregate_select_cache
         else:
             return self.aggregates
+
     aggregate_select = property(_aggregate_select)
 
     def _extra_select(self):
@@ -1748,12 +1754,13 @@ class Query(object):
             return self._extra_select_cache
         elif self.extra_select_mask is not None:
             self._extra_select_cache = SortedDict([
-                (k,v) for k,v in self.extra.items()
+                (k, v) for k, v in self.extra.items()
                 if k in self.extra_select_mask
             ])
             return self._extra_select_cache
         else:
             return self.extra
+
     extra_select = property(_extra_select)
 
     def set_start(self, start):
@@ -1770,7 +1777,7 @@ class Query(object):
         opts = self.model._meta
         alias = self.get_initial_alias()
         field, col, opts, joins, last, extra = self.setup_joins(
-                start.split(LOOKUP_SEP), opts, alias, False)
+            start.split(LOOKUP_SEP), opts, alias, False)
         select_col = self.alias_map[joins[1]][LHS_JOIN_COL]
         select_alias = alias
 
@@ -1785,7 +1792,7 @@ class Query(object):
         for alias in joins[1:]:
             join_info = self.alias_map[alias]
             if (join_info[LHS_JOIN_COL] != select_col
-                    or join_info[JOIN_TYPE] != self.INNER):
+                or join_info[JOIN_TYPE] != self.INNER):
                 break
             self.unref_alias(select_alias)
             select_alias = join_info[RHS_ALIAS]
@@ -1818,7 +1825,9 @@ def setup_join_cache(sender, **kwargs):
     """
     sender._meta._join_cache = {}
 
+
 signals.class_prepared.connect(setup_join_cache)
+
 
 def add_to_dict(data, key, value):
     """
@@ -1829,6 +1838,7 @@ def add_to_dict(data, key, value):
         data[key].add(value)
     else:
         data[key] = set([value])
+
 
 def get_proxied_model(opts):
     int_opts = opts

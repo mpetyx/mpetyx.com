@@ -4,6 +4,7 @@ from time import time
 
 from django.utils.hashcompat import md5_constructor
 
+
 class CursorDebugWrapper(object):
     def __init__(self, cursor, db):
         self.cursor = cursor
@@ -48,6 +49,7 @@ class CursorDebugWrapper(object):
 def typecast_date(s):
     return s and datetime.date(*map(int, s.split('-'))) or None # returns None if s is null
 
+
 def typecast_time(s): # does NOT store time zone information
     if not s: return None
     hour, minutes, seconds = s.split(':')
@@ -55,7 +57,8 @@ def typecast_time(s): # does NOT store time zone information
         seconds, microseconds = seconds.split('.')
     else:
         microseconds = '0'
-    return datetime.time(int(hour), int(minutes), int(seconds), int(float('.'+microseconds) * 1000000))
+    return datetime.time(int(hour), int(minutes), int(seconds), int(float('.' + microseconds) * 1000000))
+
 
 def typecast_timestamp(s): # does NOT store time zone information
     # "2005-07-29 15:48:00.590358-05"
@@ -81,12 +84,14 @@ def typecast_timestamp(s): # does NOT store time zone information
     else:
         microseconds = '0'
     return datetime.datetime(int(dates[0]), int(dates[1]), int(dates[2]),
-        int(times[0]), int(times[1]), int(seconds), int(float('.'+microseconds) * 1000000))
+                             int(times[0]), int(times[1]), int(seconds), int(float('.' + microseconds) * 1000000))
+
 
 def typecast_boolean(s):
     if s is None: return None
     if not s: return False
     return str(s)[0].lower() == 't'
+
 
 def typecast_decimal(s):
     if s is None or s == '':
@@ -100,10 +105,12 @@ def typecast_decimal(s):
 def rev_typecast_boolean(obj, d):
     return obj and '1' or '0'
 
+
 def rev_typecast_decimal(d):
     if d is None:
         return None
     return str(d)
+
 
 def truncate_name(name, length=None):
     """Shortens a string to a repeatable mangled version with the given length.
@@ -113,7 +120,8 @@ def truncate_name(name, length=None):
 
     hash = md5_constructor(name).hexdigest()[:4]
 
-    return '%s%s' % (name[:length-4], hash)
+    return '%s%s' % (name[:length - 4], hash)
+
 
 def format_number(value, max_digits, decimal_places):
     """

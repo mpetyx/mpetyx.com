@@ -16,7 +16,7 @@ COUNTIES_CHOICES = (
     ('BT', u'Botoşani'),
     ('BV', u'Braşov'),
     ('BR', u'Brăila'),
-    ('B',  u'Bucureşti'),
+    ('B', u'Bucureşti'),
     ('BZ', u'Buzău'),
     ('CS', u'Caraş-Severin'),
     ('CL', u'Călăraşi'),

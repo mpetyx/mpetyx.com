@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from django.conf import settings
 from django.contrib.auth.backends import RemoteUserBackend
 from django.contrib.auth.models import User
 from django.test import TestCase
 
+from django.conf import settings
+
 
 class RemoteUserTest(TestCase):
-
     urls = 'django.contrib.auth.tests.urls'
     middleware = 'django.contrib.auth.middleware.RemoteUserMiddleware'
     backend = 'django.contrib.auth.backends.RemoteUserBackend'
@@ -109,7 +109,7 @@ class RemoteUserNoCreateTest(RemoteUserTest):
     class that doesn't create unknown users.
     """
 
-    backend =\
+    backend = \
         'django.contrib.auth.tests.remote_user.RemoteUserNoCreateBackend'
 
     def test_unknown_user(self):
@@ -145,7 +145,7 @@ class RemoteUserCustomTest(RemoteUserTest):
     and configure_user methods.
     """
 
-    backend =\
+    backend = \
         'django.contrib.auth.tests.remote_user.CustomRemoteUserBackend'
     # REMOTE_USER strings with e-mail addresses for the custom backend to
     # clean.

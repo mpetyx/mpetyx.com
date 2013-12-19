@@ -1,6 +1,4 @@
-from django import template
 from django.db import transaction
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AdminPasswordChangeForm
 from django.contrib.auth.models import User, Group
@@ -8,18 +6,23 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
 from django.utils.html import escape
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext, ugettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 
+from django.conf import settings
+from django.template import RequestContext
+
+
 csrf_protect_m = method_decorator(csrf_protect)
+
 
 class GroupAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     ordering = ('name',)
     filter_horizontal = ('permissions',)
+
 
 class UserAdmin(admin.ModelAdmin):
     add_form_template = 'admin/auth/user/add_form.html'
@@ -75,8 +78,9 @@ class UserAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         from django.conf.urls.defaults import patterns
+
         return patterns('',
-            (r'^(\d+)/password/$', self.admin_site.admin_view(self.user_change_password))
+                        (r'^(\d+)/password/$', self.admin_site.admin_view(self.user_change_password))
         ) + super(UserAdmin, self).get_urls()
 
     @csrf_protect_m
@@ -92,7 +96,8 @@ class UserAdmin(admin.ModelAdmin):
             if self.has_add_permission(request) and settings.DEBUG:
                 # Raise Http404 in debug mode so that the user gets a helpful
                 # error message.
-                raise Http404('Your user does not have the "Change user" permission. In order to add users, Django requires that your user account have both the "Add user" and "Change user" permissions set.')
+                raise Http404(
+                    'Your user does not have the "Change user" permission. In order to add users, Django requires that your user account have both the "Add user" and "Change user" permissions set.')
             raise PermissionDenied
         if extra_context is None:
             extra_context = {}

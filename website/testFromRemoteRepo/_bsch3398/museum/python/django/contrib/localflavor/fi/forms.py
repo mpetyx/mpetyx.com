@@ -8,21 +8,27 @@ from django.forms import ValidationError
 from django.forms.fields import Field, RegexField, Select
 from django.utils.translation import ugettext_lazy as _
 
+
 class FIZipCodeField(RegexField):
     default_error_messages = {
         'invalid': _('Enter a zip code in the format XXXXX.'),
     }
+
     def __init__(self, *args, **kwargs):
         super(FIZipCodeField, self).__init__(r'^\d{5}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                             max_length=None, min_length=None, *args, **kwargs)
+
 
 class FIMunicipalitySelect(Select):
     """
     A Select widget that uses a list of Finnish municipalities as its choices.
     """
+
     def __init__(self, attrs=None):
         from fi_municipalities import MUNICIPALITY_CHOICES
+
         super(FIMunicipalitySelect, self).__init__(attrs, choices=MUNICIPALITY_CHOICES)
+
 
 class FISocialSecurityNumber(Field):
     default_error_messages = {

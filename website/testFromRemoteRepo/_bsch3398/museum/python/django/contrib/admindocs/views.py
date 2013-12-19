@@ -1,6 +1,7 @@
-from django import template, templatetags
-from django.template import RequestContext
-from django.conf import settings
+import inspect
+import os
+import re
+
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import models
 from django.shortcuts import render_to_response
@@ -12,24 +13,32 @@ from django.contrib.sites.models import Site
 from django.utils.importlib import import_module
 from django.utils.translation import ugettext as _
 from django.utils.safestring import mark_safe
-import inspect, os, re
+
+from django import template
+from django.template import RequestContext
+from django.conf import settings
+
 
 # Exclude methods starting with these strings from documentation
 MODEL_METHODS_EXCLUDE = ('_', 'add_', 'delete', 'save', 'set_')
 
+
 class GenericSite(object):
     domain = 'example.com'
     name = 'my site'
+
 
 def get_root_path():
     try:
         return urlresolvers.reverse('admin:index')
     except urlresolvers.NoReverseMatch:
         from django.contrib import admin
+
         try:
             return urlresolvers.reverse(admin.site.root, args=[''])
         except urlresolvers.NoReverseMatch:
             return getattr(settings, "ADMIN_SITE_ROOT_URL", "/admin/")
+
 
 def doc_index(request):
     if not utils.docutils_is_available:
@@ -37,15 +46,22 @@ def doc_index(request):
     return render_to_response('admin_doc/index.html', {
         'root_path': get_root_path(),
     }, context_instance=RequestContext(request))
+
+
 doc_index = staff_member_required(doc_index)
+
 
 def bookmarklets(request):
     admin_root = get_root_path()
     return render_to_response('admin_doc/bookmarklets.html', {
         'root_path': admin_root,
-        'admin_url': mark_safe("%s://%s%s" % (request.is_secure() and 'https' or 'http', request.get_host(), admin_root)),
+        'admin_url': mark_safe(
+            "%s://%s%s" % (request.is_secure() and 'https' or 'http', request.get_host(), admin_root)),
     }, context_instance=RequestContext(request))
+
+
 bookmarklets = staff_member_required(bookmarklets)
+
 
 def template_tag_index(request):
     if not utils.docutils_is_available:
@@ -78,7 +94,10 @@ def template_tag_index(request):
         'root_path': get_root_path(),
         'tags': tags
     }, context_instance=RequestContext(request))
+
+
 template_tag_index = staff_member_required(template_tag_index)
+
 
 def template_filter_index(request):
     if not utils.docutils_is_available:
@@ -111,7 +130,10 @@ def template_filter_index(request):
         'root_path': get_root_path(),
         'filters': filters
     }, context_instance=RequestContext(request))
+
+
 template_filter_index = staff_member_required(template_filter_index)
+
 
 def view_index(request):
     if not utils.docutils_is_available:
@@ -142,7 +164,10 @@ def view_index(request):
         'root_path': get_root_path(),
         'views': views
     }, context_instance=RequestContext(request))
+
+
 view_index = staff_member_required(view_index)
+
 
 def view_detail(request, view):
     if not utils.docutils_is_available:
@@ -167,7 +192,10 @@ def view_detail(request, view):
         'body': body,
         'meta': metadata,
     }, context_instance=RequestContext(request))
+
+
 view_detail = staff_member_required(view_detail)
+
 
 def model_index(request):
     if not utils.docutils_is_available:
@@ -177,7 +205,10 @@ def model_index(request):
         'root_path': get_root_path(),
         'models': m_list
     }, context_instance=RequestContext(request))
+
+
 model_index = staff_member_required(model_index)
+
 
 def model_detail(request, app_label, model_name):
     if not utils.docutils_is_available:
@@ -194,7 +225,8 @@ def model_detail(request, app_label, model_name):
             model = m
             break
     if model is None:
-        raise Http404(_("Model %(model_name)r not found in app %(app_label)r") % {'model_name': model_name, 'app_label': app_label})
+        raise Http404(_("Model %(model_name)r not found in app %(app_label)r") % {'model_name': model_name,
+                                                                                  'app_label': app_label})
 
     opts = model._meta
 
@@ -206,7 +238,9 @@ def model_detail(request, app_label, model_name):
         if isinstance(field, models.ForeignKey):
             data_type = related_object_name = field.rel.to.__name__
             app_label = field.rel.to._meta.app_label
-            verbose = utils.parse_rst((_("the related `%(app_label)s.%(data_type)s` object")  % {'app_label': app_label, 'data_type': data_type}), 'model', _('model:') + data_type)
+            verbose = utils.parse_rst((_("the related `%(app_label)s.%(data_type)s` object") % {'app_label': app_label,
+                                                                                                'data_type': data_type}),
+                                      'model', _('model:') + data_type)
         else:
             data_type = get_readable_field_data_type(field)
             verbose = field.verbose_name
@@ -221,16 +255,17 @@ def model_detail(request, app_label, model_name):
     for field in opts.many_to_many:
         data_type = related_object_name = field.rel.to.__name__
         app_label = field.rel.to._meta.app_label
-        verbose = _("related `%(app_label)s.%(object_name)s` objects") % {'app_label': app_label, 'object_name': data_type}
+        verbose = _("related `%(app_label)s.%(object_name)s` objects") % {'app_label': app_label,
+                                                                          'object_name': data_type}
         fields.append({
             'name': "%s.all" % field.name,
             "data_type": 'List',
-            'verbose': utils.parse_rst(_("all %s") % verbose , 'model', _('model:') + opts.module_name),
+            'verbose': utils.parse_rst(_("all %s") % verbose, 'model', _('model:') + opts.module_name),
         })
         fields.append({
-            'name'      : "%s.count" % field.name,
-            'data_type' : 'Integer',
-            'verbose'   : utils.parse_rst(_("number of %s") % verbose , 'model', _('model:') + opts.module_name),
+            'name': "%s.count" % field.name,
+            'data_type': 'Integer',
+            'verbose': utils.parse_rst(_("number of %s") % verbose, 'model', _('model:') + opts.module_name),
         })
 
     # Gather model methods.
@@ -253,17 +288,18 @@ def model_detail(request, app_label, model_name):
 
     # Gather related objects
     for rel in opts.get_all_related_objects() + opts.get_all_related_many_to_many_objects():
-        verbose = _("related `%(app_label)s.%(object_name)s` objects") % {'app_label': rel.opts.app_label, 'object_name': rel.opts.object_name}
+        verbose = _("related `%(app_label)s.%(object_name)s` objects") % {'app_label': rel.opts.app_label,
+                                                                          'object_name': rel.opts.object_name}
         accessor = rel.get_accessor_name()
         fields.append({
-            'name'      : "%s.all" % accessor,
-            'data_type' : 'List',
-            'verbose'   : utils.parse_rst(_("all %s") % verbose , 'model', _('model:') + opts.module_name),
+            'name': "%s.all" % accessor,
+            'data_type': 'List',
+            'verbose': utils.parse_rst(_("all %s") % verbose, 'model', _('model:') + opts.module_name),
         })
         fields.append({
-            'name'      : "%s.count" % accessor,
-            'data_type' : 'Integer',
-            'verbose'   : utils.parse_rst(_("number of %s") % verbose , 'model', _('model:') + opts.module_name),
+            'name': "%s.count" % accessor,
+            'data_type': 'Integer',
+            'verbose': utils.parse_rst(_("number of %s") % verbose, 'model', _('model:') + opts.module_name),
         })
     return render_to_response('admin_doc/model_detail.html', {
         'root_path': get_root_path(),
@@ -272,7 +308,10 @@ def model_detail(request, app_label, model_name):
         'description': model.__doc__,
         'fields': fields,
     }, context_instance=RequestContext(request))
+
+
 model_detail = staff_member_required(model_detail)
+
 
 def template_detail(request, template):
     templates = []
@@ -297,6 +336,8 @@ def template_detail(request, template):
         'name': template,
         'templates': templates,
     }, context_instance=RequestContext(request))
+
+
 template_detail = staff_member_required(template_detail)
 
 ####################
@@ -306,6 +347,7 @@ template_detail = staff_member_required(template_detail)
 def missing_docutils_page(request):
     """Display an error message for people without docutils"""
     return render_to_response('admin_doc/missing_docutils.html')
+
 
 def load_all_installed_template_libraries():
     # Load/register all template tag libraries from installed apps.
@@ -322,6 +364,7 @@ def load_all_installed_template_libraries():
             except template.InvalidTemplateLibrary, e:
                 pass
 
+
 def get_return_data_type(func_name):
     """Return a somewhat-helpful data type given a function name"""
     if func_name.startswith('get_'):
@@ -331,12 +374,14 @@ def get_return_data_type(func_name):
             return 'Integer'
     return ''
 
+
 def get_readable_field_data_type(field):
     """Returns the description for a given field type, if it exists,
     Fields' descriptions can contain format strings, which will be interpolated
     against the values of field.__dict__ before being output."""
 
     return field.description % field.__dict__
+
 
 def extract_views_from_urlpatterns(urlpatterns, base=''):
     """
@@ -361,8 +406,10 @@ def extract_views_from_urlpatterns(urlpatterns, base=''):
             raise TypeError(_("%s does not appear to be a urlpattern object") % p)
     return views
 
+
 named_group_matcher = re.compile(r'\(\?P(<\w+>).+?\)')
 non_named_group_matcher = re.compile(r'\(.*?\)')
+
 
 def simplify_regex(pattern):
     """

@@ -1,11 +1,11 @@
-from django.conf import settings
 from django.contrib.auth.models import User, Group, Permission, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
+from django.conf import settings
+
 
 class BackendTest(TestCase):
-
     backend = 'django.contrib.auth.backends.ModelBackend'
 
     def setUp(self):
@@ -37,7 +37,7 @@ class BackendTest(TestCase):
 
     def test_custom_perms(self):
         user = User.objects.get(username='test')
-        content_type=ContentType.objects.get_for_model(Group)
+        content_type = ContentType.objects.get_for_model(Group)
         perm = Permission.objects.create(name='test', content_type=content_type, codename='test')
         user.user_permissions.add(perm)
         user.save()
@@ -77,7 +77,7 @@ class BackendTest(TestCase):
     def test_has_no_object_perm(self):
         """Regressiontest for #12462"""
         user = User.objects.get(username='test')
-        content_type=ContentType.objects.get_for_model(Group)
+        content_type = ContentType.objects.get_for_model(Group)
         perm = Permission.objects.create(name='test', content_type=content_type, codename='test')
         user.user_permissions.add(perm)
         user.save()
@@ -171,19 +171,17 @@ class RowlevelBackendTest(TestCase):
         self.assertEqual(self.user2.get_all_permissions(), set([]))
 
     def test_get_group_permissions(self):
-        content_type=ContentType.objects.get_for_model(Group)
+        content_type = ContentType.objects.get_for_model(Group)
         group = Group.objects.create(name='test_group')
         self.user3.groups.add(group)
         self.assertEqual(self.user3.get_group_permissions(TestObj()), set(['group_perm']))
 
 
 class AnonymousUserBackend(SimpleRowlevelBackend):
-
     supports_anonymous_user = True
 
 
 class NoAnonymousUserBackend(SimpleRowlevelBackend):
-
     supports_anonymous_user = False
 
 

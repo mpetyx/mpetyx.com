@@ -1,5 +1,6 @@
 from django.utils.encoding import smart_str, smart_unicode
 
+
 def ssn_check_digit(value):
     "Calculate Italian social security number check digit."
     ssn_even_chars = {
@@ -32,6 +33,7 @@ def ssn_check_digit(value):
             raise ValueError(msg)
     return ssn_check_digits[total % 26]
 
+
 def vat_number_check_digit(vat_number):
     "Calculate Italian VAT number check digit."
     normalized_vat_number = smart_str(vat_number).zfill(10)
@@ -39,6 +41,6 @@ def vat_number_check_digit(vat_number):
     for i in range(0, 10, 2):
         total += int(normalized_vat_number[i])
     for i in range(1, 11, 2):
-        quotient , remainder = divmod(int(normalized_vat_number[i]) * 2, 10)
+        quotient, remainder = divmod(int(normalized_vat_number[i]) * 2, 10)
         total += quotient + remainder
     return smart_unicode((10 - total % 10) % 10)

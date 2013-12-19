@@ -2,9 +2,11 @@
 Cached, database-backed sessions.
 """
 
-from django.conf import settings
 from django.contrib.sessions.backends.db import SessionStore as DBStore
 from django.core.cache import cache
+
+from django.conf import settings
+
 
 class SessionStore(DBStore):
     """

@@ -3,6 +3,7 @@
 import os
 import time
 import shutil
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -10,6 +11,7 @@ except ImportError:
 
 from django.core.cache.backends.base import BaseCache
 from django.utils.hashcompat import md5_constructor
+
 
 class CacheClass(BaseCache):
     def __init__(self, dir, params):
@@ -154,9 +156,10 @@ class CacheClass(BaseCache):
 
     def _get_num_entries(self):
         count = 0
-        for _,_,files in os.walk(self._dir):
+        for _, _, files in os.walk(self._dir):
             count += len(files)
         return count
+
     _num_entries = property(_get_num_entries)
 
     def clear(self):

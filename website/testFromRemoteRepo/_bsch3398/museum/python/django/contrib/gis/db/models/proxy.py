@@ -6,6 +6,7 @@ corresponding to geographic model fields.
 Thanks to Robert Coup for providing this functionality (see #4322).
 """
 
+
 class GeometryProxy(object):
     def __init__(self, klass, field):
         """
@@ -30,7 +31,7 @@ class GeometryProxy(object):
 
         if isinstance(geom_value, self._klass):
             geom = geom_value
-        elif (geom_value is None) or (geom_value==''):
+        elif (geom_value is None) or (geom_value == ''):
             geom = None
         else:
             # Otherwise, a Geometry object is built using the field's contents,
@@ -57,7 +58,8 @@ class GeometryProxy(object):
             # Set with None, WKT, HEX, or WKB
             pass
         else:
-            raise TypeError('cannot set %s GeometryProxy with value of type: %s' % (obj.__class__.__name__, type(value)))
+            raise TypeError(
+                'cannot set %s GeometryProxy with value of type: %s' % (obj.__class__.__name__, type(value)))
 
         # Setting the objects dictionary with the value, and returning.
         obj.__dict__[self._field.attname] = value

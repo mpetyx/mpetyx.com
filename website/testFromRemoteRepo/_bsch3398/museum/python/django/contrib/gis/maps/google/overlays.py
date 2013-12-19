@@ -1,6 +1,7 @@
 from django.utils.safestring import mark_safe
 from django.contrib.gis.geos import fromstr, Point, LineString, LinearRing, Polygon
 
+
 class GEvent(object):
     """
     A Python wrapper for the Google GEvent object.
@@ -47,7 +48,8 @@ class GEvent(object):
 
     def __unicode__(self):
         "Returns the parameter part of a GEvent."
-        return mark_safe('"%s", %s' %(self.event, self.action))
+        return mark_safe('"%s", %s' % (self.event, self.action))
+
 
 class GOverlayBase(object):
     def __init__(self):
@@ -65,12 +67,14 @@ class GOverlayBase(object):
         "The string representation is the JavaScript API call."
         return mark_safe('%s(%s)' % (self.__class__.__name__, self.js_params))
 
+
 class GPolygon(GOverlayBase):
     """
     A Python wrapper for the Google GPolygon object.  For more information
     please see the Google Maps API Reference:
      http://code.google.com/apis/maps/documentation/reference.html#GPolygon
     """
+
     def __init__(self, poly,
                  stroke_color='#0000ff', stroke_weight=2, stroke_opacity=1,
                  fill_color='#0000ff', fill_opacity=0.4):
@@ -122,12 +126,14 @@ class GPolygon(GOverlayBase):
         return '%s, "%s", %s, %s, "%s", %s' % (self.points, self.stroke_color, self.stroke_weight, self.stroke_opacity,
                                                self.fill_color, self.fill_opacity)
 
+
 class GPolyline(GOverlayBase):
     """
     A Python wrapper for the Google GPolyline object.  For more information
     please see the Google Maps API Reference:
      http://code.google.com/apis/maps/documentation/reference.html#GPolyline
     """
+
     def __init__(self, geom, color='#0000ff', weight=2, opacity=1):
         """
         The GPolyline object may be initialized on GEOS LineStirng, LinearRing,
@@ -220,6 +226,7 @@ class GIcon(object):
             image at which the info window is anchored to this icon.
 
     """
+
     def __init__(self, varname, image=None, iconsize=None,
                  shadow=None, shadowsize=None, iconanchor=None,
                  infowindowanchor=None):
@@ -233,11 +240,12 @@ class GIcon(object):
 
     def __cmp__(self, other):
         return cmp(self.varname, other.varname)
-    
+
     def __hash__(self):
         # XOR with hash of GIcon type so that hash('varname') won't 
         # equal hash(GIcon('varname')).
         return hash(self.__class__) ^ hash(self.varname)
+
 
 class GMarker(GOverlayBase):
     """
@@ -258,6 +266,7 @@ class GMarker(GOverlayBase):
           return render_to_response('mytemplate.html',
                  {'google' : GoogleMap(markers=[marker])})
     """
+
     def __init__(self, geom, title=None, draggable=False, icon=None):
         """
         The GMarker object may initialize on GEOS Points or a parameter
@@ -278,7 +287,7 @@ class GMarker(GOverlayBase):
             self.latlng = self.latlng_from_coords(geom.coords)
         else:
             raise TypeError('GMarker may only initialize on GEOS Point geometry.')
-        # Getting the envelope for automatic zoom determination.
+            # Getting the envelope for automatic zoom determination.
         self.envelope = geom.envelope
         # TODO: Add support for more GMarkerOptions
         self.title = title
@@ -287,7 +296,7 @@ class GMarker(GOverlayBase):
         super(GMarker, self).__init__()
 
     def latlng_from_coords(self, coords):
-        return 'new GLatLng(%s,%s)' %(coords[1], coords[0])
+        return 'new GLatLng(%s,%s)' % (coords[1], coords[0])
 
     def options(self):
         result = []

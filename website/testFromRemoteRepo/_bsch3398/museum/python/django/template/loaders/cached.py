@@ -3,10 +3,10 @@ Wrapper class that takes a list of template loaders as an argument and attempts
 to load templates from them in order, caching the result.
 """
 
-from django.template import TemplateDoesNotExist
 from django.template.loader import BaseLoader, get_template_from_string, find_template_loader, make_origin
-from django.utils.importlib import import_module
-from django.core.exceptions import ImproperlyConfigured
+
+from django.template import TemplateDoesNotExist
+
 
 class Loader(BaseLoader):
     is_usable = True

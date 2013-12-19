@@ -1,5 +1,7 @@
 # enable CGI debugging - remove before production!!!
-import cgitb; cgitb.enable()
+import cgitb;
+
+cgitb.enable()
 
 import cx_Oracle
 

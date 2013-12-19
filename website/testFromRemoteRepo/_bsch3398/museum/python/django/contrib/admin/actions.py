@@ -2,16 +2,15 @@
 Built-in, globally-available admin actions.
 """
 
-from django import template
 from django.core.exceptions import PermissionDenied
 from django.contrib.admin import helpers
 from django.contrib.admin.util import get_deleted_objects, model_ngettext
 from django.shortcuts import render_to_response
 from django.utils.encoding import force_unicode
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
-from django.utils.text import capfirst
 from django.utils.translation import ugettext_lazy, ugettext as _
+
+from django import template
+
 
 def delete_selected(modeladmin, request, queryset):
     """
@@ -32,7 +31,8 @@ def delete_selected(modeladmin, request, queryset):
 
     # Populate deletable_objects, a data structure of all related objects that
     # will also be deleted.
-    deletable_objects, perms_needed = get_deleted_objects(queryset, opts, request.user, modeladmin.admin_site, levels_to_root=2)
+    deletable_objects, perms_needed = get_deleted_objects(queryset, opts, request.user, modeladmin.admin_site,
+                                                          levels_to_root=2)
 
     # The user has already confirmed the deletion.
     # Do the deletion and return a None to display the change list view again.
@@ -48,7 +48,7 @@ def delete_selected(modeladmin, request, queryset):
             modeladmin.message_user(request, _("Successfully deleted %(count)d %(items)s.") % {
                 "count": n, "items": model_ngettext(modeladmin.opts, n)
             })
-        # Return None to display the change list page again.
+            # Return None to display the change list page again.
         return None
 
     context = {
@@ -69,5 +69,6 @@ def delete_selected(modeladmin, request, queryset):
         "admin/%s/delete_selected_confirmation.html" % app_label,
         "admin/delete_selected_confirmation.html"
     ], context, context_instance=template.RequestContext(request))
+
 
 delete_selected.short_description = ugettext_lazy("Delete selected %(verbose_name_plural)s")

@@ -3,14 +3,17 @@
 BR-specific Form helpers
 """
 
+import re
+
 from django.core.validators import EMPTY_VALUES
 from django.forms import ValidationError
 from django.forms.fields import Field, RegexField, CharField, Select
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
-import re
+
 
 phone_digits_re = re.compile(r'^(\d{2})[-\.]?(\d{4})[-\.]?(\d{4})$')
+
 
 class BRZipCodeField(RegexField):
     default_error_messages = {
@@ -19,7 +22,8 @@ class BRZipCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(BRZipCodeField, self).__init__(r'^\d{5}-\d{3}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                             max_length=None, min_length=None, *args, **kwargs)
+
 
 class BRPhoneNumberField(Field):
     default_error_messages = {
@@ -36,14 +40,18 @@ class BRPhoneNumberField(Field):
             return u'%s-%s-%s' % (m.group(1), m.group(2), m.group(3))
         raise ValidationError(self.error_messages['invalid'])
 
+
 class BRStateSelect(Select):
     """
     A Select widget that uses a list of Brazilian states/territories
     as its choices.
     """
+
     def __init__(self, attrs=None):
         from br_states import STATE_CHOICES
+
         super(BRStateSelect, self).__init__(attrs, choices=STATE_CHOICES)
+
 
 class BRStateChoiceField(Field):
     """
@@ -59,6 +67,7 @@ class BRStateChoiceField(Field):
         super(BRStateChoiceField, self).__init__(required, widget, label,
                                                  initial, help_text)
         from br_states import STATE_CHOICES
+
         self.widget.choices = STATE_CHOICES
 
     def clean(self, value):
@@ -73,10 +82,12 @@ class BRStateChoiceField(Field):
             raise ValidationError(self.error_messages['invalid'])
         return value
 
+
 def DV_maker(v):
     if v >= 2:
         return 11 - v
     return 0
+
 
 class BRCPFField(CharField):
     """
@@ -124,6 +135,7 @@ class BRCPFField(CharField):
             raise ValidationError(self.error_messages['invalid'])
 
         return orig_value
+
 
 class BRCNPJField(Field):
     default_error_messages = {

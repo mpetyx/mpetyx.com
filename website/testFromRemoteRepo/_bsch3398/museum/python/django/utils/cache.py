@@ -20,15 +20,17 @@ An example: i18n middleware would need to distinguish caches by the
 import re
 import time
 
-from django.conf import settings
 from django.core.cache import cache
 from django.utils.encoding import smart_str, iri_to_uri
 from django.utils.http import http_date
-from django.utils.hashcompat import md5_constructor
 from django.utils.translation import get_language
-from django.http import HttpRequest
+
+from django.conf import settings
+from django.utils.hashcompat import md5_constructor
+
 
 cc_delim_re = re.compile(r'\s*,\s*')
+
 
 def patch_cache_control(response, **kwargs):
     """
@@ -42,6 +44,7 @@ def patch_cache_control(response, **kwargs):
     * All other parameters are added with their value, after applying
       str() to it.
     """
+
     def dictitem(s):
         t = s.split('=', 1)
         if len(t) > 1:
@@ -72,6 +75,7 @@ def patch_cache_control(response, **kwargs):
     cc = ', '.join([dictvalue(el) for el in cc.items()])
     response['Cache-Control'] = cc
 
+
 def get_max_age(response):
     """
     Returns the max-age from the response Cache-Control header as an integer
@@ -80,12 +84,13 @@ def get_max_age(response):
     if not response.has_header('Cache-Control'):
         return
     cc = dict([_to_tuple(el) for el in
-        cc_delim_re.split(response['Cache-Control'])])
+               cc_delim_re.split(response['Cache-Control'])])
     if 'max-age' in cc:
         try:
             return int(cc['max-age'])
         except (ValueError, TypeError):
             pass
+
 
 def patch_response_headers(response, cache_timeout=None):
     """
@@ -109,11 +114,13 @@ def patch_response_headers(response, cache_timeout=None):
         response['Expires'] = http_date(time.time() + cache_timeout)
     patch_cache_control(response, max_age=cache_timeout)
 
+
 def add_never_cache_headers(response):
     """
     Adds headers to a response to indicate that a page should never be cached.
     """
     patch_response_headers(response, cache_timeout=-1)
+
 
 def patch_vary_headers(response, newheaders):
     """
@@ -128,11 +135,12 @@ def patch_vary_headers(response, newheaders):
         vary_headers = cc_delim_re.split(response['Vary'])
     else:
         vary_headers = []
-    # Use .lower() here so we treat headers as case-insensitive.
+        # Use .lower() here so we treat headers as case-insensitive.
     existing_headers = set([header.lower() for header in vary_headers])
     additional_headers = [newheader for newheader in newheaders
                           if newheader.lower() not in existing_headers]
     response['Vary'] = ', '.join(vary_headers + additional_headers)
+
 
 def _i18n_cache_key_suffix(request, cache_key):
     """If enabled, returns the cache key ending with a locale."""
@@ -142,6 +150,7 @@ def _i18n_cache_key_suffix(request, cache_key):
         # which in turn can also fall back to settings.LANGUAGE_CODE
         cache_key += '.%s' % getattr(request, 'LANGUAGE_CODE', get_language())
     return cache_key
+
 
 def _generate_cache_key(request, headerlist, key_prefix):
     """Returns a cache key from the headers given in the header list."""
@@ -155,12 +164,14 @@ def _generate_cache_key(request, headerlist, key_prefix):
         key_prefix, path.hexdigest(), ctx.hexdigest())
     return _i18n_cache_key_suffix(request, cache_key)
 
+
 def _generate_cache_header_key(key_prefix, request):
     """Returns a cache key for the header cache."""
     path = md5_constructor(iri_to_uri(request.path))
     cache_key = 'views.decorators.cache.cache_header.%s.%s' % (
         key_prefix, path.hexdigest())
     return _i18n_cache_key_suffix(request, cache_key)
+
 
 def get_cache_key(request, key_prefix=None):
     """
@@ -181,6 +192,7 @@ def get_cache_key(request, key_prefix=None):
     else:
         return None
 
+
 def learn_cache_key(request, response, cache_timeout=None, key_prefix=None):
     """
     Learns what headers to take into account for some request path from the
@@ -200,7 +212,7 @@ def learn_cache_key(request, response, cache_timeout=None, key_prefix=None):
         cache_timeout = settings.CACHE_MIDDLEWARE_SECONDS
     cache_key = _generate_cache_header_key(key_prefix, request)
     if response.has_header('Vary'):
-        headerlist = ['HTTP_'+header.upper().replace('-', '_')
+        headerlist = ['HTTP_' + header.upper().replace('-', '_')
                       for header in cc_delim_re.split(response['Vary'])]
         cache.set(cache_key, headerlist, cache_timeout)
         return _generate_cache_key(request, headerlist, key_prefix)
@@ -212,7 +224,7 @@ def learn_cache_key(request, response, cache_timeout=None, key_prefix=None):
 
 
 def _to_tuple(s):
-    t = s.split('=',1)
+    t = s.split('=', 1)
     if len(t) == 2:
         return t[0].lower(), t[1]
     return t[0].lower(), True

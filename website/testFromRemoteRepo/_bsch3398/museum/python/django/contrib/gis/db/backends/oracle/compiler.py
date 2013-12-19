@@ -3,8 +3,10 @@ from django.db.backends.oracle import compiler
 
 SQLCompiler = compiler.SQLCompiler
 
+
 class GeoSQLCompiler(BaseGeoSQLCompiler, SQLCompiler):
     pass
+
 
 class SQLInsertCompiler(compiler.SQLInsertCompiler, GeoSQLCompiler):
     def placeholder(self, field, val):
@@ -31,14 +33,18 @@ class SQLInsertCompiler(compiler.SQLInsertCompiler, GeoSQLCompiler):
             # Return the common case for the placeholder
             return '%s'
 
+
 class SQLDeleteCompiler(compiler.SQLDeleteCompiler, GeoSQLCompiler):
     pass
+
 
 class SQLUpdateCompiler(compiler.SQLUpdateCompiler, GeoSQLCompiler):
     pass
 
+
 class SQLAggregateCompiler(compiler.SQLAggregateCompiler, GeoSQLCompiler):
     pass
+
 
 class SQLDateCompiler(compiler.SQLDateCompiler, GeoSQLCompiler):
     pass

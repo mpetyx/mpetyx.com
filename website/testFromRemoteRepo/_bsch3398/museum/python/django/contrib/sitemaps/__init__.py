@@ -1,10 +1,14 @@
-from django.core import urlresolvers, paginator
 import urllib
+
+from django.core import urlresolvers, paginator
+
 
 PING_URL = "http://www.google.com/webmasters/tools/ping"
 
+
 class SitemapNotFound(Exception):
     pass
+
 
 def ping_google(sitemap_url=None, ping_url=PING_URL):
     """
@@ -28,10 +32,12 @@ def ping_google(sitemap_url=None, ping_url=PING_URL):
         raise SitemapNotFound("You didn't provide a sitemap_url, and the sitemap URL couldn't be auto-detected.")
 
     from django.contrib.sites.models import Site
+
     current_site = Site.objects.get_current()
     url = "http://%s%s" % (current_site.domain, sitemap_url)
-    params = urllib.urlencode({'sitemap':url})
+    params = urllib.urlencode({'sitemap': url})
     urllib.urlopen("%s?%s" % (ping_url, params))
+
 
 class Sitemap(object):
     # This limit is defined by Google. See the index documentation at
@@ -57,28 +63,33 @@ class Sitemap(object):
         if not hasattr(self, "_paginator"):
             self._paginator = paginator.Paginator(self.items(), self.limit)
         return self._paginator
+
     paginator = property(_get_paginator)
 
     def get_urls(self, page=1):
         from django.contrib.sites.models import Site
+
         current_site = Site.objects.get_current()
         urls = []
         for item in self.paginator.page(page).object_list:
             loc = "http://%s%s" % (current_site.domain, self.__get('location', item))
             url_info = {
-                'location':   loc,
-                'lastmod':    self.__get('lastmod', item, None),
+                'location': loc,
+                'lastmod': self.__get('lastmod', item, None),
                 'changefreq': self.__get('changefreq', item, None),
-                'priority':   self.__get('priority', item, None)
+                'priority': self.__get('priority', item, None)
             }
             urls.append(url_info)
         return urls
 
+
 class FlatPageSitemap(Sitemap):
     def items(self):
         from django.contrib.sites.models import Site
+
         current_site = Site.objects.get_current()
         return current_site.flatpage_set.all()
+
 
 class GenericSitemap(Sitemap):
     priority = None

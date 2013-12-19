@@ -1,18 +1,20 @@
-from django.conf import settings
 from django.core import signals
 from django.core.exceptions import ImproperlyConfigured
 from django.db.utils import ConnectionHandler, ConnectionRouter, load_backend, DEFAULT_DB_ALIAS, \
-                            DatabaseError, IntegrityError
-from django.utils.functional import curry
+    DatabaseError, IntegrityError
+
+from django.conf import settings
+
 
 __all__ = ('backend', 'connection', 'connections', 'router', 'DatabaseError',
-    'IntegrityError', 'DEFAULT_DB_ALIAS')
+           'IntegrityError', 'DEFAULT_DB_ALIAS')
 
 
 # For backwards compatibility - Port any old database settings over to
 # the new values.
 if not settings.DATABASES:
     import warnings
+
     warnings.warn(
         "settings.DATABASE_* is deprecated; use settings.DATABASES instead.",
         PendingDeprecationWarning
@@ -37,6 +39,7 @@ if DEFAULT_DB_ALIAS not in settings.DATABASES:
 for alias, database in settings.DATABASES.items():
     if database['ENGINE'] in ("postgresql", "postgresql_psycopg2", "sqlite3", "mysql", "oracle"):
         import warnings
+
         if 'django.contrib.gis' in settings.INSTALLED_APPS:
             warnings.warn(
                 "django.contrib.gis is now implemented as a full database backend. "
@@ -80,6 +83,8 @@ backend = load_backend(connection.settings_dict['ENGINE'])
 def close_connection(**kwargs):
     for conn in connections.all():
         conn.close()
+
+
 signals.request_finished.connect(close_connection)
 
 # Register an event that resets connection.queries
@@ -87,15 +92,20 @@ signals.request_finished.connect(close_connection)
 def reset_queries(**kwargs):
     for conn in connections.all():
         conn.queries = []
+
+
 signals.request_started.connect(reset_queries)
 
 # Register an event that rolls back the connections
 # when a Django request has an exception.
 def _rollback_on_exception(**kwargs):
     from django.db import transaction
+
     for conn in connections:
         try:
             transaction.rollback_unless_managed(using=conn)
         except DatabaseError:
             pass
+
+
 signals.got_request_exception.connect(_rollback_on_exception)

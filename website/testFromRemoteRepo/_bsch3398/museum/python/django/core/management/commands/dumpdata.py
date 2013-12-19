@@ -1,36 +1,37 @@
+from optparse import make_option
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.base import BaseCommand, CommandError
 from django.core import serializers
 from django.db import connections, router, DEFAULT_DB_ALIAS
 from django.utils.datastructures import SortedDict
 
-from optparse import make_option
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--format', default='json', dest='format',
-            help='Specifies the output serialization format for fixtures.'),
+                    help='Specifies the output serialization format for fixtures.'),
         make_option('--indent', default=None, dest='indent', type='int',
-            help='Specifies the indent level to use when pretty-printing output'),
+                    help='Specifies the indent level to use when pretty-printing output'),
         make_option('--database', action='store', dest='database',
-            default=DEFAULT_DB_ALIAS, help='Nominates a specific database to load '
-                'fixtures into. Defaults to the "default" database.'),
-        make_option('-e', '--exclude', dest='exclude',action='append', default=[],
-            help='App to exclude (use multiple --exclude to exclude multiple apps).'),
+                    default=DEFAULT_DB_ALIAS, help='Nominates a specific database to load '
+                                                   'fixtures into. Defaults to the "default" database.'),
+        make_option('-e', '--exclude', dest='exclude', action='append', default=[],
+                    help='App to exclude (use multiple --exclude to exclude multiple apps).'),
         make_option('-n', '--natural', action='store_true', dest='use_natural_keys', default=False,
-            help='Use natural keys if they are available.'),
+                    help='Use natural keys if they are available.'),
     )
     help = 'Output the contents of the database as a fixture of the given format.'
     args = '[appname appname.ModelName ...]'
 
     def handle(self, *app_labels, **options):
-        from django.db.models import get_app, get_apps, get_models, get_model
+        from django.db.models import get_app, get_apps, get_model
 
-        format = options.get('format','json')
-        indent = options.get('indent',None)
+        format = options.get('format', 'json')
+        indent = options.get('indent', None)
         using = options.get('database', DEFAULT_DB_ALIAS)
         connection = connections[using]
-        exclude = options.get('exclude',[])
+        exclude = options.get('exclude', [])
         show_traceback = options.get('traceback', False)
         use_natural_keys = options.get('use_natural_keys', False)
 
@@ -84,11 +85,12 @@ class Command(BaseCommand):
 
         try:
             return serializers.serialize(format, objects, indent=indent,
-                        use_natural_keys=use_natural_keys)
+                                         use_natural_keys=use_natural_keys)
         except Exception, e:
             if show_traceback:
                 raise
             raise CommandError("Unable to serialize database: %s" % e)
+
 
 def sort_dependencies(app_list):
     """Sort a list of app,modellist pairs into a single list of models.
@@ -158,8 +160,8 @@ def sort_dependencies(app_list):
                 skipped.append((model, deps))
         if not changed:
             raise CommandError("Can't resolve dependencies for %s in serialized app list." %
-                ', '.join('%s.%s' % (model._meta.app_label, model._meta.object_name)
-                for model, deps in sorted(skipped, key=lambda obj: obj[0].__name__))
+                               ', '.join('%s.%s' % (model._meta.app_label, model._meta.object_name)
+                                         for model, deps in sorted(skipped, key=lambda obj: obj[0].__name__))
             )
         model_dependencies = skipped
 

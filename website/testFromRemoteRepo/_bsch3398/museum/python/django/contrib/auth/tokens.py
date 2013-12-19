@@ -1,12 +1,16 @@
 from datetime import date
-from django.conf import settings
+
 from django.utils.http import int_to_base36, base36_to_int
+
+from django.conf import settings
+
 
 class PasswordResetTokenGenerator(object):
     """
     Strategy object used to generate and check tokens for the password
     reset mechanism.
     """
+
     def make_token(self, user):
         """
         Returns a token that can be used once to do a password reset
@@ -51,16 +55,18 @@ class PasswordResetTokenGenerator(object):
         # invalid as soon as it is used.
         # We limit the hash to 20 chars to keep URL short
         from django.utils.hashcompat import sha_constructor
+
         hash = sha_constructor(settings.SECRET_KEY + unicode(user.id) +
                                user.password + user.last_login.strftime('%Y-%m-%d %H:%M:%S') +
                                unicode(timestamp)).hexdigest()[::2]
         return "%s-%s" % (ts_b36, hash)
 
     def _num_days(self, dt):
-        return (dt - date(2001,1,1)).days
+        return (dt - date(2001, 1, 1)).days
 
     def _today(self):
         # Used for mocking in tests
         return date.today()
+
 
 default_token_generator = PasswordResetTokenGenerator()

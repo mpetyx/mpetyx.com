@@ -1,6 +1,7 @@
 from django.core.context_processors import PermWrapper
-from django.utils.functional import lazy, memoize, SimpleLazyObject
+from django.utils.functional import lazy, SimpleLazyObject
 from django.contrib import messages
+
 
 def auth(request):
     """
@@ -24,10 +25,11 @@ def auth(request):
             return request.user
         else:
             from django.contrib.auth.models import AnonymousUser
+
             return AnonymousUser()
 
     return {
         'user': SimpleLazyObject(get_user),
         'messages': messages.get_messages(request),
-        'perms':  lazy(lambda: PermWrapper(get_user()), PermWrapper)(),
+        'perms': lazy(lambda: PermWrapper(get_user()), PermWrapper)(),
     }

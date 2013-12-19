@@ -48,9 +48,11 @@ More details about how the caching works:
 
 """
 
-from django.conf import settings
 from django.core.cache import cache
 from django.utils.cache import get_cache_key, learn_cache_key, patch_response_headers, get_max_age
+
+from django.conf import settings
+
 
 class UpdateCacheMiddleware(object):
     """
@@ -61,6 +63,7 @@ class UpdateCacheMiddleware(object):
     UpdateCacheMiddleware must be the first piece of middleware in
     MIDDLEWARE_CLASSES so that it'll get called last during the response phase.
     """
+
     def __init__(self):
         self.cache_timeout = settings.CACHE_MIDDLEWARE_SECONDS
         self.key_prefix = settings.CACHE_MIDDLEWARE_KEY_PREFIX
@@ -79,7 +82,7 @@ class UpdateCacheMiddleware(object):
             return response
         if not response.status_code == 200:
             return response
-        # Try to get the timeout from the "max-age" section of the "Cache-
+            # Try to get the timeout from the "max-age" section of the "Cache-
         # Control" header before reverting to using the default cache_timeout
         # length.
         timeout = get_max_age(response)
@@ -94,6 +97,7 @@ class UpdateCacheMiddleware(object):
             cache.set(cache_key, response, timeout)
         return response
 
+
 class FetchFromCacheMiddleware(object):
     """
     Request-phase cache middleware that fetches a page from the cache.
@@ -102,6 +106,7 @@ class FetchFromCacheMiddleware(object):
     FetchFromCacheMiddleware must be the last piece of middleware in
     MIDDLEWARE_CLASSES so that it'll get called last during the request phase.
     """
+
     def __init__(self):
         self.cache_timeout = settings.CACHE_MIDDLEWARE_SECONDS
         self.key_prefix = settings.CACHE_MIDDLEWARE_KEY_PREFIX
@@ -113,7 +118,8 @@ class FetchFromCacheMiddleware(object):
         version if available.
         """
         if self.cache_anonymous_only:
-            assert hasattr(request, 'user'), "The Django cache middleware with CACHE_MIDDLEWARE_ANONYMOUS_ONLY=True requires authentication middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert 'django.contrib.auth.middleware.AuthenticationMiddleware' before the CacheMiddleware."
+            assert hasattr(request,
+                           'user'), "The Django cache middleware with CACHE_MIDDLEWARE_ANONYMOUS_ONLY=True requires authentication middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert 'django.contrib.auth.middleware.AuthenticationMiddleware' before the CacheMiddleware."
 
         if not request.method in ('GET', 'HEAD') or request.GET:
             request._cache_update_cache = False
@@ -136,6 +142,7 @@ class FetchFromCacheMiddleware(object):
         request._cache_update_cache = False
         return response
 
+
 class CacheMiddleware(UpdateCacheMiddleware, FetchFromCacheMiddleware):
     """
     Cache middleware that provides basic behavior for many simple sites.
@@ -143,6 +150,7 @@ class CacheMiddleware(UpdateCacheMiddleware, FetchFromCacheMiddleware):
     Also used as the hook point for the cache decorator, which is generated
     using the decorator-from-middleware utility.
     """
+
     def __init__(self, cache_timeout=None, key_prefix=None, cache_anonymous_only=None):
         self.cache_timeout = cache_timeout
         if cache_timeout is None:

@@ -2,32 +2,33 @@ import os
 import sys
 from django.db.backends.creation import BaseDatabaseCreation
 
+
 class DatabaseCreation(BaseDatabaseCreation):
     # SQLite doesn't actually support most of these types, but it "does the right
     # thing" given more verbose field definitions, so leave them as is so that
     # schema inspection is more useful.
     data_types = {
-        'AutoField':                    'integer',
-        'BooleanField':                 'bool',
-        'CharField':                    'varchar(%(max_length)s)',
-        'CommaSeparatedIntegerField':   'varchar(%(max_length)s)',
-        'DateField':                    'date',
-        'DateTimeField':                'datetime',
-        'DecimalField':                 'decimal',
-        'FileField':                    'varchar(%(max_length)s)',
-        'FilePathField':                'varchar(%(max_length)s)',
-        'FloatField':                   'real',
-        'IntegerField':                 'integer',
-        'BigIntegerField':              'bigint',
-        'IPAddressField':               'char(15)',
-        'NullBooleanField':             'bool',
-        'OneToOneField':                'integer',
-        'PositiveIntegerField':         'integer unsigned',
-        'PositiveSmallIntegerField':    'smallint unsigned',
-        'SlugField':                    'varchar(%(max_length)s)',
-        'SmallIntegerField':            'smallint',
-        'TextField':                    'text',
-        'TimeField':                    'time',
+        'AutoField': 'integer',
+        'BooleanField': 'bool',
+        'CharField': 'varchar(%(max_length)s)',
+        'CommaSeparatedIntegerField': 'varchar(%(max_length)s)',
+        'DateField': 'date',
+        'DateTimeField': 'datetime',
+        'DecimalField': 'decimal',
+        'FileField': 'varchar(%(max_length)s)',
+        'FilePathField': 'varchar(%(max_length)s)',
+        'FloatField': 'real',
+        'IntegerField': 'integer',
+        'BigIntegerField': 'bigint',
+        'IPAddressField': 'char(15)',
+        'NullBooleanField': 'bool',
+        'OneToOneField': 'integer',
+        'PositiveIntegerField': 'integer unsigned',
+        'PositiveSmallIntegerField': 'smallint unsigned',
+        'SlugField': 'varchar(%(max_length)s)',
+        'SmallIntegerField': 'smallint',
+        'TextField': 'text',
+        'TimeField': 'time',
     }
 
     def sql_for_pending_references(self, model, style, pending_references):
@@ -46,15 +47,16 @@ class DatabaseCreation(BaseDatabaseCreation):
                 print "Destroying old test database..."
             if os.access(test_database_name, os.F_OK):
                 if not autoclobber:
-                    confirm = raw_input("Type 'yes' if you would like to try deleting the test database '%s', or 'no' to cancel: " % test_database_name)
+                    confirm = raw_input(
+                        "Type 'yes' if you would like to try deleting the test database '%s', or 'no' to cancel: " % test_database_name)
                 if autoclobber or confirm == 'yes':
-                  try:
-                      if verbosity >= 1:
-                          print "Destroying old test database..."
-                      os.remove(test_database_name)
-                  except Exception, e:
-                      sys.stderr.write("Got an error deleting the old test database: %s\n" % e)
-                      sys.exit(2)
+                    try:
+                        if verbosity >= 1:
+                            print "Destroying old test database..."
+                        os.remove(test_database_name)
+                    except Exception, e:
+                        sys.stderr.write("Got an error deleting the old test database: %s\n" % e)
+                        sys.exit(2)
                 else:
                     print "Tests cancelled."
                     sys.exit(1)

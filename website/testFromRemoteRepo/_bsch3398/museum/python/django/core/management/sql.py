@@ -1,13 +1,12 @@
 import os
 import re
 
-from django.conf import settings
-from django.contrib.contenttypes import generic
 from django.core.management.base import CommandError
-from django.dispatch import dispatcher
 from django.db import models
 from django.db.models import get_models
-from django.db.backends.util import truncate_name
+
+from django.conf import settings
+
 
 def sql_create(app, style, connection):
     "Returns a list of the CREATE TABLE SQL statements for the given app."
@@ -16,9 +15,9 @@ def sql_create(app, style, connection):
         # This must be the "dummy" database backend, which means the user
         # hasn't set ENGINE for the databse.
         raise CommandError("Django doesn't know which syntax to use for your SQL statements,\n" +
-            "because you haven't specified the ENGINE setting for the database.\n" +
-            "Edit your settings file and change DATBASES['default']['ENGINE'] to something like\n" +
-            "'django.db.backends.postgresql' or 'django.db.backends.mysql'")
+                           "because you haven't specified the ENGINE setting for the database.\n" +
+                           "Edit your settings file and change DATBASES['default']['ENGINE'] to something like\n" +
+                           "'django.db.backends.postgresql' or 'django.db.backends.mysql'")
 
     # Get installed models, so we generate REFERENCES right.
     # We trim models from the current app so that the sqlreset command does not
@@ -27,7 +26,8 @@ def sql_create(app, style, connection):
     app_models = models.get_models(app, include_auto_created=True)
     final_output = []
     tables = connection.introspection.table_names()
-    known_models = set([model for model in connection.introspection.installed_models(tables) if model not in app_models])
+    known_models = set(
+        [model for model in connection.introspection.installed_models(tables) if model not in app_models])
     pending_references = {}
 
     for model in app_models:
@@ -48,12 +48,13 @@ def sql_create(app, style, connection):
         alter_sql = []
         for model in not_installed_models:
             alter_sql.extend(['-- ' + sql for sql in
-                connection.creation.sql_for_pending_references(model, style, pending_references)])
+                              connection.creation.sql_for_pending_references(model, style, pending_references)])
         if alter_sql:
             final_output.append('-- The following references should be added but depend on non-existent tables:')
             final_output.extend(alter_sql)
 
     return final_output
+
 
 def sql_delete(app, style, connection):
     "Returns a list of the DROP TABLE SQL statements for the given app."
@@ -83,7 +84,7 @@ def sql_delete(app, style, connection):
             opts = model._meta
             for f in opts.local_fields:
                 if f.rel and f.rel.to not in to_delete:
-                    references_to_delete.setdefault(f.rel.to, []).append( (model, f) )
+                    references_to_delete.setdefault(f.rel.to, []).append((model, f))
 
             to_delete.add(model)
 
@@ -99,9 +100,11 @@ def sql_delete(app, style, connection):
 
     return output[::-1] # Reverse it, to deal with table dependencies.
 
+
 def sql_reset(app, style, connection):
     "Returns a list of the DROP TABLE SQL, then the CREATE TABLE SQL, for the given module."
     return sql_delete(app, style, connection) + sql_all(app, style, connection)
+
 
 def sql_flush(style, connection, only_django=False):
     """
@@ -117,6 +120,7 @@ def sql_flush(style, connection, only_django=False):
     statements = connection.ops.sql_flush(style, tables, connection.introspection.sequence_list())
     return statements
 
+
 def sql_custom(app, style, connection):
     "Returns a list of the custom table modifying SQL statements for the given app."
     output = []
@@ -129,6 +133,7 @@ def sql_custom(app, style, connection):
 
     return output
 
+
 def sql_indexes(app, style, connection):
     "Returns a list of the CREATE INDEX SQL statements for all models in the given app."
     output = []
@@ -136,9 +141,11 @@ def sql_indexes(app, style, connection):
         output.extend(connection.creation.sql_indexes_for_model(model, style))
     return output
 
+
 def sql_all(app, style, connection):
     "Returns a list of CREATE TABLE SQL, initial-data inserts, and CREATE INDEX SQL for the given module."
     return sql_create(app, style, connection) + sql_custom(app, style, connection) + sql_indexes(app, style, connection)
+
 
 def custom_sql_for_model(model, style, connection):
     opts = model._meta
@@ -181,5 +188,5 @@ def emit_post_sync_signal(created_models, verbosity, interactive, db):
         if verbosity >= 2:
             print "Running post-sync handlers for application", app_name
         models.signals.post_syncdb.send(sender=app, app=app,
-            created_models=created_models, verbosity=verbosity,
-            interactive=interactive, db=db)
+                                        created_models=created_models, verbosity=verbosity,
+                                        interactive=interactive, db=db)

@@ -6,17 +6,20 @@ AR-specific Form helpers.
 from django.forms import ValidationError
 from django.core.validators import EMPTY_VALUES
 from django.forms.fields import RegexField, CharField, Select
-from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
+
 
 class ARProvinceSelect(Select):
     """
     A Select widget that uses a list of Argentinean provinces/autonomous cities
     as its choices.
     """
+
     def __init__(self, attrs=None):
         from ar_provinces import PROVINCE_CHOICES
+
         super(ARProvinceSelect, self).__init__(attrs, choices=PROVINCE_CHOICES)
+
 
 class ARPostalCodeField(RegexField):
     """
@@ -30,7 +33,7 @@ class ARPostalCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(ARPostalCodeField, self).__init__(r'^\d{4}$|^[A-HJ-NP-Za-hj-np-z]\d{4}\D{3}$',
-            min_length=4, max_length=8, *args, **kwargs)
+                                                min_length=4, max_length=8, *args, **kwargs)
 
     def clean(self, value):
         value = super(ARPostalCodeField, self).clean(value)
@@ -41,6 +44,7 @@ class ARPostalCodeField(RegexField):
         if len(value) == 8:
             return u'%s%s%s' % (value[0].upper(), value[1:5], value[5:].upper())
         return value
+
 
 class ARDNIField(CharField):
     """
@@ -53,7 +57,7 @@ class ARDNIField(CharField):
 
     def __init__(self, *args, **kwargs):
         super(ARDNIField, self).__init__(max_length=10, min_length=7, *args,
-                **kwargs)
+                                         **kwargs)
 
     def clean(self, value):
         """
@@ -71,6 +75,7 @@ class ARDNIField(CharField):
 
         return value
 
+
 class ARCUITField(RegexField):
     """
     This field validates a CUIT (Código Único de Identificación Tributaria). A
@@ -83,7 +88,7 @@ class ARCUITField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(ARCUITField, self).__init__(r'^\d{2}-?\d{8}-?\d$',
-            *args, **kwargs)
+                                          *args, **kwargs)
 
     def clean(self, value):
         """

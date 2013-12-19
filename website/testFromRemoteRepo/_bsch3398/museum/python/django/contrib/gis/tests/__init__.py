@@ -1,8 +1,11 @@
 import sys
 
+
 def run_tests(*args, **kwargs):
     from django.test.simple import run_tests as base_run_tests
+
     return base_run_tests(*args, **kwargs)
+
 
 def geo_suite():
     """
@@ -23,6 +26,7 @@ def geo_suite():
 
     # Adding the GEOS tests.
     from django.contrib.gis.geos import tests as geos_tests
+
     gis_tests.append(geos_tests.suite())
 
     # Tests that require use of a spatial database (e.g., creation of models)
@@ -34,7 +38,7 @@ def geo_suite():
     # Tests that do not require setting up and tearing down a spatial database.
     test_suite_names = [
         'test_measure',
-        ]
+    ]
 
     if HAS_GDAL:
         # These tests require GDAL.
@@ -47,12 +51,13 @@ def geo_suite():
 
         test_suite_names.extend(['test_spatialrefsys', 'test_geoforms'])
         test_apps.append('layermap')
-        
+
         # Adding the GDAL tests.
         from django.contrib.gis.gdal import tests as gdal_tests
+
         gis_tests.append(gdal_tests.suite())
     else:
-        print >>sys.stderr, "GDAL not available - no tests requiring GDAL will be run."
+        print >> sys.stderr, "GDAL not available - no tests requiring GDAL will be run."
 
     if HAS_GEOIP and hasattr(settings, 'GEOIP_PATH'):
         test_suite_names.append('test_geoip')
@@ -65,6 +70,7 @@ def geo_suite():
 
     return gis_tests, test_apps
 
+
 def run_gis_tests(test_labels, **kwargs):
     """
     Use this routine as the TEST_RUNNER in your settings in order to run the
@@ -73,7 +79,6 @@ def run_gis_tests(test_labels, **kwargs):
     """
     from django.conf import settings
     from django.db.models import loading
-    from django.contrib.gis.tests.utils import mysql
 
     # Getting initial values.
     old_installed = settings.INSTALLED_APPS
@@ -81,10 +86,10 @@ def run_gis_tests(test_labels, **kwargs):
 
     # Overridding the INSTALLED_APPS with only what we need,
     # to prevent unnecessary database table creation.
-    new_installed =  ['django.contrib.sites',
-                      'django.contrib.sitemaps',
-                      'django.contrib.gis',
-                      ]
+    new_installed = ['django.contrib.sites',
+                     'django.contrib.sitemaps',
+                     'django.contrib.gis',
+    ]
 
     # Setting the URLs.
     settings.ROOT_URLCONF = 'django.contrib.gis.tests.urls'

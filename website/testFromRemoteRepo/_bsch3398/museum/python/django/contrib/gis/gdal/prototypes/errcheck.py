@@ -12,14 +12,18 @@ def arg_byref(args, offset=-1):
     "Returns the pointer argument's by-refernece value."
     return args[offset]._obj.value
 
+
 def ptr_byref(args, offset=-1):
     "Returns the pointer argument passed in by-reference."
     return args[offset]._obj
 
+
 def check_bool(result, func, cargs):
     "Returns the boolean evaluation of the value."
-    if bool(result): return True
-    else: return False
+    if bool(result):
+        return True
+    else:
+        return False
 
 ### String checking Routines ###
 def check_const_string(result, func, cargs, offset=None):
@@ -33,6 +37,7 @@ def check_const_string(result, func, cargs, offset=None):
     else:
         return result
 
+
 def check_string(result, func, cargs, offset=-1, str_result=False):
     """
     Checks the string output returned from the given function, and frees
@@ -45,15 +50,17 @@ def check_string(result, func, cargs, offset=-1, str_result=False):
     if str_result:
         # For routines that return a string.
         ptr = result
-        if not ptr: s = None
-        else: s = string_at(result)
+        if not ptr:
+            s = None
+        else:
+            s = string_at(result)
     else:
         # Error-code return specified.
         check_err(result)
         ptr = ptr_byref(cargs, offset)
         # Getting the string value
         s = ptr.value
-    # Correctly freeing the allocated memory beind GDAL pointer 
+        # Correctly freeing the allocated memory beind GDAL pointer
     # w/the VSIFree routine.
     if ptr: lgdal.VSIFree(ptr)
     return s
@@ -73,9 +80,10 @@ def check_geom(result, func, cargs):
     # restype is set to c_void_p
     if isinstance(result, (int, long)):
         result = c_void_p(result)
-    if not result: 
+    if not result:
         raise OGRException('Invalid geometry pointer returned from "%s".' % func.__name__)
     return result
+
 
 def check_geom_offset(result, func, cargs, offset=-1):
     "Chcks the geometry at the given offset in the C parameter list."
@@ -100,6 +108,7 @@ def check_arg_errcode(result, func, cargs):
     check_err(arg_byref(cargs))
     return result
 
+
 def check_errcode(result, func, cargs):
     """
     Check the error code returned (c_int).
@@ -107,14 +116,16 @@ def check_errcode(result, func, cargs):
     check_err(result)
     return
 
+
 def check_pointer(result, func, cargs):
     "Makes sure the result pointer is valid."
     if isinstance(result, (int, long)):
         result = c_void_p(result)
-    if bool(result): 
+    if bool(result):
         return result
-    else: 
+    else:
         raise OGRException('Invalid pointer returned from "%s"' % func.__name__)
+
 
 def check_str_arg(result, func, cargs):
     """

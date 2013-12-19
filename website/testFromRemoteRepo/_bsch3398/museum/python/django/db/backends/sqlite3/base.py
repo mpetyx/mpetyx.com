@@ -26,13 +26,13 @@ try:
 except ImportError, exc:
     import sys
     from django.core.exceptions import ImproperlyConfigured
+
     if sys.version_info < (2, 5, 0):
         module = 'pysqlite2 module'
         exc = e1
     else:
         module = 'either pysqlite2 or sqlite3 modules (tried in that order)'
     raise ImproperlyConfigured("Error loading %s: %s" % (module, exc))
-
 
 DatabaseError = Database.DatabaseError
 IntegrityError = Database.IntegrityError
@@ -45,14 +45,15 @@ Database.register_converter("timestamp", util.typecast_timestamp)
 Database.register_converter("TIMESTAMP", util.typecast_timestamp)
 Database.register_converter("decimal", util.typecast_decimal)
 Database.register_adapter(decimal.Decimal, util.rev_typecast_decimal)
-if Database.version_info >= (2,4,1):
+if Database.version_info >= (2, 4, 1):
     # Starting in 2.4.1, the str type is not accepted anymore, therefore,
     # we convert all str objects to Unicode
     # As registering a adapter for a primitive type causes a small
     # slow-down, this adapter is only registered for sqlite3 versions
     # needing it.
-    Database.register_adapter(str, lambda s:s.decode('utf-8'))
-    Database.register_adapter(SafeString, lambda s:s.decode('utf-8'))
+    Database.register_adapter(str, lambda s: s.decode('utf-8'))
+    Database.register_adapter(SafeString, lambda s: s.decode('utf-8'))
+
 
 class DatabaseFeatures(BaseDatabaseFeatures):
     # SQLite cannot handle us only partially reading from a cursor's result set
@@ -60,6 +61,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # setting ensures we always read result sets fully into memory all in one
     # go.
     can_use_chunked_reads = False
+
 
 class DatabaseOperations(BaseDatabaseOperations):
     def date_extract_sql(self, lookup_type, field_name):
@@ -95,10 +97,10 @@ class DatabaseOperations(BaseDatabaseOperations):
         # Note: The DELETE FROM... SQL generated below works for SQLite databases
         # because constraints don't exist
         sql = ['%s %s %s;' % \
-                (style.SQL_KEYWORD('DELETE'),
-                 style.SQL_KEYWORD('FROM'),
-                 style.SQL_FIELD(self.quote_name(table))
-                 ) for table in tables]
+               (style.SQL_KEYWORD('DELETE'),
+                style.SQL_KEYWORD('FROM'),
+                style.SQL_FIELD(self.quote_name(table))
+               ) for table in tables]
         # Note: No requirement for reset of auto-incremented indices (cf. other
         # sql_flush() implementations). Just return SQL at this point
         return sql
@@ -128,8 +130,8 @@ class DatabaseOperations(BaseDatabaseOperations):
         # No field, or the field isn't known to be a decimal or integer
         return value
 
-class DatabaseWrapper(BaseDatabaseWrapper):
 
+class DatabaseWrapper(BaseDatabaseWrapper):
     # SQLite requires LIKE statements to include an ESCAPE clause if the value
     # being escaped has a percent or underscore in it.
     # See http://www.sqlite.org/lang_expr.html for an explanation.
@@ -165,7 +167,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             settings_dict = self.settings_dict
             if not settings_dict['NAME']:
                 from django.core.exceptions import ImproperlyConfigured
-                raise ImproperlyConfigured("Please fill out the database NAME in the settings module before using the database.")
+
+                raise ImproperlyConfigured(
+                    "Please fill out the database NAME in the settings module before using the database.")
             kwargs = {
                 'database': settings_dict['NAME'],
                 'detect_types': Database.PARSE_DECLTYPES | Database.PARSE_COLNAMES,
@@ -186,7 +190,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         if self.settings_dict['NAME'] != ":memory:":
             BaseDatabaseWrapper.close(self)
 
+
 FORMAT_QMARK_REGEX = re.compile(r'(?![^%])%s')
+
 
 class SQLiteCursorWrapper(Database.Cursor):
     """
@@ -194,6 +200,7 @@ class SQLiteCursorWrapper(Database.Cursor):
     This fixes it -- but note that if you want to use a literal "%s" in a query,
     you'll need to use "%%s".
     """
+
     def execute(self, query, params=()):
         query = self.convert_query(query)
         try:
@@ -213,7 +220,8 @@ class SQLiteCursorWrapper(Database.Cursor):
             raise utils.DatabaseError, utils.DatabaseError(*tuple(e)), sys.exc_info()[2]
 
     def convert_query(self, query):
-        return FORMAT_QMARK_REGEX.sub('?', query).replace('%%','%')
+        return FORMAT_QMARK_REGEX.sub('?', query).replace('%%', '%')
+
 
 def _sqlite_extract(lookup_type, dt):
     if dt is None:
@@ -227,6 +235,7 @@ def _sqlite_extract(lookup_type, dt):
     else:
         return getattr(dt, lookup_type)
 
+
 def _sqlite_date_trunc(lookup_type, dt):
     try:
         dt = util.typecast_timestamp(dt)
@@ -239,8 +248,10 @@ def _sqlite_date_trunc(lookup_type, dt):
     elif lookup_type == 'day':
         return "%i-%02i-%02i 00:00:00" % (dt.year, dt.month, dt.day)
 
+
 def _sqlite_regexp(re_pattern, re_string):
     import re
+
     try:
         return bool(re.search(re_pattern, re_string))
     except:

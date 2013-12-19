@@ -9,12 +9,14 @@ import posixpath
 import re
 import stat
 import urllib
-from email.Utils import parsedate_tz, mktime_tz
 
-from django.template import loader
 from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseNotModified
-from django.template import Template, Context, TemplateDoesNotExist
 from django.utils.http import http_date
+
+from email.Utils import parsedate_tz, mktime_tz
+from django.template import loader
+from django.template import Template, Context, TemplateDoesNotExist
+
 
 def serve(request, path, document_root=None, show_indexes=False):
     """
@@ -54,7 +56,7 @@ def serve(request, path, document_root=None, show_indexes=False):
         raise Http404("Directory indexes are not allowed here.")
     if not os.path.exists(fullpath):
         raise Http404('"%s" does not exist' % fullpath)
-    # Respect the If-Modified-Since header.
+        # Respect the If-Modified-Since header.
     statobj = os.stat(fullpath)
     mimetype = mimetypes.guess_type(fullpath)[0] or 'application/octet-stream'
     if not was_modified_since(request.META.get('HTTP_IF_MODIFIED_SINCE'),
@@ -65,6 +67,7 @@ def serve(request, path, document_root=None, show_indexes=False):
     response["Last-Modified"] = http_date(statobj[stat.ST_MTIME])
     response["Content-Length"] = len(contents)
     return response
+
 
 DEFAULT_DIRECTORY_INDEX_TEMPLATE = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -89,10 +92,11 @@ DEFAULT_DIRECTORY_INDEX_TEMPLATE = """
 </html>
 """
 
+
 def directory_index(path, fullpath):
     try:
         t = loader.select_template(['static/directory_index.html',
-                'static/directory_index'])
+                                    'static/directory_index'])
     except TemplateDoesNotExist:
         t = Template(DEFAULT_DIRECTORY_INDEX_TEMPLATE, name='Default directory index template')
     files = []
@@ -102,10 +106,11 @@ def directory_index(path, fullpath):
                 f += '/'
             files.append(f)
     c = Context({
-        'directory' : path + '/',
-        'file_list' : files,
+        'directory': path + '/',
+        'file_list': files,
     })
     return HttpResponse(t.render(c))
+
 
 def was_modified_since(header=None, mtime=0, size=0):
     """

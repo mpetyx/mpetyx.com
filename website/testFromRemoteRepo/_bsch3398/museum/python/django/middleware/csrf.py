@@ -9,11 +9,13 @@ import itertools
 import re
 import random
 
-from django.conf import settings
 from django.core.urlresolvers import get_callable
 from django.utils.cache import patch_vary_headers
-from django.utils.hashcompat import md5_constructor
 from django.utils.safestring import mark_safe
+
+from django.conf import settings
+from django.utils.hashcompat import md5_constructor
+
 
 _POST_FORM_RE = \
     re.compile(r'(<form\W[^>]*\bmethod\s*=\s*(\'|"|)POST(\'|"|)\b[^>]*>)', re.IGNORECASE)
@@ -27,18 +29,22 @@ else:
     randrange = random.randrange
 _MAX_CSRF_KEY = 18446744073709551616L     # 2 << 63
 
+
 def _get_failure_view():
     """
     Returns the view to be used for CSRF rejections
     """
     return get_callable(settings.CSRF_FAILURE_VIEW)
 
+
 def _get_new_csrf_key():
     return md5_constructor("%s%s"
-                % (randrange(0, _MAX_CSRF_KEY), settings.SECRET_KEY)).hexdigest()
+                           % (randrange(0, _MAX_CSRF_KEY), settings.SECRET_KEY)).hexdigest()
+
 
 def _make_legacy_session_token(session_id):
     return md5_constructor(settings.SECRET_KEY + session_id).hexdigest()
+
 
 def get_token(request):
     """
@@ -52,6 +58,7 @@ def get_token(request):
     request.META["CSRF_COOKIE_USED"] = True
     return request.META.get("CSRF_COOKIE", None)
 
+
 class CsrfViewMiddleware(object):
     """
     Middleware that requires a present and correct csrfmiddlewaretoken
@@ -61,6 +68,7 @@ class CsrfViewMiddleware(object):
     This middleware should be used in conjunction with the csrf_token template
     tag.
     """
+
     def process_view(self, request, callback, callback_args, callback_kwargs):
         if getattr(callback, 'csrf_exempt', False):
             return None
@@ -69,6 +77,7 @@ class CsrfViewMiddleware(object):
             return None
 
         reject = lambda s: _get_failure_view()(request, reason=s)
+
         def accept():
             # Avoid checking the request twice by adding a custom attribute to
             # request.  This will be relevant when both decorator and middleware
@@ -178,12 +187,13 @@ class CsrfViewMiddleware(object):
 
         # Set the CSRF cookie even if it's already set, so we renew the expiry timer.
         response.set_cookie(settings.CSRF_COOKIE_NAME,
-                request.META["CSRF_COOKIE"], max_age = 60 * 60 * 24 * 7 * 52,
-                domain=settings.CSRF_COOKIE_DOMAIN)
+                            request.META["CSRF_COOKIE"], max_age=60 * 60 * 24 * 7 * 52,
+                            domain=settings.CSRF_COOKIE_DOMAIN)
         # Content varies with the CSRF cookie, so set the Vary header.
         patch_vary_headers(response, ('Cookie',))
         response.csrf_processing_done = True
         return response
+
 
 class CsrfResponseMiddleware(object):
     """
@@ -194,8 +204,10 @@ class CsrfResponseMiddleware(object):
     applications are converted to using use the csrf_token template tag
     instead. It will be removed in Django 1.4.
     """
+
     def __init__(self):
         import warnings
+
         warnings.warn(
             "CsrfResponseMiddleware and CsrfMiddleware are deprecated; use CsrfViewMiddleware and the template tag instead (see CSRF documentation).",
             PendingDeprecationWarning
@@ -215,12 +227,13 @@ class CsrfResponseMiddleware(object):
             # ensure we don't add the 'id' attribute twice (HTML validity)
             idattributes = itertools.chain(("id='csrfmiddlewaretoken'",),
                                            itertools.repeat(''))
+
             def add_csrf_field(match):
                 """Returns the matched <form> tag plus the added <input> element"""
                 return mark_safe(match.group() + "<div style='display:none;'>" + \
-                "<input type='hidden' " + idattributes.next() + \
-                " name='csrfmiddlewaretoken' value='" + csrf_token + \
-                "' /></div>")
+                                 "<input type='hidden' " + idattributes.next() + \
+                                 " name='csrfmiddlewaretoken' value='" + csrf_token + \
+                                 "' /></div>")
 
             # Modify any POST forms
             response.content, n = _POST_FORM_RE.subn(add_csrf_field, response.content)
@@ -234,6 +247,7 @@ class CsrfResponseMiddleware(object):
                 # to delete. See bug #9163
                 del response['ETag']
         return response
+
 
 class CsrfMiddleware(object):
     """

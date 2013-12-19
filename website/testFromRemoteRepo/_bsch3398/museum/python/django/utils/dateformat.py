@@ -22,6 +22,7 @@ from django.utils.encoding import force_unicode
 re_formatchars = re.compile(r'(?<!\\)([aAbBcdDfFgGhHiIjlLmMnNOPrsStTUuwWyYzZ])')
 re_escaped = re.compile(r'\\(.)')
 
+
 class Formatter(object):
     def format(self, formatstr):
         pieces = []
@@ -31,6 +32,7 @@ class Formatter(object):
             elif piece:
                 pieces.append(re_escaped.sub(r'\1', piece))
         return u''.join(pieces)
+
 
 class TimeFormat(Formatter):
     def __init__(self, t):
@@ -229,7 +231,7 @@ class DateFormat(TimeFormat):
         weekday = self.data.weekday() + 1
         day_of_year = self.z()
         if day_of_year <= (8 - jan1_weekday) and jan1_weekday > 4:
-            if jan1_weekday == 5 or (jan1_weekday == 6 and calendar.isleap(self.data.year-1)):
+            if jan1_weekday == 5 or (jan1_weekday == 6 and calendar.isleap(self.data.year - 1)):
                 week_number = 53
             else:
                 week_number = 52
@@ -275,10 +277,12 @@ class DateFormat(TimeFormat):
         # seconds positive. Positive offsets have days=0
         return offset.days * 86400 + offset.seconds
 
+
 def format(value, format_string):
     "Convenience function"
     df = DateFormat(value)
     return df.format(format_string)
+
 
 def time_format(value, format_string):
     "Convenience function"

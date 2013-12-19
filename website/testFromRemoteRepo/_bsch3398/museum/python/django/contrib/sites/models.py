@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 SITE_CACHE = {}
 
+
 class SiteManager(models.Manager):
     def get_current(self):
         """
@@ -11,11 +12,14 @@ class SiteManager(models.Manager):
         time it's retrieved from the database.
         """
         from django.conf import settings
+
         try:
             sid = settings.SITE_ID
         except AttributeError:
             from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured("You're using the Django \"sites framework\" without having set the SITE_ID setting. Create a site in your database and set the SITE_ID setting to fix this error.")
+
+            raise ImproperlyConfigured(
+                "You're using the Django \"sites framework\" without having set the SITE_ID setting. Create a site in your database and set the SITE_ID setting to fix this error.")
         try:
             current_site = SITE_CACHE[sid]
         except KeyError:
@@ -27,6 +31,7 @@ class SiteManager(models.Manager):
         """Clears the ``Site`` object cache."""
         global SITE_CACHE
         SITE_CACHE = {}
+
 
 class Site(models.Model):
     domain = models.CharField(_('domain name'), max_length=100)
@@ -56,6 +61,7 @@ class Site(models.Model):
         except KeyError:
             pass
 
+
 class RequestSite(object):
     """
     A class that shares the primary interface of Site (i.e., it has
@@ -64,6 +70,7 @@ class RequestSite(object):
 
     The save() and delete() methods raise NotImplementedError.
     """
+
     def __init__(self, request):
         self.domain = self.name = request.get_host()
 

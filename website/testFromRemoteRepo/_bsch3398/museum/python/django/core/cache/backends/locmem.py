@@ -1,6 +1,7 @@
 "Thread-safe in-memory cache backend."
 
 import time
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -8,6 +9,7 @@ except ImportError:
 
 from django.core.cache.backends.base import BaseCache
 from django.utils.synch import RWLock
+
 
 class CacheClass(BaseCache):
     def __init__(self, _, params):

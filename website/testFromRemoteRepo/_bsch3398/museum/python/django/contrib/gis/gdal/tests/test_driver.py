@@ -1,4 +1,4 @@
-import os, os.path, unittest
+import unittest
 from django.contrib.gis.gdal import Driver, OGRException
 
 valid_drivers = ('ESRI Shapefile', 'MapInfo File', 'TIGER', 'S57', 'DGN',
@@ -6,14 +6,14 @@ valid_drivers = ('ESRI Shapefile', 'MapInfo File', 'TIGER', 'S57', 'DGN',
 
 invalid_drivers = ('Foo baz', 'clucka', 'ESRI Shp')
 
-aliases = {'eSrI' : 'ESRI Shapefile',
-           'TigER/linE' : 'TIGER',
-           'SHAPE' : 'ESRI Shapefile',
-           'sHp' : 'ESRI Shapefile',
-           }
+aliases = {'eSrI': 'ESRI Shapefile',
+           'TigER/linE': 'TIGER',
+           'SHAPE': 'ESRI Shapefile',
+           'sHp': 'ESRI Shapefile',
+}
+
 
 class DriverTest(unittest.TestCase):
-
     def test01_valid_driver(self):
         "Testing valid OGR Data Source Drivers."
         for d in valid_drivers:
@@ -31,10 +31,12 @@ class DriverTest(unittest.TestCase):
             dr = Driver(alias)
             self.assertEqual(full_name, str(dr))
 
+
 def suite():
     s = unittest.TestSuite()
     s.addTest(unittest.makeSuite(DriverTest))
     return s
+
 
 def run(verbosity=2):
     unittest.TextTestRunner(verbosity=verbosity).run(suite())

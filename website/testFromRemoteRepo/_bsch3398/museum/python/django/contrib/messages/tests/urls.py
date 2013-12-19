@@ -1,8 +1,8 @@
-from django.conf.urls.defaults import *
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response
+
+from django.conf.urls.defaults import *
 from django.template import RequestContext, Template
 
 
@@ -34,6 +34,6 @@ def show(request):
 
 
 urlpatterns = patterns('',
-    ('^add/(debug|info|success|warning|error)/$', add),
-    ('^show/$', show),
+                       ('^add/(debug|info|success|warning|error)/$', add),
+                       ('^show/$', show),
 )

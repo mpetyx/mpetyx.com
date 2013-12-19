@@ -28,7 +28,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os, sys, time
+import os
+import sys
+import time
 
 try:
     import thread
@@ -42,11 +44,11 @@ try:
 except ImportError:
     pass
 
-
 RUN_RELOADER = True
 
 _mtimes = {}
 _win = (sys.platform == "win32")
+
 
 def code_changed():
     global _mtimes, _win
@@ -67,11 +69,13 @@ def code_changed():
             return True
     return False
 
+
 def reloader_thread():
     while RUN_RELOADER:
         if code_changed():
             sys.exit(3) # force reload
         time.sleep(1)
+
 
 def restart_with_reloader():
     while True:
@@ -83,6 +87,7 @@ def restart_with_reloader():
         exit_code = os.spawnve(os.P_WAIT, sys.executable, args, new_environ)
         if exit_code != 3:
             return exit_code
+
 
 def python_reloader(main_func, args, kwargs):
     if os.environ.get("RUN_MAIN") == "true":
@@ -97,8 +102,10 @@ def python_reloader(main_func, args, kwargs):
         except KeyboardInterrupt:
             pass
 
+
 def jython_reloader(main_func, args, kwargs):
     from _systemrestart import SystemRestart
+
     thread.start_new_thread(main_func, args)
     while True:
         if code_changed():

@@ -7,22 +7,22 @@ Source: http://www.canada.gc.ca/othergov/prov_e.html
 
 This exists in this standalone file so that it's only imported into memory 
 when explicitly needed. 
-""" 
+"""
 
-PROVINCE_CHOICES = ( 
-    ('AB', 'Alberta'), 
-    ('BC', 'British Columbia'), 
-    ('MB', 'Manitoba'), 
-    ('NB', 'New Brunswick'), 
-    ('NF', 'Newfoundland and Labrador'), 
-    ('NT', 'Northwest Territories'), 
-    ('NS', 'Nova Scotia'), 
-    ('NU', 'Nunavut'), 
-    ('ON', 'Ontario'), 
-    ('PE', 'Prince Edward Island'), 
-    ('QC', 'Quebec'), 
-    ('SK', 'Saskatchewan'), 
-    ('YK', 'Yukon') 
+PROVINCE_CHOICES = (
+    ('AB', 'Alberta'),
+    ('BC', 'British Columbia'),
+    ('MB', 'Manitoba'),
+    ('NB', 'New Brunswick'),
+    ('NF', 'Newfoundland and Labrador'),
+    ('NT', 'Northwest Territories'),
+    ('NS', 'Nova Scotia'),
+    ('NU', 'Nunavut'),
+    ('ON', 'Ontario'),
+    ('PE', 'Prince Edward Island'),
+    ('QC', 'Quebec'),
+    ('SK', 'Saskatchewan'),
+    ('YK', 'Yukon')
 )
 
 PROVINCES_NORMALIZED = {

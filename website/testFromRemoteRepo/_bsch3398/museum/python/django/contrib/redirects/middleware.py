@@ -2,6 +2,7 @@ from django.contrib.redirects.models import Redirect
 from django import http
 from django.conf import settings
 
+
 class RedirectFallbackMiddleware(object):
     def process_response(self, request, response):
         if response.status_code != 404:
@@ -15,7 +16,7 @@ class RedirectFallbackMiddleware(object):
             # Try removing the trailing slash.
             try:
                 r = Redirect.objects.get(site__id__exact=settings.SITE_ID,
-                    old_path=path[:path.rfind('/')]+path[path.rfind('/')+1:])
+                                         old_path=path[:path.rfind('/')] + path[path.rfind('/') + 1:])
             except Redirect.DoesNotExist:
                 pass
         if r is not None:

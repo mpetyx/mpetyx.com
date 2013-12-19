@@ -1,12 +1,13 @@
-from django import template, forms
 from django.contrib.admin.views.decorators import staff_member_required
-from django.template import loader
 from django.shortcuts import render_to_response
 from django.contrib.sites.models import Site
-from django.conf import settings
 from django.utils.importlib import import_module
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import messages
+
+from django import template, forms
+from django.template import loader
+from django.conf import settings
 
 
 def template_validator(request):
@@ -31,6 +32,8 @@ def template_validator(request):
         'title': 'Template validator',
         'form': form,
     }, context_instance=template.RequestContext(request))
+
+
 template_validator = staff_member_required(template_validator)
 
 
@@ -61,6 +64,7 @@ class TemplateValidatorForm(forms.Form):
             node = loader.do_extends(parser, token)
             node.template_dirs = settings_module.TEMPLATE_DIRS
             return node
+
         register = template.Library()
         register.tag('extends', new_do_extends)
         template.builtins.append(register)

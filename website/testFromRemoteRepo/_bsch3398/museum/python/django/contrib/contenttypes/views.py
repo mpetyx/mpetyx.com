@@ -1,7 +1,9 @@
-from django import http
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
+
+from django import http
+
 
 def shortcut(request, content_type_id, object_id):
     "Redirect to an object's page based on a content-type ID and an object ID."

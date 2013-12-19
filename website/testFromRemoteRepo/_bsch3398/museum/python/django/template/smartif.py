@@ -1,7 +1,6 @@
 """
 Parser and utilities for the smart 'if' tag
 """
-import operator
 
 # Using a simple top down parser, as described here:
 #    http://effbot.org/zone/simple-top-down-parsing.htm.
@@ -46,6 +45,7 @@ def infix(bp, func):
     Creates an infix operator, given a binding power and a function that
     evaluates the node
     """
+
     class Operator(TokenBase):
         lbp = bp
 
@@ -71,6 +71,7 @@ def prefix(bp, func):
     Creates a prefix operator, given a binding power and a function that
     evaluates the node.
     """
+
     class Operator(TokenBase):
         lbp = bp
 
@@ -145,6 +146,7 @@ class EndToken(TokenBase):
     def nud(self, parser):
         raise parser.error_class("Unexpected end of expression in if tag.")
 
+
 EndToken = EndToken()
 
 
@@ -158,7 +160,7 @@ class IfParser(object):
         i = 0
         while i < l:
             token = tokens[i]
-            if token == "not" and i + 1 < l and tokens[i+1] == "in":
+            if token == "not" and i + 1 < l and tokens[i + 1] == "in":
                 token = "not in"
                 i += 1 # skip 'in'
             mapped_tokens.append(self.translate_token(token))

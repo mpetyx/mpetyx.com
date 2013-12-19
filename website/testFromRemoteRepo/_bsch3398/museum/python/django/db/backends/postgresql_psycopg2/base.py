@@ -9,18 +9,20 @@ import sys
 from django.db import utils
 from django.db.backends import *
 from django.db.backends.signals import connection_created
+from django.db.backends.postgresql_psycopg2.introspection import DatabaseIntrospection
+from django.utils.safestring import SafeUnicode, SafeString
+
 from django.db.backends.postgresql.operations import DatabaseOperations as PostgresqlDatabaseOperations
 from django.db.backends.postgresql.client import DatabaseClient
 from django.db.backends.postgresql.creation import DatabaseCreation
 from django.db.backends.postgresql.version import get_version
-from django.db.backends.postgresql_psycopg2.introspection import DatabaseIntrospection
-from django.utils.safestring import SafeUnicode, SafeString
 
 try:
     import psycopg2 as Database
     import psycopg2.extensions
 except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
+
     raise ImproperlyConfigured("Error loading psycopg2 module: %s" % e)
 
 DatabaseError = Database.DatabaseError
@@ -29,6 +31,7 @@ IntegrityError = Database.IntegrityError
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 psycopg2.extensions.register_adapter(SafeString, psycopg2.extensions.QuotedString)
 psycopg2.extensions.register_adapter(SafeUnicode, psycopg2.extensions.QuotedString)
+
 
 class CursorWrapper(object):
     """
@@ -64,9 +67,11 @@ class CursorWrapper(object):
     def __iter__(self):
         return iter(self.cursor)
 
+
 class DatabaseFeatures(BaseDatabaseFeatures):
     needs_datetime_string_cast = False
     can_return_id_from_insert = False
+
 
 class DatabaseOperations(PostgresqlDatabaseOperations):
     def last_executed_query(self, cursor, sql, params):
@@ -77,6 +82,7 @@ class DatabaseOperations(PostgresqlDatabaseOperations):
 
     def return_insert_id(self):
         return "RETURNING %s", ()
+
 
 class DatabaseWrapper(BaseDatabaseWrapper):
     operators = {
@@ -118,6 +124,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
             set_tz = settings_dict.get('TIME_ZONE')
             if settings_dict['NAME'] == '':
                 from django.core.exceptions import ImproperlyConfigured
+
                 raise ImproperlyConfigured("You need to specify NAME in your Django settings file.")
             conn_params = {
                 'database': settings_dict['NAME'],
@@ -152,7 +159,9 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                     # FIXME: Needs extra code to do reliable model insert
                     # handling, so we forbid it for now.
                     from django.core.exceptions import ImproperlyConfigured
-                    raise ImproperlyConfigured("You cannot use autocommit=True with PostgreSQL prior to 8.2 at the moment.")
+
+                    raise ImproperlyConfigured(
+                        "You cannot use autocommit=True with PostgreSQL prior to 8.2 at the moment.")
                 else:
                     # FIXME: Eventually we're enable this by default for
                     # versions that support it, but, right now, that's hard to

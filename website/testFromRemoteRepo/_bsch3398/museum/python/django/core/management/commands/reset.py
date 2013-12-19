@@ -1,18 +1,18 @@
 from optparse import make_option
 
-from django.conf import settings
 from django.core.management.base import AppCommand, CommandError
 from django.core.management.color import no_style
 from django.core.management.sql import sql_reset
 from django.db import connections, transaction, DEFAULT_DB_ALIAS
 
+
 class Command(AppCommand):
     option_list = AppCommand.option_list + (
         make_option('--noinput', action='store_false', dest='interactive', default=True,
-            help='Tells Django to NOT prompt the user for input of any kind.'),
+                    help='Tells Django to NOT prompt the user for input of any kind.'),
         make_option('--database', action='store', dest='database',
-            default=DEFAULT_DB_ALIAS, help='Nominates a database to reset. '
-                'Defaults to the "default" database.'),
+                    default=DEFAULT_DB_ALIAS, help='Nominates a database to reset. '
+                                                   'Defaults to the "default" database.'),
     )
     help = "Executes ``sqlreset`` for the given app(s) in the current database."
     args = '[appname ...]'

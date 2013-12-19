@@ -1,6 +1,5 @@
 from optparse import make_option
 
-from django.conf import settings
 from django.db import connections, transaction, models, DEFAULT_DB_ALIAS
 from django.core.management import call_command
 from django.core.management.base import NoArgsCommand, CommandError
@@ -8,15 +7,16 @@ from django.core.management.color import no_style
 from django.core.management.sql import sql_flush, emit_post_sync_signal
 from django.utils.importlib import import_module
 
+from django.conf import settings
 
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--noinput', action='store_false', dest='interactive', default=True,
-            help='Tells Django to NOT prompt the user for input of any kind.'),
+                    help='Tells Django to NOT prompt the user for input of any kind.'),
         make_option('--database', action='store', dest='database',
-            default=DEFAULT_DB_ALIAS, help='Nominates a database to flush. '
-                'Defaults to the "default" database.'),
+                    default=DEFAULT_DB_ALIAS, help='Nominates a database to flush. '
+                                                   'Defaults to the "default" database.'),
     )
     help = "Executes ``sqlflush`` on the current database."
 

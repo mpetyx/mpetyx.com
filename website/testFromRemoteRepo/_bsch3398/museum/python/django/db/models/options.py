@@ -1,7 +1,6 @@
 import re
 from bisect import bisect
 
-from django.conf import settings
 from django.db.models.related import RelatedObject
 from django.db.models.fields.related import ManyToManyRel
 from django.db.models.fields import AutoField, FieldDoesNotExist
@@ -11,13 +10,18 @@ from django.utils.translation import activate, deactivate_all, get_language, str
 from django.utils.encoding import force_unicode, smart_str
 from django.utils.datastructures import SortedDict
 
+from django.conf import settings
+
+
 # Calculate the verbose_name by converting from InitialCaps to "lowercase with spaces".
-get_verbose_name = lambda class_name: re.sub('(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', ' \\1', class_name).lower().strip()
+get_verbose_name = lambda class_name: re.sub('(((?<=[a-z])[A-Z])|([A-Z](?![A-Z]|$)))', ' \\1',
+                                             class_name).lower().strip()
 
 DEFAULT_NAMES = ('verbose_name', 'db_table', 'ordering',
                  'unique_together', 'permissions', 'get_latest_by',
                  'order_with_respect_to', 'app_label', 'db_tablespace',
                  'abstract', 'managed', 'proxy', 'auto_created')
+
 
 class Options(object):
     def __init__(self, meta, app_label=None):
@@ -27,8 +31,8 @@ class Options(object):
         self.verbose_name_plural = None
         self.db_table = ''
         self.ordering = []
-        self.unique_together =  []
-        self.permissions =  []
+        self.unique_together = []
+        self.permissions = []
         self.object_name, self.app_label = None, app_label
         self.get_latest_by = None
         self.order_with_respect_to = None
@@ -86,7 +90,8 @@ class Options(object):
 
             # verbose_name_plural is a special case because it uses a 's'
             # by default.
-            setattr(self, 'verbose_name_plural', meta_attrs.pop('verbose_name_plural', string_concat(self.verbose_name, 's')))
+            setattr(self, 'verbose_name_plural',
+                    meta_attrs.pop('verbose_name_plural', string_concat(self.verbose_name, 's')))
 
             # Any leftover attributes must be invalid.
             if meta_attrs != {}:
@@ -117,7 +122,7 @@ class Options(object):
                 self.setup_pk(field)
             else:
                 auto = AutoField(verbose_name='ID', primary_key=True,
-                        auto_created=True)
+                                 auto_created=True)
                 model.add_to_class('id', auto)
 
         # Determine any sets of fields that are pointing to the same targets
@@ -191,6 +196,7 @@ class Options(object):
         raw = force_unicode(self.verbose_name)
         activate(lang)
         return raw
+
     verbose_name_raw = property(verbose_name_raw)
 
     def _fields(self):
@@ -206,6 +212,7 @@ class Options(object):
         except AttributeError:
             self._fill_fields_cache()
         return self._field_name_cache
+
     fields = property(_fields)
 
     def get_fields_with_model(self):
@@ -238,6 +245,7 @@ class Options(object):
         except AttributeError:
             self._fill_m2m_cache()
         return self._m2m_cache.keys()
+
     many_to_many = property(_many_to_many)
 
     def get_m2m_with_model(self):
@@ -292,7 +300,7 @@ class Options(object):
                 return cache[name]
         except KeyError:
             raise FieldDoesNotExist('%s has no field named %r'
-                    % (self.object_name, name))
+                                    % (self.object_name, name))
 
     def get_all_field_names(self):
         """
@@ -431,7 +439,7 @@ class Options(object):
                 res.insert(0, parent)
                 return res
         raise TypeError('%r is not an ancestor of this model'
-                % model._meta.module_name)
+                        % model._meta.module_name)
 
     def get_parent_list(self):
         """

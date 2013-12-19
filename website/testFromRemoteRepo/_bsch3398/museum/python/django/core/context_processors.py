@@ -7,9 +7,11 @@ These are referenced from the setting TEMPLATE_CONTEXT_PROCESSORS and used by
 RequestContext.
 """
 
-from django.conf import settings
 from django.middleware.csrf import get_token
 from django.utils.functional import lazy
+
+from django.conf import settings
+
 
 def auth(request):
     """
@@ -20,6 +22,7 @@ def auth(request):
     in Django 1.4.
     """
     import warnings
+
     warnings.warn(
         "The context processor at `django.core.context_processors.auth` is " \
         "deprecated; use the path `django.contrib.auth.context_processors.auth` " \
@@ -27,13 +30,16 @@ def auth(request):
         PendingDeprecationWarning
     )
     from django.contrib.auth.context_processors import auth as auth_context_processor
+
     return auth_context_processor(request)
+
 
 def csrf(request):
     """
     Context processor that provides a CSRF token, or the string 'NOTPROVIDED' if
     it has not been provided by either a view decorator or the middleware
     """
+
     def _get_val():
         token = get_token(request)
         if token is None:
@@ -43,9 +49,11 @@ def csrf(request):
             return 'NOTPROVIDED'
         else:
             return token
+
     _get_val = lazy(_get_val, str)
 
-    return {'csrf_token': _get_val() }
+    return {'csrf_token': _get_val()}
+
 
 def debug(request):
     "Returns context variables helpful for debugging."
@@ -53,8 +61,10 @@ def debug(request):
     if settings.DEBUG and request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS:
         context_extras['debug'] = True
         from django.db import connection
+
         context_extras['sql_queries'] = connection.queries
     return context_extras
+
 
 def i18n(request):
     from django.utils import translation
@@ -66,12 +76,14 @@ def i18n(request):
 
     return context_extras
 
+
 def media(request):
     """
     Adds media-related context variables to the context.
 
     """
     return {'MEDIA_URL': settings.MEDIA_URL}
+
 
 def request(request):
     return {'request': request}
@@ -91,6 +103,7 @@ class PermLookupDict(object):
 
     def __nonzero__(self):
         return self.user.has_module_perms(self.module_name)
+
 
 class PermWrapper(object):
     def __init__(self, user):

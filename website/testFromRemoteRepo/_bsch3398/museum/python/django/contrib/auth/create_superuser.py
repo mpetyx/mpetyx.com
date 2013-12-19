@@ -5,4 +5,5 @@ createsuperuser instead.
 
 if __name__ == "__main__":
     from django.core.management import call_command
+
     call_command("createsuperuser")

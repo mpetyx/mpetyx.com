@@ -7,8 +7,8 @@ from django.contrib.gis.measure import D
 from django.test import TestCase
 from models import City, County, Zipcode
 
-class GeographyTest(TestCase):
 
+class GeographyTest(TestCase):
     def test01_fixture_load(self):
         "Ensure geography features loaded properly."
         self.assertEqual(8, City.objects.count())
@@ -17,13 +17,13 @@ class GeographyTest(TestCase):
         "Testing GeoQuerySet distance lookup support on non-point geography fields."
         z = Zipcode.objects.get(code='77002')
         cities1 = list(City.objects
-                       .filter(point__distance_lte=(z.poly, D(mi=500)))
-                       .order_by('name')
-                       .values_list('name', flat=True))
+        .filter(point__distance_lte=(z.poly, D(mi=500)))
+        .order_by('name')
+        .values_list('name', flat=True))
         cities2 = list(City.objects
-                       .filter(point__dwithin=(z.poly, D(mi=500)))
-                       .order_by('name')
-                       .values_list('name', flat=True))
+        .filter(point__dwithin=(z.poly, D(mi=500)))
+        .order_by('name')
+        .values_list('name', flat=True))
         for cities in [cities1, cities2]:
             self.assertEqual(['Dallas', 'Houston', 'Oklahoma City'], cities)
 
@@ -54,10 +54,10 @@ class GeographyTest(TestCase):
         # Getting the shapefile and mapping dictionary.
         shp_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'data'))
         co_shp = os.path.join(shp_path, 'counties', 'counties.shp')
-        co_mapping = {'name' : 'Name',
-                      'state' : 'State',
-                      'mpoly' : 'MULTIPOLYGON',
-                      }
+        co_mapping = {'name': 'Name',
+                      'state': 'State',
+                      'mpoly': 'MULTIPOLYGON',
+        }
 
         # Reference county names, number of polygons, and state names.
         names = ['Bexar', 'Galveston', 'Harris', 'Honolulu', 'Pueblo']

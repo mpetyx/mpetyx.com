@@ -6,13 +6,15 @@ class LazyUser(object):
     def __get__(self, request, obj_type=None):
         if not hasattr(request, '_cached_user'):
             from django.contrib.auth import get_user
+
             request._cached_user = get_user(request)
         return request._cached_user
 
 
 class AuthenticationMiddleware(object):
     def process_request(self, request):
-        assert hasattr(request, 'session'), "The Django authentication middleware requires session middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert 'django.contrib.sessions.middleware.SessionMiddleware'."
+        assert hasattr(request,
+                       'session'), "The Django authentication middleware requires session middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert 'django.contrib.sessions.middleware.SessionMiddleware'."
         request.__class__.user = LazyUser()
         return None
 
@@ -52,13 +54,13 @@ class RemoteUserMiddleware(object):
             # request.user set to AnonymousUser by the
             # AuthenticationMiddleware).
             return
-        # If the user is already authenticated and that user is the user we are
+            # If the user is already authenticated and that user is the user we are
         # getting passed in the headers, then the correct user is already
         # persisted in the session and we don't need to continue.
         if request.user.is_authenticated():
             if request.user.username == self.clean_username(username, request):
                 return
-        # We are seeing this user for the first time in this session, attempt
+            # We are seeing this user for the first time in this session, attempt
         # to authenticate the user.
         user = auth.authenticate(remote_user=username)
         if user:

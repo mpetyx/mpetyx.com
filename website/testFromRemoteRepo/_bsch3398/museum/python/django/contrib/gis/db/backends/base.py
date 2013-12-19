@@ -3,8 +3,8 @@ Base/mixin classes for the spatial backend database operations and the
 `SpatialRefSys` model the backend.
 """
 import re
-from django.conf import settings
 from django.contrib.gis import gdal
+
 
 class BaseSpatialOperations(object):
     """
@@ -131,6 +131,7 @@ class BaseSpatialOperations(object):
     def spatial_ref_sys(self):
         raise NotImplementedError
 
+
 class SpatialRefSysMixin(object):
     """
     The SpatialRefSysMixin is a class used by the database-dependent
@@ -146,7 +147,8 @@ class SpatialRefSysMixin(object):
     # TODO: Figure out how to pull out angular units of projected coordinate system and
     # fix for LOCAL_CS types.  GDAL should be highly recommended for performing
     # distance queries.
-    units_regex = re.compile(r'.+UNIT ?\["(?P<unit_name>[\w \'\(\)]+)", ?(?P<unit>[\d\.]+)(,AUTHORITY\["(?P<unit_auth_name>[\w \'\(\)]+)","(?P<unit_auth_val>\d+)"\])?\]([\w ]+)?(,AUTHORITY\["(?P<auth_name>[\w \'\(\)]+)","(?P<auth_val>\d+)"\])?\]$')
+    units_regex = re.compile(
+        r'.+UNIT ?\["(?P<unit_name>[\w \'\(\)]+)", ?(?P<unit>[\d\.]+)(,AUTHORITY\["(?P<unit_auth_name>[\w \'\(\)]+)","(?P<unit_auth_val>\d+)"\])?\]([\w ]+)?(,AUTHORITY\["(?P<auth_name>[\w \'\(\)]+)","(?P<auth_val>\d+)"\])?\]$')
 
     @property
     def srs(self):
@@ -188,8 +190,10 @@ class SpatialRefSysMixin(object):
             return self.srs.ellipsoid
         else:
             m = self.spheroid_regex.match(self.wkt)
-            if m: return (float(m.group('major')), float(m.group('flattening')))
-            else: return None
+            if m:
+                return (float(m.group('major')), float(m.group('flattening')))
+            else:
+                return None
 
     @property
     def name(self):

@@ -2,21 +2,20 @@
 Tools for sending email.
 """
 
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module
+
+from django.conf import settings
+
 
 # Imported for backwards compatibility, and for the sake
 # of a cleaner namespace. These symbols used to be in
 # django/core/mail.py before the introduction of email
 # backends and the subsequent reorganization (See #10355)
-from django.core.mail.utils import CachedDnsName, DNS_NAME
 from django.core.mail.message import \
-    EmailMessage, EmailMultiAlternatives, \
-    SafeMIMEText, SafeMIMEMultipart, \
-    DEFAULT_ATTACHMENT_MIME_TYPE, make_msgid, \
-    BadHeaderError, forbid_multi_line_headers
+    EmailMessage
 from django.core.mail.backends.smtp import EmailBackend as _SMTPConnection
+
 
 def get_connection(backend=None, fail_silently=False, **kwds):
     """Load an e-mail backend and return an instance of it.
@@ -55,8 +54,8 @@ def send_mail(subject, message, from_email, recipient_list,
     functionality should use the EmailMessage class directly.
     """
     connection = connection or get_connection(username=auth_user,
-                                    password=auth_password,
-                                    fail_silently=fail_silently)
+                                              password=auth_password,
+                                              fail_silently=fail_silently)
     return EmailMessage(subject, message, from_email, recipient_list,
                         connection=connection).send()
 
@@ -76,8 +75,8 @@ def send_mass_mail(datatuple, fail_silently=False, auth_user=None,
     functionality should use the EmailMessage class directly.
     """
     connection = connection or get_connection(username=auth_user,
-                                    password=auth_password,
-                                    fail_silently=fail_silently)
+                                              password=auth_password,
+                                              fail_silently=fail_silently)
     messages = [EmailMessage(subject, message, sender, recipient)
                 for subject, message, sender, recipient in datatuple]
     return connection.send_messages(messages)
@@ -104,6 +103,7 @@ def mail_managers(subject, message, fail_silently=False, connection=None):
 class SMTPConnection(_SMTPConnection):
     def __init__(self, *args, **kwds):
         import warnings
+
         warnings.warn(
             'mail.SMTPConnection is deprecated; use mail.get_connection() instead.',
             PendingDeprecationWarning

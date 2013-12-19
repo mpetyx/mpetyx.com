@@ -5,12 +5,14 @@ from django.utils.cache import patch_vary_headers
 
 re_accepts_gzip = re.compile(r'\bgzip\b')
 
+
 class GZipMiddleware(object):
     """
     This middleware compresses content if the browser allows gzip compression.
     It sets the Vary header accordingly, so that caches will base their storage
     on the Accept-Encoding header.
     """
+
     def process_response(self, request, response):
         # It's not worth compressing non-OK or really short responses.
         if response.status_code != 200 or len(response.content) < 200:

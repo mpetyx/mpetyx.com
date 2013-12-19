@@ -22,6 +22,7 @@ ESCAPE_MAPPINGS = {
     "Z": None,
 }
 
+
 class Choice(list):
     """
     Used to represent multiple possibilities at this point in a pattern string.
@@ -29,15 +30,18 @@ class Choice(list):
     code is clear.
     """
 
+
 class Group(list):
     """
     Used to represent a capturing group in the pattern string.
     """
 
+
 class NonCapture(list):
     """
     Used to represent a non-capturing group in the pattern string.
     """
+
 
 def normalize(pattern):
     """
@@ -77,7 +81,7 @@ def normalize(pattern):
     try:
         ch, escaped = pattern_iter.next()
     except StopIteration:
-        return zip([u''],  [[]])
+        return zip([u''], [[]])
 
     try:
         while True:
@@ -136,7 +140,7 @@ def normalize(pattern):
                         ch, escaped = pattern_iter.next()
                         if ch != '<':
                             raise ValueError("Non-reversible reg-exp portion: '(?P%s'" % ch)
-                        # We are in a named capturing group. Extra the name and
+                            # We are in a named capturing group. Extra the name and
                         # then skip to the end.
                         name = []
                         ch, escaped = pattern_iter.next()
@@ -180,9 +184,10 @@ def normalize(pattern):
         pass
     except NotImplementedError:
         # A case of using the disjunctive form. No results for you!
-        return zip([u''],  [[]])
+        return zip([u''], [[]])
 
     return zip(*flatten_result(result))
+
 
 def next_char(input_iter):
     """
@@ -204,6 +209,7 @@ def next_char(input_iter):
             continue
         yield representative, True
 
+
 def walk_to_end(ch, input_iter):
     """
     The iterator is currently inside a capturing group. We want to walk to the
@@ -223,6 +229,7 @@ def walk_to_end(ch, input_iter):
             if not nesting:
                 return
             nesting -= 1
+
 
 def get_quantifier(ch, input_iter):
     """
@@ -260,6 +267,7 @@ def get_quantifier(ch, input_iter):
         ch = None
     return int(values[0]), ch
 
+
 def contains(source, inst):
     """
     Returns True if the "source" contains an instance of "inst". False,
@@ -272,6 +280,7 @@ def contains(source, inst):
             if contains(elt, inst):
                 return True
     return False
+
 
 def flatten_result(source):
     """

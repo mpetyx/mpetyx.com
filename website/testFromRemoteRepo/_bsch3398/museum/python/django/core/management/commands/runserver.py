@@ -1,14 +1,16 @@
-from django.core.management.base import BaseCommand, CommandError
 from optparse import make_option
 import os
 import sys
 
+from django.core.management.base import BaseCommand, CommandError
+
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--noreload', action='store_false', dest='use_reloader', default=True,
-            help='Tells Django to NOT use the auto-reloader.'),
+                    help='Tells Django to NOT use the auto-reloader.'),
         make_option('--adminmedia', dest='admin_media_path', default='',
-            help='Specifies the directory from which to serve admin media.'),
+                    help='Specifies the directory from which to serve admin media.'),
     )
     help = "Starts a lightweight Web server for development."
     args = '[optional port number, or ipaddr:port]'
@@ -20,6 +22,7 @@ class Command(BaseCommand):
         import django
         from django.core.servers.basehttp import run, AdminMediaHandler, WSGIServerException
         from django.core.handlers.wsgi import WSGIHandler
+
         if args:
             raise CommandError('Usage is runserver %s' % self.args)
         if not addrport:
@@ -44,6 +47,7 @@ class Command(BaseCommand):
         def inner_run():
             from django.conf import settings
             from django.utils import translation
+
             print "Validating models..."
             self.validate(display_num_errors=True)
             print "\nDjango version %s, using settings %r" % (django.get_version(), settings.SETTINGS_MODULE)
@@ -79,6 +83,7 @@ class Command(BaseCommand):
 
         if use_reloader:
             from django.utils import autoreload
+
             autoreload.main(inner_run)
         else:
             inner_run()

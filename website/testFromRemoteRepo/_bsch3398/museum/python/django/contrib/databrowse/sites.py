@@ -1,14 +1,18 @@
-from django import http
 from django.db import models
-from django.contrib.databrowse.datastructures import EasyModel
 from django.shortcuts import render_to_response
 from django.utils.safestring import mark_safe
+
+from django import http
+from django.contrib.databrowse.datastructures import EasyModel
+
 
 class AlreadyRegistered(Exception):
     pass
 
+
 class NotRegistered(Exception):
     pass
+
 
 class DatabrowsePlugin(object):
     def urls(self, plugin_name, easy_instance_field):
@@ -32,6 +36,7 @@ class DatabrowsePlugin(object):
         Handles main URL routing for a plugin's model-specific pages.
         """
         raise NotImplementedError
+
 
 class ModelDatabrowse(object):
     plugins = {}
@@ -61,12 +66,14 @@ class ModelDatabrowse(object):
 
     def main_view(self, request):
         easy_model = EasyModel(self.site, self.model)
-        html_snippets = mark_safe(u'\n'.join([p.model_index_html(request, self.model, self.site) for p in self.plugins.values()]))
+        html_snippets = mark_safe(
+            u'\n'.join([p.model_index_html(request, self.model, self.site) for p in self.plugins.values()]))
         return render_to_response('databrowse/model_detail.html', {
             'model': easy_model,
             'root_url': self.site.root_url,
             'plugin_html': html_snippets,
         })
+
 
 class DatabrowseSite(object):
     def __init__(self):
@@ -139,11 +146,13 @@ class DatabrowseSite(object):
             raise http.Http404("This model exists but has not been registered with databrowse.")
         return databrowse_class(model, self).root(request, rest_of_url)
 
+
 site = DatabrowseSite()
 
 from django.contrib.databrowse.plugins.calendars import CalendarPlugin
 from django.contrib.databrowse.plugins.objects import ObjectDetailPlugin
 from django.contrib.databrowse.plugins.fieldchoices import FieldChoicePlugin
+
 
 class DefaultModelDatabrowse(ModelDatabrowse):
     plugins = {'objects': ObjectDetailPlugin(), 'calendars': CalendarPlugin(), 'fields': FieldChoicePlugin()}

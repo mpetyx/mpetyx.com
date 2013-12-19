@@ -21,6 +21,7 @@ else:
             path = join(os.getcwdu(), path)
         return normpath(path)
 
+
 def safe_join(base, *paths):
     """
     Joins one or more path components to the base path component intelligently.
@@ -40,7 +41,7 @@ def safe_join(base, *paths):
     # the final path is os.sep (or nothing, in which case final_path must be
     # equal to base_path).
     if not final_path.startswith(base_path) \
-       or final_path[base_path_len:base_path_len+1] not in ('', sep):
+        or final_path[base_path_len:base_path_len + 1] not in ('', sep):
         raise ValueError('the joined path is located outside of the base path'
                          ' component')
     return final_path

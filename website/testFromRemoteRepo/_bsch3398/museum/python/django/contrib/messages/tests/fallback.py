@@ -74,7 +74,7 @@ class FallbackTest(BaseTest):
         # Set initial cookie and session data.
         example_messages = [str(i) for i in range(5)]
         set_cookie_data(cookie_storage, example_messages[:4] +
-                        [CookieStorage.not_finished])
+                                        [CookieStorage.not_finished])
         set_session_data(session_storage, example_messages[4:])
 
         # Test that the message actually contains what we expect.

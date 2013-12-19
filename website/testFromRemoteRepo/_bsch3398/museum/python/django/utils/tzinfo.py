@@ -4,8 +4,10 @@ import time
 from datetime import timedelta, tzinfo
 from django.utils.encoding import smart_unicode, smart_str, DEFAULT_LOCALE_ENCODING
 
+
 class FixedOffset(tzinfo):
     "Fixed offset in minutes east from UTC."
+
     def __init__(self, offset):
         if isinstance(offset, timedelta):
             self.__offset = offset
@@ -28,8 +30,10 @@ class FixedOffset(tzinfo):
     def dst(self, dt):
         return timedelta(0)
 
+
 class LocalTimezone(tzinfo):
     "Proxy timezone information from time module."
+
     def __init__(self, dt):
         tzinfo.__init__(self)
         self._tzname = self.tzname(dt)

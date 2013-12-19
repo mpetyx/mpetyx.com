@@ -2,6 +2,7 @@ import sys
 from django.core.management.color import color_style
 from django.utils.itercompat import is_iterable
 
+
 class ModelErrorCollection:
     def __init__(self, outfile=sys.stdout):
         self.errors = []
@@ -11,6 +12,7 @@ class ModelErrorCollection:
     def add(self, context, error):
         self.errors.append((context, error))
         self.outfile.write(self.style.ERROR("%s: %s\n" % (context, error)))
+
 
 def get_validation_errors(outfile, app=None):
     """
@@ -34,18 +36,22 @@ def get_validation_errors(outfile, app=None):
         # Do field-specific validation.
         for f in opts.local_fields:
             if f.name == 'id' and not f.primary_key and opts.pk.name == 'id':
-                e.add(opts, '"%s": You can\'t use "id" as a field name, because each model automatically gets an "id" field if none of the fields have primary_key=True. You need to either remove/rename your "id" field or add primary_key=True to a field.' % f.name)
+                e.add(opts,
+                      '"%s": You can\'t use "id" as a field name, because each model automatically gets an "id" field if none of the fields have primary_key=True. You need to either remove/rename your "id" field or add primary_key=True to a field.' % f.name)
             if f.name.endswith('_'):
-                e.add(opts, '"%s": Field names cannot end with underscores, because this would lead to ambiguous queryset filters.' % f.name)
+                e.add(opts,
+                      '"%s": Field names cannot end with underscores, because this would lead to ambiguous queryset filters.' % f.name)
             if isinstance(f, models.CharField):
                 try:
                     max_length = int(f.max_length)
                     if max_length <= 0:
-                        e.add(opts, '"%s": CharFields require a "max_length" attribute that is a positive integer.' % f.name)
+                        e.add(opts,
+                              '"%s": CharFields require a "max_length" attribute that is a positive integer.' % f.name)
                 except (ValueError, TypeError):
-                    e.add(opts, '"%s": CharFields require a "max_length" attribute that is a positive integer.' % f.name)
+                    e.add(opts,
+                          '"%s": CharFields require a "max_length" attribute that is a positive integer.' % f.name)
             if isinstance(f, models.DecimalField):
-                decimalp_msg ='"%s": DecimalFields require a "decimal_places" attribute that is a non-negative integer.'
+                decimalp_msg = '"%s": DecimalFields require a "decimal_places" attribute that is a non-negative integer.'
                 try:
                     decimal_places = int(f.decimal_places)
                     if decimal_places < 0:
@@ -56,7 +62,7 @@ def get_validation_errors(outfile, app=None):
                 try:
                     max_digits = int(f.max_digits)
                     if max_digits <= 0:
-                        e.add(opts,  mdigits_msg % f.name)
+                        e.add(opts, mdigits_msg % f.name)
                 except (ValueError, TypeError):
                     e.add(opts, mdigits_msg % f.name)
             if isinstance(f, models.FileField) and not f.upload_to:
@@ -69,7 +75,8 @@ def get_validation_errors(outfile, app=None):
                     try:
                         import Image
                     except ImportError:
-                        e.add(opts, '"%s": To use ImageFields, you need to install the Python Imaging Library. Get it at http://www.pythonware.com/products/pil/ .' % f.name)
+                        e.add(opts,
+                              '"%s": To use ImageFields, you need to install the Python Imaging Library. Get it at http://www.pythonware.com/products/pil/ .' % f.name)
             if isinstance(f, models.BooleanField) and getattr(f, 'null', False):
                 e.add(opts, '"%s": BooleanFields do not accept null values. Use a NullBooleanField instead.' % f.name)
             if f.choices:
@@ -89,15 +96,18 @@ def get_validation_errors(outfile, app=None):
             # fields, m2m fields, m2m related objects or related objects
             if f.rel:
                 if f.rel.to not in models.get_models():
-                    e.add(opts, "'%s' has a relation with model %s, which has either not been installed or is abstract." % (f.name, f.rel.to))
-                # it is a string and we could not find the model it refers to
+                    e.add(opts,
+                          "'%s' has a relation with model %s, which has either not been installed or is abstract." % (
+                          f.name, f.rel.to))
+                    # it is a string and we could not find the model it refers to
                 # so skip the next section
                 if isinstance(f.rel.to, (str, unicode)):
                     continue
 
                 # Make sure the related field specified by a ForeignKey is unique
                 if not f.rel.to._meta.get_field(f.rel.field_name).unique:
-                    e.add(opts, "Field '%s' under model '%s' must have a unique=True constraint." % (f.rel.field_name, f.rel.to.__name__))
+                    e.add(opts, "Field '%s' under model '%s' must have a unique=True constraint." % (
+                    f.rel.field_name, f.rel.to.__name__))
 
                 rel_opts = f.rel.to._meta
                 rel_name = RelatedObject(f.rel.to, cls, f).get_accessor_name()
@@ -105,25 +115,41 @@ def get_validation_errors(outfile, app=None):
                 if not f.rel.is_hidden():
                     for r in rel_opts.fields:
                         if r.name == rel_name:
-                            e.add(opts, "Accessor for field '%s' clashes with field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.name, f.name))
+                            e.add(opts,
+                                  "Accessor for field '%s' clashes with field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                  f.name, rel_opts.object_name, r.name, f.name))
                         if r.name == rel_query_name:
-                            e.add(opts, "Reverse query name for field '%s' clashes with field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.name, f.name))
+                            e.add(opts,
+                                  "Reverse query name for field '%s' clashes with field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                  f.name, rel_opts.object_name, r.name, f.name))
                     for r in rel_opts.local_many_to_many:
                         if r.name == rel_name:
-                            e.add(opts, "Accessor for field '%s' clashes with m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.name, f.name))
+                            e.add(opts,
+                                  "Accessor for field '%s' clashes with m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                  f.name, rel_opts.object_name, r.name, f.name))
                         if r.name == rel_query_name:
-                            e.add(opts, "Reverse query name for field '%s' clashes with m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.name, f.name))
+                            e.add(opts,
+                                  "Reverse query name for field '%s' clashes with m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                  f.name, rel_opts.object_name, r.name, f.name))
                     for r in rel_opts.get_all_related_many_to_many_objects():
                         if r.get_accessor_name() == rel_name:
-                            e.add(opts, "Accessor for field '%s' clashes with related m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
+                            e.add(opts,
+                                  "Accessor for field '%s' clashes with related m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                  f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
                         if r.get_accessor_name() == rel_query_name:
-                            e.add(opts, "Reverse query name for field '%s' clashes with related m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
+                            e.add(opts,
+                                  "Reverse query name for field '%s' clashes with related m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                  f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
                     for r in rel_opts.get_all_related_objects():
                         if r.field is not f:
                             if r.get_accessor_name() == rel_name:
-                                e.add(opts, "Accessor for field '%s' clashes with related field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
+                                e.add(opts,
+                                      "Accessor for field '%s' clashes with related field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                      f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
                             if r.get_accessor_name() == rel_query_name:
-                                e.add(opts, "Reverse query name for field '%s' clashes with related field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
+                                e.add(opts,
+                                      "Reverse query name for field '%s' clashes with related field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                      f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
 
         seen_intermediary_signatures = []
         for i, f in enumerate(opts.local_many_to_many):
@@ -131,7 +157,9 @@ def get_validation_errors(outfile, app=None):
             # existing fields, m2m fields, m2m related objects or related
             # objects
             if f.rel.to not in models.get_models():
-                e.add(opts, "'%s' has an m2m relation with model %s, which has either not been installed or is abstract." % (f.name, f.rel.to))
+                e.add(opts,
+                      "'%s' has an m2m relation with model %s, which has either not been installed or is abstract." % (
+                      f.name, f.rel.to))
                 # it is a string and we could not find the model it refers to
                 # so skip the next section
                 if isinstance(f.rel.to, (str, unicode)):
@@ -153,48 +181,48 @@ def get_validation_errors(outfile, app=None):
                             seen_self += 1
                         if seen_self > 2:
                             e.add(opts, "Intermediary model %s has more than "
-                                "two foreign keys to %s, which is ambiguous "
-                                "and is not permitted." % (
-                                    f.rel.through._meta.object_name,
-                                    from_model._meta.object_name
-                                )
+                                        "two foreign keys to %s, which is ambiguous "
+                                        "and is not permitted." % (
+                                            f.rel.through._meta.object_name,
+                                            from_model._meta.object_name
+                                        )
                             )
                     else:
                         if rel_to == from_model:
                             if seen_from:
                                 e.add(opts, "Intermediary model %s has more "
-                                    "than one foreign key to %s, which is "
-                                    "ambiguous and is not permitted." % (
-                                        f.rel.through._meta.object_name,
-                                         from_model._meta.object_name
-                                     )
-                                 )
+                                            "than one foreign key to %s, which is "
+                                            "ambiguous and is not permitted." % (
+                                                f.rel.through._meta.object_name,
+                                                from_model._meta.object_name
+                                            )
+                                )
                             else:
                                 seen_from = True
                         elif rel_to == to_model:
                             if seen_to:
                                 e.add(opts, "Intermediary model %s has more "
-                                    "than one foreign key to %s, which is "
-                                    "ambiguous and is not permitted." % (
-                                        f.rel.through._meta.object_name,
-                                        rel_to._meta.object_name
-                                    )
+                                            "than one foreign key to %s, which is "
+                                            "ambiguous and is not permitted." % (
+                                                f.rel.through._meta.object_name,
+                                                rel_to._meta.object_name
+                                            )
                                 )
                             else:
                                 seen_to = True
                 if f.rel.through not in models.get_models(include_auto_created=True):
                     e.add(opts, "'%s' specifies an m2m relation through model "
-                        "%s, which has not been installed." % (f.name, f.rel.through)
+                                "%s, which has not been installed." % (f.name, f.rel.through)
                     )
                 signature = (f.rel.to, cls, f.rel.through)
                 if signature in seen_intermediary_signatures:
                     e.add(opts, "The model %s has two manually-defined m2m "
-                        "relations through the model %s, which is not "
-                        "permitted. Please consider using an extra field on "
-                        "your intermediary model instead." % (
-                            cls._meta.object_name,
-                            f.rel.through._meta.object_name
-                        )
+                                "relations through the model %s, which is not "
+                                "permitted. Please consider using an extra field on "
+                                "your intermediary model instead." % (
+                                    cls._meta.object_name,
+                                    f.rel.through._meta.object_name
+                                )
                     )
                 else:
                     seen_intermediary_signatures.append(signature)
@@ -208,13 +236,13 @@ def get_validation_errors(outfile, app=None):
                                 seen_this_fk = True
                     if not seen_related_fk or not seen_this_fk:
                         e.add(opts, "'%s' is a manually-defined m2m relation "
-                            "through model %s, which does not have foreign keys "
-                            "to %s and %s" % (f.name, f.rel.through._meta.object_name,
-                                f.rel.to._meta.object_name, cls._meta.object_name)
+                                    "through model %s, which does not have foreign keys "
+                                    "to %s and %s" % (f.name, f.rel.through._meta.object_name,
+                                                      f.rel.to._meta.object_name, cls._meta.object_name)
                         )
             elif isinstance(f.rel.through, basestring):
                 e.add(opts, "'%s' specifies an m2m relation through model %s, "
-                    "which has not been installed" % (f.name, f.rel.through)
+                            "which has not been installed" % (f.name, f.rel.through)
                 )
 
             rel_opts = f.rel.to._meta
@@ -227,25 +255,41 @@ def get_validation_errors(outfile, app=None):
             if rel_name is not None:
                 for r in rel_opts.fields:
                     if r.name == rel_name:
-                        e.add(opts, "Accessor for m2m field '%s' clashes with field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.name, f.name))
+                        e.add(opts,
+                              "Accessor for m2m field '%s' clashes with field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                              f.name, rel_opts.object_name, r.name, f.name))
                     if r.name == rel_query_name:
-                        e.add(opts, "Reverse query name for m2m field '%s' clashes with field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.name, f.name))
+                        e.add(opts,
+                              "Reverse query name for m2m field '%s' clashes with field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                              f.name, rel_opts.object_name, r.name, f.name))
                 for r in rel_opts.local_many_to_many:
                     if r.name == rel_name:
-                        e.add(opts, "Accessor for m2m field '%s' clashes with m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.name, f.name))
+                        e.add(opts,
+                              "Accessor for m2m field '%s' clashes with m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                              f.name, rel_opts.object_name, r.name, f.name))
                     if r.name == rel_query_name:
-                        e.add(opts, "Reverse query name for m2m field '%s' clashes with m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.name, f.name))
+                        e.add(opts,
+                              "Reverse query name for m2m field '%s' clashes with m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                              f.name, rel_opts.object_name, r.name, f.name))
                 for r in rel_opts.get_all_related_many_to_many_objects():
                     if r.field is not f:
                         if r.get_accessor_name() == rel_name:
-                            e.add(opts, "Accessor for m2m field '%s' clashes with related m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
+                            e.add(opts,
+                                  "Accessor for m2m field '%s' clashes with related m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                  f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
                         if r.get_accessor_name() == rel_query_name:
-                            e.add(opts, "Reverse query name for m2m field '%s' clashes with related m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
+                            e.add(opts,
+                                  "Reverse query name for m2m field '%s' clashes with related m2m field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                                  f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
                 for r in rel_opts.get_all_related_objects():
                     if r.get_accessor_name() == rel_name:
-                        e.add(opts, "Accessor for m2m field '%s' clashes with related field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
+                        e.add(opts,
+                              "Accessor for m2m field '%s' clashes with related field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                              f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
                     if r.get_accessor_name() == rel_query_name:
-                        e.add(opts, "Reverse query name for m2m field '%s' clashes with related field '%s.%s'. Add a related_name argument to the definition for '%s'." % (f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
+                        e.add(opts,
+                              "Reverse query name for m2m field '%s' clashes with related field '%s.%s'. Add a related_name argument to the definition for '%s'." % (
+                              f.name, rel_opts.object_name, r.get_accessor_name(), f.name))
 
         # Check ordering attribute.
         if opts.ordering:
@@ -255,7 +299,7 @@ def get_validation_errors(outfile, app=None):
                     field_name = field_name[1:]
                 if opts.order_with_respect_to and field_name == '_order':
                     continue
-                # Skip ordering in the format field1__field2 (FIXME: checking
+                    # Skip ordering in the format field1__field2 (FIXME: checking
                 # this format would be nice, but it's a little fiddly).
                 if '_' in field_name:
                     continue
@@ -270,11 +314,14 @@ def get_validation_errors(outfile, app=None):
                 try:
                     f = opts.get_field(field_name, many_to_many=True)
                 except models.FieldDoesNotExist:
-                    e.add(opts, '"unique_together" refers to %s, a field that doesn\'t exist. Check your syntax.' % field_name)
+                    e.add(opts,
+                          '"unique_together" refers to %s, a field that doesn\'t exist. Check your syntax.' % field_name)
                 else:
                     if isinstance(f.rel, models.ManyToManyRel):
-                        e.add(opts, '"unique_together" refers to %s. ManyToManyFields are not supported in unique_together.' % f.name)
+                        e.add(opts,
+                              '"unique_together" refers to %s. ManyToManyFields are not supported in unique_together.' % f.name)
                     if f not in opts.local_fields:
-                        e.add(opts, '"unique_together" refers to %s. This is not in the same model as the unique_together statement.' % f.name)
+                        e.add(opts,
+                              '"unique_together" refers to %s. This is not in the same model as the unique_together statement.' % f.name)
 
     return len(e.errors)

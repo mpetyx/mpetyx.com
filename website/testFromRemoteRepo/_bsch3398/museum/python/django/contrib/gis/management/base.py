@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
+
 class ArgsCommand(BaseCommand):
     """
     Command class for commands that take multiple arguments.

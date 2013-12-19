@@ -1,12 +1,13 @@
 from django.forms.models import ModelFormMetaclass, ModelForm
-from django.template import RequestContext, loader
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.core.xheaders import populate_xheaders
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.utils.translation import ugettext
 from django.contrib.auth.views import redirect_to_login
 from django.views.generic import GenericViewError
 from django.contrib import messages
+
+from django.template import RequestContext, loader
+from django.core.xheaders import populate_xheaders
 
 
 def apply_extra_context(extra_context, context):
@@ -19,6 +20,7 @@ def apply_extra_context(extra_context, context):
             context[key] = value()
         else:
             context[key] = value
+
 
 def get_model_and_form_class(model, form_class):
     """
@@ -39,11 +41,13 @@ def get_model_and_form_class(model, form_class):
         # and passing in a temporary inner class.
         class Meta:
             model = tmp_model
+
         class_name = model.__name__ + 'Form'
         form_class = ModelFormMetaclass(class_name, (ModelForm,), {'Meta': Meta})
         return model, form_class
     raise GenericViewError("Generic view must be called with either a model or"
                            " form_class argument.")
+
 
 def redirect(post_save_redirect, obj):
     """
@@ -69,6 +73,7 @@ def redirect(post_save_redirect, obj):
             " parameter to the generic view or define a get_absolute_url"
             " method on the Model.")
 
+
 def lookup_object(model, object_id, slug, slug_field):
     """
     Return the ``model`` object with the passed ``object_id``.  If
@@ -91,9 +96,10 @@ def lookup_object(model, object_id, slug, slug_field):
         raise Http404("No %s found for %s"
                       % (model._meta.verbose_name, lookup_kwargs))
 
+
 def create_object(request, model=None, template_name=None,
-        template_loader=loader, extra_context=None, post_save_redirect=None,
-        login_required=False, context_processors=None, form_class=None):
+                  template_loader=loader, extra_context=None, post_save_redirect=None,
+                  login_required=False, context_processors=None, form_class=None):
     """
     Generic object-creation function.
 
@@ -111,9 +117,9 @@ def create_object(request, model=None, template_name=None,
         form = form_class(request.POST, request.FILES)
         if form.is_valid():
             new_object = form.save()
-            
-            msg = ugettext("The %(verbose_name)s was created successfully.") %\
-                                    {"verbose_name": model._meta.verbose_name}
+
+            msg = ugettext("The %(verbose_name)s was created successfully.") % \
+                  {"verbose_name": model._meta.verbose_name}
             messages.success(request, msg, fail_silently=True)
             return redirect(post_save_redirect, new_object)
     else:
@@ -129,11 +135,12 @@ def create_object(request, model=None, template_name=None,
     apply_extra_context(extra_context, c)
     return HttpResponse(t.render(c))
 
+
 def update_object(request, model=None, object_id=None, slug=None,
-        slug_field='slug', template_name=None, template_loader=loader,
-        extra_context=None, post_save_redirect=None, login_required=False,
-        context_processors=None, template_object_name='object',
-        form_class=None):
+                  slug_field='slug', template_name=None, template_loader=loader,
+                  extra_context=None, post_save_redirect=None, login_required=False,
+                  context_processors=None, template_object_name='object',
+                  form_class=None):
     """
     Generic object-update function.
 
@@ -155,8 +162,8 @@ def update_object(request, model=None, object_id=None, slug=None,
         form = form_class(request.POST, request.FILES, instance=obj)
         if form.is_valid():
             obj = form.save()
-            msg = ugettext("The %(verbose_name)s was updated successfully.") %\
-                                    {"verbose_name": model._meta.verbose_name}
+            msg = ugettext("The %(verbose_name)s was updated successfully.") % \
+                  {"verbose_name": model._meta.verbose_name}
             messages.success(request, msg, fail_silently=True)
             return redirect(post_save_redirect, obj)
     else:
@@ -174,10 +181,11 @@ def update_object(request, model=None, object_id=None, slug=None,
     populate_xheaders(request, response, model, getattr(obj, obj._meta.pk.attname))
     return response
 
+
 def delete_object(request, model, post_delete_redirect, object_id=None,
-        slug=None, slug_field='slug', template_name=None,
-        template_loader=loader, extra_context=None, login_required=False,
-        context_processors=None, template_object_name='object'):
+                  slug=None, slug_field='slug', template_name=None,
+                  template_loader=loader, extra_context=None, login_required=False,
+                  context_processors=None, template_object_name='object'):
     """
     Generic object-delete function.
 
@@ -198,8 +206,8 @@ def delete_object(request, model, post_delete_redirect, object_id=None,
 
     if request.method == 'POST':
         obj.delete()
-        msg = ugettext("The %(verbose_name)s was deleted.") %\
-                                    {"verbose_name": model._meta.verbose_name}
+        msg = ugettext("The %(verbose_name)s was deleted.") % \
+              {"verbose_name": model._meta.verbose_name}
         messages.success(request, msg, fail_silently=True)
         return HttpResponseRedirect(post_delete_redirect)
     else:

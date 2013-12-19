@@ -3,7 +3,6 @@ from django.contrib.gis.gdal.base import GDALBase
 from django.contrib.gis.gdal.error import OGRException, OGRIndexError
 from django.contrib.gis.gdal.field import Field
 from django.contrib.gis.gdal.geometries import OGRGeometry, OGRGeomType
-from django.contrib.gis.gdal.srs import SpatialReference
 
 # ctypes function prototypes
 from django.contrib.gis.gdal.prototypes import ds as capi, geom as geom_api
@@ -41,7 +40,7 @@ class Feature(GDALBase):
                 raise OGRIndexError('index out of range')
             i = index
         return Field(self.ptr, i)
-    
+
     def __iter__(self):
         "Iterates over each field in the Feature."
         for i in xrange(self.num_fields):
@@ -50,7 +49,7 @@ class Feature(GDALBase):
     def __len__(self):
         "Returns the count of fields in this feature."
         return self.num_fields
-        
+
     def __str__(self):
         "The string name of the feature."
         return 'Feature FID %d in Layer<%s>' % (self.fid, self.layer_name)
@@ -64,7 +63,7 @@ class Feature(GDALBase):
     def fid(self):
         "Returns the feature identifier."
         return capi.get_fid(self.ptr)
-        
+
     @property
     def layer_name(self):
         "Returns the name of the layer for the feature."
@@ -78,7 +77,7 @@ class Feature(GDALBase):
     @property
     def fields(self):
         "Returns a list of fields in the Feature."
-        return [capi.get_field_name(capi.get_field_defn(self._fdefn, i)) 
+        return [capi.get_field_name(capi.get_field_defn(self._fdefn, i))
                 for i in xrange(self.num_fields)]
 
     @property
@@ -92,7 +91,7 @@ class Feature(GDALBase):
     def geom_type(self):
         "Returns the OGR Geometry Type for this Feture."
         return OGRGeomType(capi.get_fd_geom_type(self._fdefn))
-    
+
     #### Feature Methods ####
     def get(self, field):
         """

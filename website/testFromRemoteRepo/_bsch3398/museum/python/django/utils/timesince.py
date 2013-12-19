@@ -1,8 +1,8 @@
 import datetime
-import time
 
 from django.utils.tzinfo import LocalTimezone
 from django.utils.translation import ungettext, ugettext
+
 
 def timesince(d, now=None):
     """
@@ -18,12 +18,12 @@ def timesince(d, now=None):
     Adapted from http://blog.natbat.co.uk/archive/2003/Jun/14/time_since
     """
     chunks = (
-      (60 * 60 * 24 * 365, lambda n: ungettext('year', 'years', n)),
-      (60 * 60 * 24 * 30, lambda n: ungettext('month', 'months', n)),
-      (60 * 60 * 24 * 7, lambda n : ungettext('week', 'weeks', n)),
-      (60 * 60 * 24, lambda n : ungettext('day', 'days', n)),
-      (60 * 60, lambda n: ungettext('hour', 'hours', n)),
-      (60, lambda n: ungettext('minute', 'minutes', n))
+        (60 * 60 * 24 * 365, lambda n: ungettext('year', 'years', n)),
+        (60 * 60 * 24 * 30, lambda n: ungettext('month', 'months', n)),
+        (60 * 60 * 24 * 7, lambda n: ungettext('week', 'weeks', n)),
+        (60 * 60 * 24, lambda n: ungettext('day', 'days', n)),
+        (60 * 60, lambda n: ungettext('hour', 'hours', n)),
+        (60, lambda n: ungettext('minute', 'minutes', n))
     )
     # Convert datetime.date to datetime.datetime for comparison.
     if not isinstance(d, datetime.datetime):
@@ -55,6 +55,7 @@ def timesince(d, now=None):
         if count2 != 0:
             s += ugettext(', %(number)d %(type)s') % {'number': count2, 'type': name2(count2)}
     return s
+
 
 def timeuntil(d, now=None):
     """

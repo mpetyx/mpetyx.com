@@ -1,6 +1,7 @@
 from django.core.exceptions import MiddlewareNotUsed
 from django.utils.http import http_date
 
+
 class ConditionalGetMiddleware(object):
     """
     Handles conditional GET operations. If the response has a ETag or
@@ -9,6 +10,7 @@ class ConditionalGetMiddleware(object):
 
     Also sets the Date and Content-Length response-headers.
     """
+
     def process_response(self, request, response):
         response['Date'] = http_date()
         if not response.has_header('Content-Length'):
@@ -31,6 +33,7 @@ class ConditionalGetMiddleware(object):
 
         return response
 
+
 class SetRemoteAddrFromForwardedFor(object):
     """
     This middleware has been removed; see the Django 1.1 release notes for
@@ -43,8 +46,10 @@ class SetRemoteAddrFromForwardedFor(object):
     this was removed in Django 1.1
     
     """
+
     def __init__(self):
         import warnings
+
         warnings.warn("SetRemoteAddrFromForwardedFor has been removed. "
                       "See the Django 1.1 release notes for details.",
                       category=DeprecationWarning)

@@ -1,6 +1,5 @@
 import datetime
 
-from django.conf import settings
 from django.contrib.admin.util import lookup_field, display_for_field, label_for_field
 from django.contrib.admin.views.main import ALL_VAR, EMPTY_CHANGELIST_VALUE
 from django.contrib.admin.views.main import ORDER_VAR, ORDER_TYPE_VAR, PAGE_VAR, SEARCH_VAR
@@ -13,6 +12,8 @@ from django.utils.safestring import mark_safe
 from django.utils.text import capfirst
 from django.utils.translation import ugettext as _
 from django.utils.encoding import smart_unicode, force_unicode
+
+from django.conf import settings
 from django.template import Library
 
 
@@ -20,17 +21,22 @@ register = Library()
 
 DOT = '.'
 
-def paginator_number(cl,i):
+
+def paginator_number(cl, i):
     """
     Generates an individual page index link in a paginated list.
     """
     if i == DOT:
         return u'... '
     elif i == cl.page_num:
-        return mark_safe(u'<span class="this-page">%d</span> ' % (i+1))
+        return mark_safe(u'<span class="this-page">%d</span> ' % (i + 1))
     else:
-        return mark_safe(u'<a href="%s"%s>%d</a> ' % (escape(cl.get_query_string({PAGE_VAR: i})), (i == cl.paginator.num_pages-1 and ' class="end"' or ''), i+1))
+        return mark_safe(u'<a href="%s"%s>%d</a> ' % (
+        escape(cl.get_query_string({PAGE_VAR: i})), (i == cl.paginator.num_pages - 1 and ' class="end"' or ''), i + 1))
+
+
 paginator_number = register.simple_tag(paginator_number)
+
 
 def pagination(cl):
     """
@@ -76,7 +82,10 @@ def pagination(cl):
         'ALL_VAR': ALL_VAR,
         '1': 1,
     }
+
+
 pagination = register.inclusion_tag('admin/pagination.html')(pagination)
+
 
 def result_headers(cl):
     """
@@ -86,8 +95,8 @@ def result_headers(cl):
 
     for i, field_name in enumerate(cl.list_display):
         header, attr = label_for_field(field_name, cl.model,
-            model_admin = cl.model_admin,
-            return_attr = True
+                                       model_admin=cl.model_admin,
+                                       return_attr=True
         )
         if attr:
             # if the field is the action checkbox: no sorting and special class
@@ -104,8 +113,8 @@ def result_headers(cl):
                 yield {"text": header}
                 continue
 
-            # So this _is_ a sortable non-field.  Go to the yield
-            # after the else clause.
+                # So this _is_ a sortable non-field.  Go to the yield
+                # after the else clause.
         else:
             admin_order_field = None
 
@@ -122,9 +131,12 @@ def result_headers(cl):
             "class_attrib": mark_safe(th_classes and ' class="%s"' % ' '.join(th_classes) or '')
         }
 
+
 def _boolean_icon(field_val):
     BOOLEAN_MAPPING = {True: 'yes', False: 'no', None: 'unknown'}
-    return mark_safe(u'<img src="%simg/admin/icon-%s.gif" alt="%s" />' % (settings.ADMIN_MEDIA_PREFIX, BOOLEAN_MAPPING[field_val], field_val))
+    return mark_safe(u'<img src="%simg/admin/icon-%s.gif" alt="%s" />' % (
+    settings.ADMIN_MEDIA_PREFIX, BOOLEAN_MAPPING[field_val], field_val))
+
 
 def items_for_result(cl, result, form):
     """
@@ -147,7 +159,7 @@ def items_for_result(cl, result, form):
                     result_repr = _boolean_icon(value)
                 else:
                     result_repr = smart_unicode(value)
-                # Strip HTML tags in the resulting text, except if the
+                    # Strip HTML tags in the resulting text, except if the
                 # function has an "allow_tags" attribute set to True.
                 if not allow_tags:
                     result_repr = escape(result_repr)
@@ -164,9 +176,9 @@ def items_for_result(cl, result, form):
                     row_class = ' class="nowrap"'
         if force_unicode(result_repr) == '':
             result_repr = mark_safe('&nbsp;')
-        # If list_display_links not defined, add the link tag to the first field
+            # If list_display_links not defined, add the link tag to the first field
         if (first and not cl.list_display_links) or field_name in cl.list_display_links:
-            table_tag = {True:'th', False:'td'}[first]
+            table_tag = {True: 'th', False: 'td'}[first]
             first = False
             url = cl.url_for_result(result)
             # Convert the pk to something that can be used in Javascript.
@@ -178,7 +190,9 @@ def items_for_result(cl, result, form):
             value = result.serializable_value(attr)
             result_id = repr(force_unicode(value))[1:]
             yield mark_safe(u'<%s%s><a href="%s"%s>%s</a></%s>' % \
-                (table_tag, row_class, url, (cl.is_popup and ' onclick="opener.dismissRelatedLookupPopup(window, %s); return false;"' % result_id or ''), conditional_escape(result_repr), table_tag))
+                            (table_tag, row_class, url, (
+                            cl.is_popup and ' onclick="opener.dismissRelatedLookupPopup(window, %s); return false;"' % result_id or ''),
+                             conditional_escape(result_repr), table_tag))
         else:
             # By default the fields come from ModelAdmin.list_editable, but if we pull
             # the fields out of the form instead of list_editable custom admins
@@ -192,6 +206,7 @@ def items_for_result(cl, result, form):
     if form:
         yield mark_safe(u'<td>%s</td>' % force_unicode(form[cl.model._meta.pk.name]))
 
+
 def results(cl):
     if cl.formset:
         for res, form in zip(cl.result_list, cl.formset.forms):
@@ -200,6 +215,7 @@ def results(cl):
         for res in cl.result_list:
             yield list(items_for_result(cl, res, None))
 
+
 def result_list(cl):
     """
     Displays the headers and data list together
@@ -207,7 +223,10 @@ def result_list(cl):
     return {'cl': cl,
             'result_headers': list(result_headers(cl)),
             'results': list(results(cl))}
+
+
 result_list = register.inclusion_tag("admin/change_list_results.html")(result_list)
+
 
 def date_hierarchy(cl):
     """
@@ -244,33 +263,36 @@ def date_hierarchy(cl):
                     'title': year_lookup
                 },
                 'choices': [{
-                    'link': link({year_field: year_lookup, month_field: month_lookup, day_field: day.day}),
-                    'title': capfirst(formats.date_format(day, 'MONTH_DAY_FORMAT'))
-                } for day in days]
+                                'link': link({year_field: year_lookup, month_field: month_lookup, day_field: day.day}),
+                                'title': capfirst(formats.date_format(day, 'MONTH_DAY_FORMAT'))
+                            } for day in days]
             }
         elif year_lookup:
             months = cl.query_set.filter(**{year_field: year_lookup}).dates(field_name, 'month')
             return {
-                'show' : True,
+                'show': True,
                 'back': {
-                    'link' : link({}),
+                    'link': link({}),
                     'title': _('All dates')
                 },
                 'choices': [{
-                    'link': link({year_field: year_lookup, month_field: month.month}),
-                    'title': capfirst(formats.date_format(month, 'YEAR_MONTH_FORMAT'))
-                } for month in months]
+                                'link': link({year_field: year_lookup, month_field: month.month}),
+                                'title': capfirst(formats.date_format(month, 'YEAR_MONTH_FORMAT'))
+                            } for month in months]
             }
         else:
             years = cl.query_set.dates(field_name, 'year')
             return {
                 'show': True,
                 'choices': [{
-                    'link': link({year_field: str(year.year)}),
-                    'title': str(year.year),
-                } for year in years]
+                                'link': link({year_field: str(year.year)}),
+                                'title': str(year.year),
+                            } for year in years]
             }
+
+
 date_hierarchy = register.inclusion_tag('admin/date_hierarchy.html')(date_hierarchy)
+
 
 def search_form(cl):
     """
@@ -281,11 +303,17 @@ def search_form(cl):
         'show_result_count': cl.result_count != cl.full_result_count,
         'search_var': SEARCH_VAR
     }
+
+
 search_form = register.inclusion_tag('admin/search_form.html')(search_form)
 
+
 def admin_list_filter(cl, spec):
-    return {'title': spec.title(), 'choices' : list(spec.choices(cl))}
+    return {'title': spec.title(), 'choices': list(spec.choices(cl))}
+
+
 admin_list_filter = register.inclusion_tag('admin/filter.html')(admin_list_filter)
+
 
 def admin_actions(context):
     """
@@ -294,4 +322,6 @@ def admin_actions(context):
     """
     context['action_index'] = context.get('action_index', -1) + 1
     return context
+
+
 admin_actions = register.inclusion_tag("admin/actions.html", takes_context=True)(admin_actions)

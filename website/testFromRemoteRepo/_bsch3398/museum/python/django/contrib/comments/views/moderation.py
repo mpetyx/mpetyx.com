@@ -1,11 +1,13 @@
-from django import template
-from django.conf import settings
 from django.shortcuts import get_object_or_404, render_to_response
 from django.contrib.auth.decorators import login_required, permission_required
-from utils import next_redirect, confirmation_view
 from django.contrib import comments
 from django.contrib.comments import signals
 from django.views.decorators.csrf import csrf_protect
+
+from django import template
+from django.conf import settings
+from utils import next_redirect, confirmation_view
+
 
 @csrf_protect
 @login_required
@@ -28,9 +30,10 @@ def flag(request, comment_id, next=None):
     # Render a form on GET
     else:
         return render_to_response('comments/flag.html',
-            {'comment': comment, "next": next},
-            template.RequestContext(request)
+                                  {'comment': comment, "next": next},
+                                  template.RequestContext(request)
         )
+
 
 @csrf_protect
 @permission_required("comments.can_moderate")
@@ -55,9 +58,10 @@ def delete(request, comment_id, next=None):
     # Render a form on GET
     else:
         return render_to_response('comments/delete.html',
-            {'comment': comment, "next": next},
-            template.RequestContext(request)
+                                  {'comment': comment, "next": next},
+                                  template.RequestContext(request)
         )
+
 
 @csrf_protect
 @permission_required("comments.can_moderate")
@@ -82,8 +86,8 @@ def approve(request, comment_id, next=None):
     # Render a form on GET
     else:
         return render_to_response('comments/approve.html',
-            {'comment': comment, "next": next},
-            template.RequestContext(request)
+                                  {'comment': comment, "next": next},
+                                  template.RequestContext(request)
         )
 
 # The following functions actually perform the various flag/aprove/delete
@@ -95,40 +99,41 @@ def perform_flag(request, comment):
     Actually perform the flagging of a comment from a request.
     """
     flag, created = comments.models.CommentFlag.objects.get_or_create(
-        comment = comment,
-        user    = request.user,
-        flag    = comments.models.CommentFlag.SUGGEST_REMOVAL
+        comment=comment,
+        user=request.user,
+        flag=comments.models.CommentFlag.SUGGEST_REMOVAL
     )
     signals.comment_was_flagged.send(
-        sender  = comment.__class__,
-        comment = comment,
-        flag    = flag,
-        created = created,
-        request = request,
+        sender=comment.__class__,
+        comment=comment,
+        flag=flag,
+        created=created,
+        request=request,
     )
+
 
 def perform_delete(request, comment):
     flag, created = comments.models.CommentFlag.objects.get_or_create(
-        comment = comment,
-        user    = request.user,
-        flag    = comments.models.CommentFlag.MODERATOR_DELETION
+        comment=comment,
+        user=request.user,
+        flag=comments.models.CommentFlag.MODERATOR_DELETION
     )
     comment.is_removed = True
     comment.save()
     signals.comment_was_flagged.send(
-        sender  = comment.__class__,
-        comment = comment,
-        flag    = flag,
-        created = created,
-        request = request,
+        sender=comment.__class__,
+        comment=comment,
+        flag=flag,
+        created=created,
+        request=request,
     )
 
 
 def perform_approve(request, comment):
     flag, created = comments.models.CommentFlag.objects.get_or_create(
-        comment = comment,
-        user    = request.user,
-        flag    = comments.models.CommentFlag.MODERATOR_APPROVAL,
+        comment=comment,
+        user=request.user,
+        flag=comments.models.CommentFlag.MODERATOR_APPROVAL,
     )
 
     comment.is_removed = False
@@ -136,24 +141,24 @@ def perform_approve(request, comment):
     comment.save()
 
     signals.comment_was_flagged.send(
-        sender  = comment.__class__,
-        comment = comment,
-        flag    = flag,
-        created = created,
-        request = request,
+        sender=comment.__class__,
+        comment=comment,
+        flag=flag,
+        created=created,
+        request=request,
     )
 
 # Confirmation views.
 
 flag_done = confirmation_view(
-    template = "comments/flagged.html",
-    doc = 'Displays a "comment was flagged" success page.'
+    template="comments/flagged.html",
+    doc='Displays a "comment was flagged" success page.'
 )
 delete_done = confirmation_view(
-    template = "comments/deleted.html",
-    doc = 'Displays a "comment was deleted" success page.'
+    template="comments/deleted.html",
+    doc='Displays a "comment was deleted" success page.'
 )
 approve_done = confirmation_view(
-    template = "comments/approved.html",
-    doc = 'Displays a "comment was approved" success page.'
+    template="comments/approved.html",
+    doc='Displays a "comment was approved" success page.'
 )

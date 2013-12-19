@@ -1,6 +1,7 @@
 """JSON token scanner
 """
 import re
+
 try:
     from simplejson._speedups import make_scanner as c_make_scanner
 except ImportError:
@@ -11,6 +12,7 @@ __all__ = ['make_scanner']
 NUMBER_RE = re.compile(
     r'(-?(?:0|[1-9]\d*))(\.\d+)?([eE][-+]?\d+)?',
     (re.VERBOSE | re.MULTILINE | re.DOTALL))
+
 
 def py_make_scanner(context):
     parse_object = context.parse_object
@@ -61,5 +63,6 @@ def py_make_scanner(context):
             raise StopIteration
 
     return _scan_once
+
 
 make_scanner = c_make_scanner or py_make_scanner

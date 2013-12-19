@@ -1,5 +1,4 @@
 from ctypes.util import find_library
-from django.conf import settings
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.backends.sqlite3.base import *
@@ -9,6 +8,9 @@ from django.contrib.gis.db.backends.spatialite.client import SpatiaLiteClient
 from django.contrib.gis.db.backends.spatialite.creation import SpatiaLiteCreation
 from django.contrib.gis.db.backends.spatialite.introspection import SpatiaLiteIntrospection
 from django.contrib.gis.db.backends.spatialite.operations import SpatiaLiteOperations
+
+from django.conf import settings
+
 
 class DatabaseWrapper(SqliteDatabaseWrapper):
     def __init__(self, *args, **kwargs):
@@ -28,7 +30,7 @@ class DatabaseWrapper(SqliteDatabaseWrapper):
             raise ImproperlyConfigured('Unable to locate the SpatiaLite library. '
                                        'Make sure it is in your library path, or set '
                                        'SPATIALITE_LIBRARY_PATH in your settings.'
-                                       )
+            )
         super(DatabaseWrapper, self).__init__(*args, **kwargs)
         self.ops = SpatiaLiteOperations(self)
         self.client = SpatiaLiteClient(self)
@@ -40,7 +42,8 @@ class DatabaseWrapper(SqliteDatabaseWrapper):
             ## The following is the same as in django.db.backends.sqlite3.base ##
             settings_dict = self.settings_dict
             if not settings_dict['NAME']:
-                raise ImproperlyConfigured("Please fill out the database NAME in the settings module before using the database.")
+                raise ImproperlyConfigured(
+                    "Please fill out the database NAME in the settings module before using the database.")
             kwargs = {
                 'database': settings_dict['NAME'],
                 'detect_types': Database.PARSE_DECLTYPES | Database.PARSE_COLNAMES,
@@ -62,7 +65,7 @@ class DatabaseWrapper(SqliteDatabaseWrapper):
                 raise ImproperlyConfigured('The pysqlite library does not support C extension loading. '
                                            'Both SQLite and pysqlite must be configured to allow '
                                            'the loading of extensions to use SpatiaLite.'
-                                           )
+                )
 
             # Loading the SpatiaLite library extension on the connection, and returning
             # the created cursor.

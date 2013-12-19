@@ -2,14 +2,17 @@
 FR-specific Form helpers
 """
 
+import re
+
 from django.core.validators import EMPTY_VALUES
 from django.forms import ValidationError
 from django.forms.fields import Field, RegexField, Select
 from django.utils.encoding import smart_unicode
 from django.utils.translation import ugettext_lazy as _
-import re
+
 
 phone_digits_re = re.compile(r'^0\d(\s|\.)?(\d{2}(\s|\.)?){3}\d{2}$')
+
 
 class FRZipCodeField(RegexField):
     default_error_messages = {
@@ -18,7 +21,8 @@ class FRZipCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(FRZipCodeField, self).__init__(r'^\d{5}$',
-            max_length=None, min_length=None, *args, **kwargs)
+                                             max_length=None, min_length=None, *args, **kwargs)
+
 
 class FRPhoneNumberField(Field):
     """
@@ -41,11 +45,14 @@ class FRPhoneNumberField(Field):
             return u'%s %s %s %s %s' % (value[0:2], value[2:4], value[4:6], value[6:8], value[8:10])
         raise ValidationError(self.error_messages['invalid'])
 
+
 class FRDepartmentSelect(Select):
     """
     A Select widget that uses a list of FR departments as its choices.
     """
+
     def __init__(self, attrs=None):
         from fr_department import DEPARTMENT_ASCII_CHOICES
+
         super(FRDepartmentSelect, self).__init__(attrs, choices=DEPARTMENT_ASCII_CHOICES)
 

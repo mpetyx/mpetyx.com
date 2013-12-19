@@ -23,6 +23,7 @@ except ImportError:
 from django.db import connections, DEFAULT_DB_ALIAS
 from django.conf import settings
 
+
 class TransactionManagementError(Exception):
     """
     This exception is thrown when something bad happens with transaction
@@ -42,6 +43,7 @@ savepoint_state = {}
 # This is a dictionary mapping thread to a dictionary mapping connection
 # alias to a boolean.
 dirty = {}
+
 
 def enter_transaction_management(managed=True, using=None):
     """
@@ -67,6 +69,7 @@ def enter_transaction_management(managed=True, using=None):
         dirty[thread_ident][using] = False
     connection._enter_transaction_management(managed)
 
+
 def leave_transaction_management(using=None):
     """
     Leaves transaction management for a running thread. A dirty flag is carried
@@ -87,6 +90,7 @@ def leave_transaction_management(using=None):
         raise TransactionManagementError("Transaction managed block ended with pending COMMIT/ROLLBACK")
     dirty[thread_ident][using] = False
 
+
 def is_dirty(using=None):
     """
     Returns True if the current transaction requires a commit for changes to
@@ -95,6 +99,7 @@ def is_dirty(using=None):
     if using is None:
         using = DEFAULT_DB_ALIAS
     return dirty.get(thread.get_ident(), {}).get(using, False)
+
 
 def set_dirty(using=None):
     """
@@ -109,6 +114,7 @@ def set_dirty(using=None):
         dirty[thread_ident][using] = True
     else:
         raise TransactionManagementError("This code isn't under transaction management")
+
 
 def set_clean(using=None):
     """
@@ -125,12 +131,14 @@ def set_clean(using=None):
         raise TransactionManagementError("This code isn't under transaction management")
     clean_savepoints(using=using)
 
+
 def clean_savepoints(using=None):
     if using is None:
         using = DEFAULT_DB_ALIAS
     thread_ident = thread.get_ident()
     if thread_ident in savepoint_state and using in savepoint_state[thread_ident]:
         del savepoint_state[thread_ident][using]
+
 
 def is_managed(using=None):
     """
@@ -143,6 +151,7 @@ def is_managed(using=None):
         if state[thread_ident][using]:
             return state[thread_ident][using][-1]
     return settings.TRANSACTIONS_MANAGED
+
 
 def managed(flag=True, using=None):
     """
@@ -164,6 +173,7 @@ def managed(flag=True, using=None):
     else:
         raise TransactionManagementError("This code isn't under transaction management")
 
+
 def commit_unless_managed(using=None):
     """
     Commits changes if the system is not in managed transaction mode.
@@ -177,6 +187,7 @@ def commit_unless_managed(using=None):
     else:
         set_dirty(using=using)
 
+
 def rollback_unless_managed(using=None):
     """
     Rolls back changes if the system is not in managed transaction mode.
@@ -189,6 +200,7 @@ def rollback_unless_managed(using=None):
     else:
         set_dirty(using=using)
 
+
 def commit(using=None):
     """
     Does the commit itself and resets the dirty flag.
@@ -199,6 +211,7 @@ def commit(using=None):
     connection._commit()
     set_clean(using=using)
 
+
 def rollback(using=None):
     """
     This function does the rollback itself and resets the dirty flag.
@@ -208,6 +221,7 @@ def rollback(using=None):
     connection = connections[using]
     connection._rollback()
     set_clean(using=using)
+
 
 def savepoint(using=None):
     """
@@ -229,6 +243,7 @@ def savepoint(using=None):
     connection._savepoint(sid)
     return sid
 
+
 def savepoint_rollback(sid, using=None):
     """
     Rolls back the most recent savepoint (if one exists). Does nothing if
@@ -240,6 +255,7 @@ def savepoint_rollback(sid, using=None):
     thread_ident = thread.get_ident()
     if thread_ident in savepoint_state and using in savepoint_state[thread_ident]:
         connection._savepoint_rollback(sid)
+
 
 def savepoint_commit(sid, using=None):
     """
@@ -263,6 +279,7 @@ def autocommit(using=None):
     this decorator is useful if you globally activated transaction management in
     your settings file and want the default behavior in some view functions.
     """
+
     def inner_autocommit(func, db=None):
         def _autocommit(*args, **kw):
             try:
@@ -271,6 +288,7 @@ def autocommit(using=None):
                 return func(*args, **kw)
             finally:
                 leave_transaction_management(using=db)
+
         return wraps(func)(_autocommit)
 
     # Note that although the first argument is *called* `using`, it
@@ -280,7 +298,7 @@ def autocommit(using=None):
         using = DEFAULT_DB_ALIAS
     if callable(using):
         return inner_autocommit(using, DEFAULT_DB_ALIAS)
-    return lambda func: inner_autocommit(func,  using)
+    return lambda func: inner_autocommit(func, using)
 
 
 def commit_on_success(using=None):
@@ -290,6 +308,7 @@ def commit_on_success(using=None):
     a rollback is made. This is one of the most common ways to do transaction
     control in web apps.
     """
+
     def inner_commit_on_success(func, db=None):
         def _commit_on_success(*args, **kw):
             try:
@@ -312,6 +331,7 @@ def commit_on_success(using=None):
                 return res
             finally:
                 leave_transaction_management(using=db)
+
         return wraps(func)(_commit_on_success)
 
     # Note that although the first argument is *called* `using`, it
@@ -323,6 +343,7 @@ def commit_on_success(using=None):
         return inner_commit_on_success(using, DEFAULT_DB_ALIAS)
     return lambda func: inner_commit_on_success(func, using)
 
+
 def commit_manually(using=None):
     """
     Decorator that activates manual transaction control. It just disables
@@ -330,6 +351,7 @@ def commit_manually(using=None):
     own -- it's up to the user to call the commit and rollback functions
     themselves.
     """
+
     def inner_commit_manually(func, db=None):
         def _commit_manually(*args, **kw):
             try:

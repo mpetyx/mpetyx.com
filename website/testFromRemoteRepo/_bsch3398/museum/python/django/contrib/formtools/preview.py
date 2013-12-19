@@ -2,16 +2,16 @@
 Formtools Preview application.
 """
 
-import cPickle as pickle
-
-from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from django.utils.hashcompat import md5_constructor
 from django.contrib.formtools.utils import security_hash
 
+from django.utils.hashcompat import md5_constructor
+
+
 AUTO_ID = 'formtools_%s' # Each form here uses this as its auto_id parameter.
+
 
 class FormPreview(object):
     preview_template = 'formtools/preview.html'
@@ -52,15 +52,15 @@ class FormPreview(object):
         "Displays the form"
         f = self.form(auto_id=AUTO_ID)
         return render_to_response(self.form_template,
-            {'form': f, 'stage_field': self.unused_name('stage'), 'state': self.state},
-            context_instance=RequestContext(request))
+                                  {'form': f, 'stage_field': self.unused_name('stage'), 'state': self.state},
+                                  context_instance=RequestContext(request))
 
     def preview_post(self, request):
         "Validates the POST data. If valid, displays the preview page. Else, redisplays form."
         f = self.form(request.POST, auto_id=AUTO_ID)
         context = {'form': f, 'stage_field': self.unused_name('stage'), 'state': self.state}
         if f.is_valid():
-            self.process_preview(request, f, context) 
+            self.process_preview(request, f, context)
             context['hash_field'] = self.unused_name('hash')
             context['hash_value'] = self.security_hash(request, f)
             return render_to_response(self.preview_template, context, context_instance=RequestContext(request))
@@ -76,8 +76,8 @@ class FormPreview(object):
             return self.done(request, f.cleaned_data)
         else:
             return render_to_response(self.form_template,
-                {'form': f, 'stage_field': self.unused_name('stage'), 'state': self.state},
-                context_instance=RequestContext(request))
+                                      {'form': f, 'stage_field': self.unused_name('stage'), 'state': self.state},
+                                      context_instance=RequestContext(request))
 
     # METHODS SUBCLASSES MIGHT OVERRIDE IF APPROPRIATE ########################
 

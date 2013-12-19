@@ -1,13 +1,15 @@
-from django.template import loader, RequestContext
 from django.http import Http404, HttpResponse
-from django.core.xheaders import populate_xheaders
 from django.core.paginator import Paginator, InvalidPage
 from django.core.exceptions import ObjectDoesNotExist
 
+from django.template import loader, RequestContext
+from django.core.xheaders import populate_xheaders
+
+
 def object_list(request, queryset, paginate_by=None, page=None,
-        allow_empty=True, template_name=None, template_loader=loader,
-        extra_context=None, context_processors=None, template_object_name='object',
-        mimetype=None):
+                allow_empty=True, template_name=None, template_loader=loader,
+                extra_context=None, context_processors=None, template_object_name='object',
+                mimetype=None):
     """
     Generic list of objects.
 
@@ -100,11 +102,12 @@ def object_list(request, queryset, paginate_by=None, page=None,
     t = template_loader.get_template(template_name)
     return HttpResponse(t.render(c), mimetype=mimetype)
 
+
 def object_detail(request, queryset, object_id=None, slug=None,
-        slug_field='slug', template_name=None, template_name_field=None,
-        template_loader=loader, extra_context=None,
-        context_processors=None, template_object_name='object',
-        mimetype=None):
+                  slug_field='slug', template_name=None, template_name_field=None,
+                  template_loader=loader, extra_context=None,
+                  context_processors=None, template_object_name='object',
+                  mimetype=None):
     """
     Generic detail of an object.
 

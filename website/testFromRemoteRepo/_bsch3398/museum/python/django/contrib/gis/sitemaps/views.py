@@ -1,5 +1,4 @@
 from django.http import HttpResponse, Http404
-from django.template import loader
 from django.contrib.sites.models import Site
 from django.core import urlresolvers
 from django.core.paginator import EmptyPage, PageNotAnInteger
@@ -7,8 +6,10 @@ from django.contrib.gis.db.models.fields import GeometryField
 from django.db import connections, DEFAULT_DB_ALIAS
 from django.db.models import get_model
 from django.utils.encoding import smart_str
-
 from django.contrib.gis.shortcuts import render_to_kml, render_to_kmz
+
+from django.template import loader
+
 
 def index(request, sitemaps):
     """
@@ -27,10 +28,11 @@ def index(request, sitemaps):
         sites.append('%s://%s%s' % (protocol, current_site.domain, sitemap_url))
 
         if pages > 1:
-            for page in range(2, pages+1):
+            for page in range(2, pages + 1):
                 sites.append('%s://%s%s?p=%s' % (protocol, current_site.domain, sitemap_url, page))
     xml = loader.render_to_string('sitemap_index.xml', {'sitemaps': sites})
     return HttpResponse(xml, mimetype='application/xml')
+
 
 def sitemap(request, sitemaps, section=None):
     """
@@ -58,6 +60,7 @@ def sitemap(request, sitemaps, section=None):
             raise Http404("No page '%s'" % page)
     xml = smart_str(loader.render_to_string('gis/sitemaps/geo_sitemap.xml', {'urlset': urls}))
     return HttpResponse(xml, mimetype='application/xml')
+
 
 def kml(request, label, model, field_name=None, compress=False, using=DEFAULT_DB_ALIAS):
     """
@@ -101,7 +104,8 @@ def kml(request, label, model, field_name=None, compress=False, using=DEFAULT_DB
         render = render_to_kmz
     else:
         render = render_to_kml
-    return render('gis/kml/placemarks.kml', {'places' : placemarks})
+    return render('gis/kml/placemarks.kml', {'places': placemarks})
+
 
 def kmz(request, label, model, field_name=None, using=DEFAULT_DB_ALIAS):
     """

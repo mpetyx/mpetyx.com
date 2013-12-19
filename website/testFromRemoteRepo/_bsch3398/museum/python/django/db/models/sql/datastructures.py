@@ -3,11 +3,14 @@ Useful auxilliary data structures for query construction. Not useful outside
 the SQL domain.
 """
 
+
 class EmptyResultSet(Exception):
     pass
 
+
 class FullResultSet(Exception):
     pass
+
 
 class MultiJoin(Exception):
     """
@@ -15,20 +18,25 @@ class MultiJoin(Exception):
     multi-valued join was attempted (if the caller wants to treat that
     exceptionally).
     """
+
     def __init__(self, level):
         self.level = level
 
+
 class Empty(object):
     pass
+
 
 class RawValue(object):
     def __init__(self, value):
         self.value = value
 
+
 class Date(object):
     """
     Add a date selection column.
     """
+
     def __init__(self, col, lookup_type):
         self.col = col
         self.lookup_type = lookup_type

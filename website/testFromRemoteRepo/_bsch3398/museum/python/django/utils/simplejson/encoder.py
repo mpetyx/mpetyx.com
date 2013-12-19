@@ -24,12 +24,15 @@ for i in range(0x20):
 INFINITY = float('1e66666')
 FLOAT_REPR = repr
 
+
 def encode_basestring(s):
     """Return a JSON representation of a Python string
 
     """
+
     def replace(match):
         return ESCAPE_DCT[match.group(0)]
+
     return '"' + ESCAPE.sub(replace, s) + '"'
 
 
@@ -39,6 +42,7 @@ def py_encode_basestring_ascii(s):
     """
     if isinstance(s, str) and HAS_UTF8.search(s) is not None:
         s = s.decode('utf-8')
+
     def replace(match):
         s = match.group(0)
         try:
@@ -53,10 +57,12 @@ def py_encode_basestring_ascii(s):
                 s1 = 0xd800 | ((n >> 10) & 0x3ff)
                 s2 = 0xdc00 | (n & 0x3ff)
                 return '\\u%04x\\u%04x' % (s1, s2)
+
     return '"' + str(ESCAPE_ASCII.sub(replace, s)) + '"'
 
 
 encode_basestring_ascii = c_encode_basestring_ascii or py_encode_basestring_ascii
+
 
 class JSONEncoder(object):
     """Extensible JSON <http://json.org> encoder for Python data structures.
@@ -89,9 +95,10 @@ class JSONEncoder(object):
     """
     item_separator = ', '
     key_separator = ': '
+
     def __init__(self, skipkeys=False, ensure_ascii=True,
-            check_circular=True, allow_nan=True, sort_keys=False,
-            indent=None, separators=None, encoding='utf-8', default=None):
+                 check_circular=True, allow_nan=True, sort_keys=False,
+                 indent=None, separators=None, encoding='utf-8', default=None):
         """Constructor for JSONEncoder, with sensible defaults.
 
         If skipkeys is False, then it is a TypeError to attempt
@@ -179,13 +186,13 @@ class JSONEncoder(object):
             if isinstance(o, str):
                 _encoding = self.encoding
                 if (_encoding is not None
-                        and not (_encoding == 'utf-8')):
+                    and not (_encoding == 'utf-8')):
                     o = o.decode(_encoding)
             if self.ensure_ascii:
                 return encode_basestring_ascii(o)
             else:
                 return encode_basestring(o)
-        # This doesn't pass the iterator directly to ''.join() because the
+            # This doesn't pass the iterator directly to ''.join() because the
         # exceptions aren't as detailed.  The list call should be roughly
         # equivalent to the PySequence_Fast that ''.join() would do.
         chunks = self.iterencode(o, _one_shot=True)
@@ -232,7 +239,7 @@ class JSONEncoder(object):
 
             if not allow_nan:
                 raise ValueError("Out of range float values are not JSON compliant: %r"
-                    % (o,))
+                                 % (o,))
 
             return text
 
@@ -249,23 +256,24 @@ class JSONEncoder(object):
                 self.skipkeys, _one_shot)
         return _iterencode(o, 0)
 
-def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separator, _item_separator, _sort_keys, _skipkeys, _one_shot,
-        ## HACK: hand-optimized bytecode; turn globals into locals
-        False=False,
-        True=True,
-        ValueError=ValueError,
-        basestring=basestring,
-        dict=dict,
-        float=float,
-        id=id,
-        int=int,
-        isinstance=isinstance,
-        list=list,
-        long=long,
-        str=str,
-        tuple=tuple,
-    ):
 
+def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separator, _item_separator, _sort_keys,
+                     _skipkeys, _one_shot,
+                     ## HACK: hand-optimized bytecode; turn globals into locals
+                     False=False,
+                     True=True,
+                     ValueError=ValueError,
+                     basestring=basestring,
+                     dict=dict,
+                     float=float,
+                     id=id,
+                     int=int,
+                     isinstance=isinstance,
+                     list=list,
+                     long=long,
+                     str=str,
+                     tuple=tuple,
+):
     def _iterencode_list(lst, _current_indent_level):
         if not lst:
             yield '[]'

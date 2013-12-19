@@ -33,10 +33,12 @@ class FlexibleFieldLookupDict:
             return self.base_data_types_reverse[key]
         except KeyError:
             import re
+
             m = re.search(r'^\s*(?:var)?char\s*\(\s*(\d+)\s*\)\s*$', key)
             if m:
                 return ('CharField', {'max_length': int(m.group(1))})
             raise KeyError
+
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
     data_types_reverse = FlexibleFieldLookupDict()
@@ -68,7 +70,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
         # Schema for this table
         cursor.execute("SELECT sql FROM sqlite_master WHERE tbl_name = %s AND type = %s", [table_name, "table"])
         results = cursor.fetchone()[0].strip()
-        results = results[results.index('(')+1:results.rindex(')')]
+        results = results[results.index('(') + 1:results.rindex(')')]
 
         # Walk through and look for references to other tables. SQLite doesn't
         # really have enforced references, but since it echoes out the SQL used
@@ -90,8 +92,7 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                 continue
             other_table_results = result[0].strip()
             li, ri = other_table_results.index('('), other_table_results.rindex(')')
-            other_table_results = other_table_results[li+1:ri]
-
+            other_table_results = other_table_results[li + 1:ri]
 
             for other_index, other_desc in enumerate(other_table_results.split(',')):
                 other_desc = other_desc.strip()
@@ -137,5 +138,5 @@ class DatabaseIntrospection(BaseDatabaseIntrospection):
                  'type': field[2],
                  'null_ok': not field[3],
                  'pk': field[5]     # undocumented
-                 } for field in cursor.fetchall()]
+                } for field in cursor.fetchall()]
 

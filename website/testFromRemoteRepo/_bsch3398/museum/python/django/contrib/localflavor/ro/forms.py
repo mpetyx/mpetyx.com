@@ -3,11 +3,10 @@
 Romanian specific form helpers.
 """
 
-import re
-
 from django.core.validators import EMPTY_VALUES
 from django.forms import ValidationError, Field, RegexField, Select
 from django.utils.translation import ugettext_lazy as _
+
 
 class ROCIFField(RegexField):
     """
@@ -21,7 +20,7 @@ class ROCIFField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(ROCIFField, self).__init__(r'^[0-9]{2,10}', max_length=10,
-                min_length=2, *args, **kwargs)
+                                         min_length=2, *args, **kwargs)
 
     def clean(self, value):
         """
@@ -30,7 +29,7 @@ class ROCIFField(RegexField):
         value = super(ROCIFField, self).clean(value)
         if value in EMPTY_VALUES:
             return u''
-        # strip RO part
+            # strip RO part
         if value[0:2] == 'RO':
             value = value[2:]
         key = '753217532'[::-1]
@@ -46,6 +45,7 @@ class ROCIFField(RegexField):
             raise ValidationError(self.error_messages['invalid'])
         return value[::-1]
 
+
 class ROCNPField(RegexField):
     """
     A Romanian personal identity code (CNP) field
@@ -58,7 +58,7 @@ class ROCNPField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(ROCNPField, self).__init__(r'^[1-9][0-9]{12}', max_length=13,
-            min_length=13, *args, **kwargs)
+                                         min_length=13, *args, **kwargs)
 
     def clean(self, value):
         """
@@ -67,11 +67,12 @@ class ROCNPField(RegexField):
         value = super(ROCNPField, self).clean(value)
         # check birthdate digits
         import datetime
+
         try:
-            datetime.date(int(value[1:3]),int(value[3:5]),int(value[5:7]))
+            datetime.date(int(value[1:3]), int(value[3:5]), int(value[5:7]))
         except:
             raise ValidationError(self.error_messages['invalid'])
-        # checksum
+            # checksum
         key = '279146358279'
         checksum = 0
         value_iter = iter(value)
@@ -83,6 +84,7 @@ class ROCNPField(RegexField):
         if checksum != int(value[12]):
             raise ValidationError(self.error_messages['invalid'])
         return value
+
 
 class ROCountyField(Field):
     """
@@ -102,6 +104,7 @@ class ROCountyField(Field):
 
     def clean(self, value):
         from ro_counties import COUNTIES_CHOICES
+
         super(ROCountyField, self).clean(value)
         if value in EMPTY_VALUES:
             return u''
@@ -109,27 +112,31 @@ class ROCountyField(Field):
             value = value.strip().upper()
         except AttributeError:
             pass
-        # search for county code
+            # search for county code
         for entry in COUNTIES_CHOICES:
             if value in entry:
                 return value
-        # search for county name
+            # search for county name
         normalized_CC = []
         for entry in COUNTIES_CHOICES:
-            normalized_CC.append((entry[0],entry[1].upper()))
+            normalized_CC.append((entry[0], entry[1].upper()))
         for entry in normalized_CC:
             if entry[1] == value:
                 return entry[0]
         raise ValidationError(self.error_messages['invalid'])
+
 
 class ROCountySelect(Select):
     """
     A Select widget that uses a list of Romanian counties (judete) as its
     choices.
     """
+
     def __init__(self, attrs=None):
         from ro_counties import COUNTIES_CHOICES
+
         super(ROCountySelect, self).__init__(attrs, choices=COUNTIES_CHOICES)
+
 
 class ROIBANField(RegexField):
     """
@@ -143,15 +150,15 @@ class ROIBANField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(ROIBANField, self).__init__(r'^[0-9A-Za-z\-\s]{24,40}$',
-                max_length=40, min_length=24, *args, **kwargs)
+                                          max_length=40, min_length=24, *args, **kwargs)
 
     def clean(self, value):
         """
         Strips - and spaces, performs country code and checksum validation
         """
         value = super(ROIBANField, self).clean(value)
-        value = value.replace('-','')
-        value = value.replace(' ','')
+        value = value.replace('-', '')
+        value = value.replace(' ', '')
         value = value.upper()
         if value[0:2] != 'RO':
             raise ValidationError(self.error_messages['invalid'])
@@ -165,6 +172,7 @@ class ROIBANField(RegexField):
             raise ValidationError(self.error_messages['invalid'])
         return value
 
+
 class ROPhoneNumberField(RegexField):
     """Romanian phone number field"""
     default_error_messages = {
@@ -173,20 +181,21 @@ class ROPhoneNumberField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(ROPhoneNumberField, self).__init__(r'^[0-9\-\(\)\s]{10,20}$',
-                max_length=20, min_length=10, *args, **kwargs)
+                                                 max_length=20, min_length=10, *args, **kwargs)
 
     def clean(self, value):
         """
         Strips -, (, ) and spaces. Checks the final length.
         """
         value = super(ROPhoneNumberField, self).clean(value)
-        value = value.replace('-','')
-        value = value.replace('(','')
-        value = value.replace(')','')
-        value = value.replace(' ','')
+        value = value.replace('-', '')
+        value = value.replace('(', '')
+        value = value.replace(')', '')
+        value = value.replace(' ', '')
         if len(value) != 10:
             raise ValidationError(self.error_messages['invalid'])
         return value
+
 
 class ROPostalCodeField(RegexField):
     """Romanian postal code field."""
@@ -196,5 +205,5 @@ class ROPostalCodeField(RegexField):
 
     def __init__(self, *args, **kwargs):
         super(ROPostalCodeField, self).__init__(r'^[0-9][0-8][0-9]{4}$',
-                max_length=6, min_length=6, *args, **kwargs)
+                                                max_length=6, min_length=6, *args, **kwargs)
 

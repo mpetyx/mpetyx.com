@@ -1,13 +1,17 @@
 from math import ceil
 
+
 class InvalidPage(Exception):
     pass
+
 
 class PageNotAnInteger(InvalidPage):
     pass
 
+
 class EmptyPage(InvalidPage):
     pass
+
 
 class Paginator(object):
     def __init__(self, object_list, per_page, orphans=0, allow_empty_first_page=True):
@@ -52,6 +56,7 @@ class Paginator(object):
                 # (i.e. is of type list).
                 self._count = len(self.object_list)
         return self._count
+
     count = property(_get_count)
 
     def _get_num_pages(self):
@@ -63,6 +68,7 @@ class Paginator(object):
                 hits = max(1, self.count - self.orphans)
                 self._num_pages = int(ceil(hits / float(self.per_page)))
         return self._num_pages
+
     num_pages = property(_get_num_pages)
 
     def _get_page_range(self):
@@ -71,9 +77,12 @@ class Paginator(object):
         a template for loop.
         """
         return range(1, self.num_pages + 1)
+
     page_range = property(_get_page_range)
 
+
 QuerySetPaginator = Paginator # For backwards-compatibility.
+
 
 class Page(object):
     def __init__(self, object_list, number, paginator):

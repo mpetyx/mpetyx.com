@@ -7,11 +7,13 @@ from django.db import models
 from django.db.models.manager import EmptyManager
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import smart_str
-from django.utils.hashcompat import md5_constructor, sha_constructor
 from django.utils.translation import ugettext_lazy as _
+
+from django.utils.hashcompat import md5_constructor, sha_constructor
 
 
 UNUSABLE_PASSWORD = '!' # This will never be a valid hash
+
 
 def get_hexdigest(algorithm, salt, raw_password):
     """
@@ -32,6 +34,7 @@ def get_hexdigest(algorithm, salt, raw_password):
         return sha_constructor(salt + raw_password).hexdigest()
     raise ValueError("Got unknown password algorithm type in password.")
 
+
 def check_password(raw_password, enc_password):
     """
     Returns a boolean of whether the raw_password was correct. Handles
@@ -40,8 +43,10 @@ def check_password(raw_password, enc_password):
     algo, salt, hsh = enc_password.split('$')
     return hsh == get_hexdigest(algo, salt, raw_password)
 
+
 class SiteProfileNotAvailable(Exception):
     pass
+
 
 class PermissionManager(models.Manager):
     def get_by_natural_key(self, codename, app_label, model):
@@ -49,6 +54,7 @@ class PermissionManager(models.Manager):
             codename=codename,
             content_type=ContentType.objects.get_by_natural_key(app_label, model)
         )
+
 
 class Permission(models.Model):
     """The permissions system provides a way to assign permissions to specific users and groups of users.
@@ -82,7 +88,9 @@ class Permission(models.Model):
 
     def natural_key(self):
         return (self.codename,) + self.content_type.natural_key()
+
     natural_key.dependencies = ['contenttypes.contenttype']
+
 
 class Group(models.Model):
     """Groups are a generic way of categorizing users to apply permissions, or some other label, to those users. A user can belong to any number of groups.
@@ -101,6 +109,7 @@ class Group(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class UserManager(models.Manager):
     def create_user(self, username, email, password=None):
         """
@@ -108,7 +117,7 @@ class UserManager(models.Manager):
         """
 
         now = datetime.datetime.now()
-        
+
         # Normalize the address by lowercasing the domain part of the email
         # address.
         try:
@@ -119,8 +128,8 @@ class UserManager(models.Manager):
             email = '@'.join([email_name, domain_part.lower()])
 
         user = self.model(username=username, email=email, is_staff=False,
-                         is_active=True, is_superuser=False, last_login=now,
-                         date_joined=now)
+                          is_active=True, is_superuser=False, last_login=now,
+                          date_joined=now)
 
         if password:
             user.set_password(password)
@@ -142,6 +151,7 @@ class UserManager(models.Manager):
         # Note that default value of allowed_chars does not have "I" or letters
         # that look like it -- just to avoid confusion.
         from random import choice
+
         return ''.join([choice(allowed_chars) for i in range(length)])
 
 
@@ -169,8 +179,8 @@ def _user_has_perm(user, perm, obj):
             if hasattr(backend, "has_perm"):
                 if obj is not None:
                     if (backend.supports_object_permissions and
-                        backend.has_perm(user, perm, obj)):
-                            return True
+                            backend.has_perm(user, perm, obj)):
+                        return True
                 else:
                     if backend.has_perm(user, perm):
                         return True
@@ -193,18 +203,24 @@ class User(models.Model):
 
     Username and password are required. Other fields are optional.
     """
-    username = models.CharField(_('username'), max_length=30, unique=True, help_text=_("Required. 30 characters or fewer. Letters, numbers and @/./+/-/_ characters"))
+    username = models.CharField(_('username'), max_length=30, unique=True, help_text=_(
+        "Required. 30 characters or fewer. Letters, numbers and @/./+/-/_ characters"))
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
     email = models.EmailField(_('e-mail address'), blank=True)
-    password = models.CharField(_('password'), max_length=128, help_text=_("Use '[algo]$[salt]$[hexdigest]' or use the <a href=\"password/\">change password form</a>."))
-    is_staff = models.BooleanField(_('staff status'), default=False, help_text=_("Designates whether the user can log into this admin site."))
-    is_active = models.BooleanField(_('active'), default=True, help_text=_("Designates whether this user should be treated as active. Unselect this instead of deleting accounts."))
-    is_superuser = models.BooleanField(_('superuser status'), default=False, help_text=_("Designates that this user has all permissions without explicitly assigning them."))
+    password = models.CharField(_('password'), max_length=128, help_text=_(
+        "Use '[algo]$[salt]$[hexdigest]' or use the <a href=\"password/\">change password form</a>."))
+    is_staff = models.BooleanField(_('staff status'), default=False,
+                                   help_text=_("Designates whether the user can log into this admin site."))
+    is_active = models.BooleanField(_('active'), default=True, help_text=_(
+        "Designates whether this user should be treated as active. Unselect this instead of deleting accounts."))
+    is_superuser = models.BooleanField(_('superuser status'), default=False, help_text=_(
+        "Designates that this user has all permissions without explicitly assigning them."))
     last_login = models.DateTimeField(_('last login'), default=datetime.datetime.now)
     date_joined = models.DateTimeField(_('date joined'), default=datetime.datetime.now)
     groups = models.ManyToManyField(Group, verbose_name=_('groups'), blank=True,
-        help_text=_("In addition to the permissions manually assigned, this user will also get all permissions granted to each group he/she is in."))
+                                    help_text=_(
+                                        "In addition to the permissions manually assigned, this user will also get all permissions granted to each group he/she is in."))
     user_permissions = models.ManyToManyField(Permission, verbose_name=_('user permissions'), blank=True)
     objects = UserManager()
 
@@ -239,6 +255,7 @@ class User(models.Model):
 
     def set_password(self, raw_password):
         import random
+
         algo = 'sha1'
         salt = get_hexdigest(algo, str(random.random()), str(random.random()))[:5]
         hsh = get_hexdigest(algo, salt, raw_password)
@@ -342,6 +359,7 @@ class User(models.Model):
     def email_user(self, subject, message, from_email=None):
         "Sends an e-mail to this User."
         from django.core.mail import send_mail
+
         send_mail(subject, message, from_email, [self.email])
 
     def get_profile(self):
@@ -351,6 +369,7 @@ class User(models.Model):
         """
         if not hasattr(self, '_profile_cache'):
             from django.conf import settings
+
             if not getattr(settings, 'AUTH_PROFILE_MODULE', False):
                 raise SiteProfileNotAvailable('You need to set AUTH_PROFILE_MO'
                                               'DULE in your project settings')
@@ -358,15 +377,15 @@ class User(models.Model):
                 app_label, model_name = settings.AUTH_PROFILE_MODULE.split('.')
             except ValueError:
                 raise SiteProfileNotAvailable('app_label and model_name should'
-                        ' be separated by a dot in the AUTH_PROFILE_MODULE set'
-                        'ting')
+                                              ' be separated by a dot in the AUTH_PROFILE_MODULE set'
+                                              'ting')
 
             try:
                 model = models.get_model(app_label, model_name)
                 if model is None:
                     raise SiteProfileNotAvailable('Unable to load the profile '
-                        'model, check AUTH_PROFILE_MODULE in your project sett'
-                        'ings')
+                                                  'model, check AUTH_PROFILE_MODULE in your project sett'
+                                                  'ings')
                 self._profile_cache = model._default_manager.using(self._state.db).get(user__id__exact=self.id)
                 self._profile_cache.user = self
             except (ImportError, ImproperlyConfigured):
@@ -375,11 +394,14 @@ class User(models.Model):
 
     def _get_message_set(self):
         import warnings
+
         warnings.warn('The user messaging API is deprecated. Please update'
                       ' your code to use the new messages framework.',
                       category=PendingDeprecationWarning)
         return self._message_set
+
     message_set = property(_get_message_set)
+
 
 class Message(models.Model):
     """
@@ -395,6 +417,7 @@ class Message(models.Model):
 
     def __unicode__(self):
         return self.message
+
 
 class AnonymousUser(object):
     id = None
@@ -437,10 +460,12 @@ class AnonymousUser(object):
 
     def _get_groups(self):
         return self._groups
+
     groups = property(_get_groups)
 
     def _get_user_permissions(self):
         return self._user_permissions
+
     user_permissions = property(_get_user_permissions)
 
     def get_group_permissions(self, obj=None):

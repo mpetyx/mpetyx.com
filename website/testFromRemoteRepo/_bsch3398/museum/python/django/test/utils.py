@@ -1,15 +1,17 @@
-import sys, time, os
-from django.conf import settings
 from django.core import mail
 from django.core.mail.backends import locmem
 from django.test import signals
-from django.template import Template
 from django.utils.translation import deactivate
+
+from django.conf import settings
+from django.template import Template
+
 
 class ContextList(list):
     """A wrapper that provides direct key access to context items contained
     in a list of context objects.
     """
+
     def __getitem__(self, key):
         if isinstance(key, basestring):
             for subcontext in self:
@@ -49,6 +51,7 @@ def setup_test_environment():
 
     deactivate()
 
+
 def teardown_test_environment():
     """Perform any global post-test teardown. This involves:
 
@@ -66,6 +69,7 @@ def teardown_test_environment():
     del mail.original_email_backend
 
     del mail.outbox
+
 
 def get_runner(settings):
     test_path = settings.TEST_RUNNER.split('.')

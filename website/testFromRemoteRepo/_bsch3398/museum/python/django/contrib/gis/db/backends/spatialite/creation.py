@@ -1,11 +1,13 @@
 import os
-from django.conf import settings
+
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
 from django.db.backends.sqlite3.creation import DatabaseCreation
 
-class SpatiaLiteCreation(DatabaseCreation):
+from django.conf import settings
 
+
+class SpatiaLiteCreation(DatabaseCreation):
     def create_test_db(self, verbosity=1, autoclobber=False):
         """
         Creates a test database, prompting the user for confirmation if the
@@ -30,6 +32,7 @@ class SpatiaLiteCreation(DatabaseCreation):
 
         if settings.CACHE_BACKEND.startswith('db://'):
             from django.core.cache import parse_backend_uri
+
             _, cache_name, _ = parse_backend_uri(settings.CACHE_BACKEND)
             call_command('createcachetable', cache_name)
 

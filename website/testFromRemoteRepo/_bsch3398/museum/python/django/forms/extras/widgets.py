@@ -16,6 +16,7 @@ __all__ = ('SelectDateWidget',)
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
 
+
 class SelectDateWidget(Widget):
     """
     A Widget that splits date input into three <select> boxes.
@@ -36,7 +37,7 @@ class SelectDateWidget(Widget):
             self.years = years
         else:
             this_year = datetime.date.today().year
-            self.years = range(this_year, this_year+10)
+            self.years = range(this_year, this_year + 10)
 
     def render(self, name, value, attrs=None):
         try:
@@ -64,7 +65,7 @@ class SelectDateWidget(Widget):
         choices = MONTHS.items()
         month_html = self.create_select(name, self.month_field, value, month_val, choices)
         choices = [(i, i) for i in range(1, 32)]
-        day_html = self.create_select(name, self.day_field, value, day_val,  choices)
+        day_html = self.create_select(name, self.day_field, value, day_val, choices)
 
         format = get_format('DATE_FORMAT')
         escaped = False
@@ -84,6 +85,7 @@ class SelectDateWidget(Widget):
 
     def id_for_label(self, id_):
         return '%s_month' % id_
+
     id_for_label = classmethod(id_for_label)
 
     def value_from_datadict(self, data, files, name):

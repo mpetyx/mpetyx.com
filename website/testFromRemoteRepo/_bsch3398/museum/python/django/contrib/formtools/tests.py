@@ -1,20 +1,25 @@
 import unittest
-from django import forms
+
 from django.contrib.formtools import preview, wizard, utils
-from django import http
 from django.test import TestCase
+
+from django import forms
+from django import http
+
 
 success_string = "Done was called!"
 
-class TestFormPreview(preview.FormPreview):
 
+class TestFormPreview(preview.FormPreview):
     def done(self, request, cleaned_data):
         return http.HttpResponse(success_string)
+
 
 class TestForm(forms.Form):
     field1 = forms.CharField()
     field1_ = forms.CharField()
     bool1 = forms.BooleanField(required=False)
+
 
 class PreviewTests(TestCase):
     urls = 'django.contrib.formtools.test_urls'
@@ -24,7 +29,7 @@ class PreviewTests(TestCase):
         self.preview = preview.FormPreview(TestForm)
         input_template = '<input type="hidden" name="%s" value="%s" />'
         self.input = input_template % (self.preview.unused_name('stage'), "%d")
-        self.test_data = {'field1':u'foo', 'field1_':u'asdf'}
+        self.test_data = {'field1': u'foo', 'field1_': u'asdf'}
 
     def test_unused_name(self):
         """
@@ -75,7 +80,7 @@ class PreviewTests(TestCase):
         """
         # Pass strings for form submittal and add stage variable to
         # show we previously saw first stage of the form.
-        self.test_data.update({'stage':2})
+        self.test_data.update({'stage': 2})
         response = self.client.post('/test1/', self.test_data)
         self.failIfEqual(response.content, success_string)
         hash = self.preview.security_hash(None, TestForm(self.test_data))
@@ -96,14 +101,14 @@ class PreviewTests(TestCase):
         ``bool1``. We need to make sure the hashes are the same in both cases.
 
         """
-        self.test_data.update({'stage':2})
+        self.test_data.update({'stage': 2})
         hash = self.preview.security_hash(None, TestForm(self.test_data))
-        self.test_data.update({'hash':hash, 'bool1':u'False'})
+        self.test_data.update({'hash': hash, 'bool1': u'False'})
         response = self.client.post('/test1/', self.test_data)
         self.assertEqual(response.content, success_string)
 
-class SecurityHashTests(unittest.TestCase):
 
+class SecurityHashTests(unittest.TestCase):
     def test_textfield_hash(self):
         """
         Regression test for #10034: the hash generation function should ignore
@@ -115,7 +120,7 @@ class SecurityHashTests(unittest.TestCase):
         hash1 = utils.security_hash(None, f1)
         hash2 = utils.security_hash(None, f2)
         self.assertEqual(hash1, hash2)
-        
+
     def test_empty_permitted(self):
         """
         Regression test for #10643: the security hash should allow forms with
@@ -127,9 +132,11 @@ class SecurityHashTests(unittest.TestCase):
         hash2 = utils.security_hash(None, f2)
         self.assertEqual(hash1, hash2)
 
+
 class HashTestForm(forms.Form):
     name = forms.CharField()
     bio = forms.CharField()
+
 
 class HashTestBlankForm(forms.Form):
     name = forms.CharField(required=False)
@@ -142,8 +149,10 @@ class HashTestBlankForm(forms.Form):
 class WizardPageOneForm(forms.Form):
     field = forms.CharField()
 
+
 class WizardPageTwoForm(forms.Form):
     field = forms.CharField()
+
 
 class WizardClass(wizard.FormWizard):
     def render_template(self, *args, **kw):
@@ -152,6 +161,7 @@ class WizardClass(wizard.FormWizard):
     def done(self, request, cleaned_data):
         return http.HttpResponse(success_string)
 
+
 class DummyRequest(http.HttpRequest):
     def __init__(self, POST=None):
         super(DummyRequest, self).__init__()
@@ -159,6 +169,7 @@ class DummyRequest(http.HttpRequest):
         if POST is not None:
             self.POST.update(POST)
         self._dont_enforce_csrf_checks = True
+
 
 class WizardTests(TestCase):
     def test_step_starts_at_zero(self):
@@ -175,7 +186,7 @@ class WizardTests(TestCase):
         step should be incremented when we go to the next page
         """
         wizard = WizardClass([WizardPageOneForm, WizardPageTwoForm])
-        request = DummyRequest(POST={"0-field":"test", "wizard_step":"0"})
+        request = DummyRequest(POST={"0-field": "test", "wizard_step": "0"})
         response = wizard(request)
         self.assertEquals(1, wizard.step)
 

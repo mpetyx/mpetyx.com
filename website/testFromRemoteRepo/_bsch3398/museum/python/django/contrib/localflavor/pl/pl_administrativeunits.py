@@ -3,7 +3,6 @@
 Polish administrative units as in http://pl.wikipedia.org/wiki/Podzia%C5%82_administracyjny_Polski
 """
 
-
 ADMINISTRATIVE_UNIT_CHOICES = (
     ('wroclaw', u'Wrocław'),
     ('jeleniagora', u'Jelenia Góra'),

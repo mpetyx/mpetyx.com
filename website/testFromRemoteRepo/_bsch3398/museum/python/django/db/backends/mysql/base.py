@@ -11,15 +11,17 @@ try:
     import MySQLdb as Database
 except ImportError, e:
     from django.core.exceptions import ImproperlyConfigured
+
     raise ImproperlyConfigured("Error loading MySQLdb module: %s" % e)
 
 # We want version (1, 2, 1, 'final', 2) or later. We can't just use
 # lexicographic ordering in this check because then (1, 2, 1, 'gamma')
 # inadvertently passes the version test.
 version = Database.version_info
-if (version < (1,2,1) or (version[:3] == (1, 2, 1) and
-        (len(version) < 5 or version[3] != 'final' or version[4] < 2))):
+if (version < (1, 2, 1) or (version[:3] == (1, 2, 1) and
+                                (len(version) < 5 or version[3] != 'final' or version[4] < 2))):
     from django.core.exceptions import ImproperlyConfigured
+
     raise ImproperlyConfigured("MySQLdb-1.2.1p2 or newer is required; you have %s" % Database.__version__)
 
 from MySQLdb.converters import conversions
@@ -36,8 +38,10 @@ from django.utils.safestring import SafeString, SafeUnicode
 
 # Raise exceptions for database warnings if DEBUG is on
 from django.conf import settings
+
 if settings.DEBUG:
     from warnings import filterwarnings
+
     filterwarnings("error", category=Database.Warning)
 
 DatabaseError = Database.DatabaseError
@@ -118,12 +122,14 @@ class CursorWrapper(object):
     def __iter__(self):
         return iter(self.cursor)
 
+
 class DatabaseFeatures(BaseDatabaseFeatures):
     empty_fetchmany_value = ()
     update_can_self_select = False
     allows_group_by_pk = True
     related_fields_match_type = True
     allow_sliced_subqueries = False
+
 
 class DatabaseOperations(BaseDatabaseOperations):
     compiler_module = "django.db.backends.mysql.compiler"
@@ -189,12 +195,12 @@ class DatabaseOperations(BaseDatabaseOperations):
             # 'ALTER TABLE table AUTO_INCREMENT = 1;'... style SQL statements
             # to reset sequence indices
             sql.extend(["%s %s %s %s %s;" % \
-                (style.SQL_KEYWORD('ALTER'),
-                 style.SQL_KEYWORD('TABLE'),
-                 style.SQL_TABLE(self.quote_name(sequence['table'])),
-                 style.SQL_KEYWORD('AUTO_INCREMENT'),
-                 style.SQL_FIELD('= 1'),
-                ) for sequence in sequences])
+                        (style.SQL_KEYWORD('ALTER'),
+                         style.SQL_KEYWORD('TABLE'),
+                         style.SQL_TABLE(self.quote_name(sequence['table'])),
+                         style.SQL_KEYWORD('AUTO_INCREMENT'),
+                         style.SQL_FIELD('= 1'),
+                        ) for sequence in sequences])
             return sql
         else:
             return []
@@ -230,8 +236,8 @@ class DatabaseOperations(BaseDatabaseOperations):
     def max_name_length(self):
         return 64
 
-class DatabaseWrapper(BaseDatabaseWrapper):
 
+class DatabaseWrapper(BaseDatabaseWrapper):
     operators = {
         'exact': '= %s',
         'iexact': 'LIKE %s',
@@ -290,7 +296,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 kwargs['host'] = settings_dict['HOST']
             if settings_dict['PORT']:
                 kwargs['port'] = int(settings_dict['PORT'])
-            # We need the number of potentially affected rows after an
+                # We need the number of potentially affected rows after an
             # "UPDATE", not the number of changed rows.
             kwargs['client_flag'] = CLIENT.FOUND_ROWS
             kwargs.update(settings_dict['OPTIONS'])
@@ -313,6 +319,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
                 self.cursor()
             m = server_version_re.match(self.connection.get_server_info())
             if not m:
-                raise Exception('Unable to determine MySQL version from version string %r' % self.connection.get_server_info())
+                raise Exception(
+                    'Unable to determine MySQL version from version string %r' % self.connection.get_server_info())
             self.server_version = tuple([int(x) for x in m.groups()])
         return self.server_version

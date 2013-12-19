@@ -1,8 +1,10 @@
-from django.template import Lexer, Parser, tag_re, NodeList, VariableNode, TemplateSyntaxError
 from django.utils.encoding import force_unicode
 from django.utils.html import escape
 from django.utils.safestring import SafeData, EscapeData
 from django.utils.formats import localize
+
+from django.template import Lexer, Parser, tag_re, NodeList, VariableNode, TemplateSyntaxError
+
 
 class DebugLexer(Lexer):
     def __init__(self, template_string, origin):
@@ -28,13 +30,14 @@ class DebugLexer(Lexer):
         token.source = self.origin, source
         return token
 
+
 class DebugParser(Parser):
     def __init__(self, lexer):
         super(DebugParser, self).__init__(lexer)
         self.command_stack = []
 
     def enter_command(self, command, token):
-        self.command_stack.append( (command, token.source) )
+        self.command_stack.append((command, token.source))
 
     def exit_command(self):
         self.command_stack.pop()
@@ -42,7 +45,7 @@ class DebugParser(Parser):
     def error(self, token, msg):
         return self.source_error(token.source, msg)
 
-    def source_error(self, source,msg):
+    def source_error(self, source, msg):
         e = TemplateSyntaxError(msg)
         e.source = source
         return e
@@ -66,6 +69,7 @@ class DebugParser(Parser):
         if not hasattr(e, 'source'):
             e.source = token.source
 
+
 class DebugNodeList(NodeList):
     def render_node(self, node, context):
         try:
@@ -76,12 +80,14 @@ class DebugNodeList(NodeList):
             raise
         except Exception, e:
             from sys import exc_info
+
             wrapped = TemplateSyntaxError(u'Caught %s while rendering: %s' %
-                (e.__class__.__name__, force_unicode(e, errors='replace')))
+                                          (e.__class__.__name__, force_unicode(e, errors='replace')))
             wrapped.source = node.source
             wrapped.exc_info = exc_info()
             raise wrapped, None, wrapped.exc_info[2]
         return result
+
 
 class DebugVariableNode(VariableNode):
     def render(self, context):

@@ -3,13 +3,14 @@
  GeometryCollection, MultiPoint, MultiLineString, and MultiPolygon
 """
 from ctypes import c_int, c_uint, byref
-from django.contrib.gis.geos.error import GEOSException, GEOSIndexError
+from django.contrib.gis.geos.error import GEOSException
 from django.contrib.gis.geos.geometry import GEOSGeometry
-from django.contrib.gis.geos.libgeos import get_pointer_arr, GEOM_PTR, GEOS_PREPARE
+from django.contrib.gis.geos.libgeos import get_pointer_arr, GEOS_PREPARE
 from django.contrib.gis.geos.linestring import LineString, LinearRing
 from django.contrib.gis.geos.point import Point
 from django.contrib.gis.geos.polygon import Polygon
 from django.contrib.gis.geos import prototypes as capi
+
 
 class GeometryCollection(GEOSGeometry):
     _typeid = 7
@@ -87,12 +88,14 @@ class GeometryCollection(GEOSGeometry):
     def tuple(self):
         "Returns a tuple of all the coordinates in this Geometry Collection"
         return tuple([g.tuple for g in self])
+
     coords = tuple
 
 # MultiPoint, MultiLineString, and MultiPolygon class definitions.
 class MultiPoint(GeometryCollection):
     _allowed = Point
     _typeid = 4
+
 
 class MultiLineString(GeometryCollection):
     _allowed = (LineString, LinearRing)
@@ -103,8 +106,9 @@ class MultiLineString(GeometryCollection):
         """ 
         Returns a LineString representing the line merge of this 
         MultiLineString.
-        """ 
-        return self._topology(capi.geos_linemerge(self.ptr))         
+        """
+        return self._topology(capi.geos_linemerge(self.ptr))
+
 
 class MultiPolygon(GeometryCollection):
     _allowed = Polygon

@@ -10,8 +10,10 @@ pretty-print::
 """
 from django.utils import simplejson
 
+
 def main():
     import sys
+
     if len(sys.argv) == 1:
         infile = sys.stdin
         outfile = sys.stdout

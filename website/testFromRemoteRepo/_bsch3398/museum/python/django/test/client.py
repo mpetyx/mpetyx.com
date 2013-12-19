@@ -1,8 +1,9 @@
 import urllib
-from urlparse import urlparse, urlunparse, urlsplit
+from urlparse import urlparse, urlsplit
 import sys
 import os
 import re
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -21,12 +22,13 @@ from django.utils.encoding import smart_str
 from django.utils.http import urlencode
 from django.utils.importlib import import_module
 from django.utils.itercompat import is_iterable
-from django.db import transaction, close_connection
+from django.db import close_connection
 from django.test.utils import ContextList
 
 BOUNDARY = 'BoUnDaRyStRiNg'
 MULTIPART_CONTENT = 'multipart/form-data; boundary=%s' % BOUNDARY
 CONTENT_TYPE_RE = re.compile('.*; charset=([\w\d-]+);?')
+
 
 class FakePayload(object):
     """
@@ -35,6 +37,7 @@ class FakePayload(object):
     length. This makes sure that views can't do anything under the test client
     that wouldn't work in Real Life.
     """
+
     def __init__(self, content):
         self.__content = StringIO(content)
         self.__len = len(content)
@@ -54,8 +57,8 @@ class ClientHandler(BaseHandler):
     Uses the WSGI interface to compose requests, but returns
     the raw HttpResponse object
     """
+
     def __call__(self, environ):
-        from django.conf import settings
         from django.core import signals
 
         # Set up middleware if needed. We couldn't do this earlier, because
@@ -84,12 +87,14 @@ class ClientHandler(BaseHandler):
 
         return response
 
+
 def store_rendered_templates(store, signal, sender, template, context, **kwargs):
     """
     Stores templates and contexts that are rendered.
     """
     store.setdefault('template', []).append(template)
     store.setdefault('context', ContextList()).append(context)
+
 
 def encode_multipart(boundary, data):
     """
@@ -136,16 +141,18 @@ def encode_multipart(boundary, data):
     ])
     return '\r\n'.join(lines)
 
+
 def encode_file(boundary, key, file):
     to_str = lambda s: smart_str(s, settings.DEFAULT_CHARSET)
     return [
         '--' + boundary,
         'Content-Disposition: form-data; name="%s"; filename="%s"' \
-            % (to_str(key), to_str(os.path.basename(file.name))),
+        % (to_str(key), to_str(os.path.basename(file.name))),
         'Content-Type: application/octet-stream',
         '',
         file.read()
     ]
+
 
 class Client(object):
     """
@@ -165,6 +172,7 @@ class Client(object):
     contexts and templates produced by a view, rather than the
     HTML rendered to the end-user.
     """
+
     def __init__(self, **defaults):
         self.handler = ClientHandler()
         self.defaults = defaults
@@ -188,6 +196,7 @@ class Client(object):
             if cookie:
                 return engine.SessionStore(cookie.value)
         return {}
+
     session = property(_session)
 
     def request(self, **request):
@@ -198,21 +207,21 @@ class Client(object):
         using the arguments to the request.
         """
         environ = {
-            'HTTP_COOKIE':       self.cookies.output(header='', sep='; '),
-            'PATH_INFO':         '/',
-            'QUERY_STRING':      '',
-            'REMOTE_ADDR':       '127.0.0.1',
-            'REQUEST_METHOD':    'GET',
-            'SCRIPT_NAME':       '',
-            'SERVER_NAME':       'testserver',
-            'SERVER_PORT':       '80',
-            'SERVER_PROTOCOL':   'HTTP/1.1',
-            'wsgi.version':      (1,0),
-            'wsgi.url_scheme':   'http',
-            'wsgi.errors':       self.errors,
+            'HTTP_COOKIE': self.cookies.output(header='', sep='; '),
+            'PATH_INFO': '/',
+            'QUERY_STRING': '',
+            'REMOTE_ADDR': '127.0.0.1',
+            'REQUEST_METHOD': 'GET',
+            'SCRIPT_NAME': '',
+            'SERVER_NAME': 'testserver',
+            'SERVER_PORT': '80',
+            'SERVER_PROTOCOL': 'HTTP/1.1',
+            'wsgi.version': (1, 0),
+            'wsgi.url_scheme': 'http',
+            'wsgi.errors': self.errors,
             'wsgi.multiprocess': True,
-            'wsgi.multithread':  False,
-            'wsgi.run_once':     False,
+            'wsgi.multithread': False,
+            'wsgi.run_once': False,
         }
         environ.update(self.defaults)
         environ.update(request)
@@ -279,11 +288,11 @@ class Client(object):
         """
         parsed = urlparse(path)
         r = {
-            'CONTENT_TYPE':    'text/html; charset=utf-8',
-            'PATH_INFO':       urllib.unquote(parsed[2]),
-            'QUERY_STRING':    urlencode(data, doseq=True) or parsed[4],
+            'CONTENT_TYPE': 'text/html; charset=utf-8',
+            'PATH_INFO': urllib.unquote(parsed[2]),
+            'QUERY_STRING': urlencode(data, doseq=True) or parsed[4],
             'REQUEST_METHOD': 'GET',
-            'wsgi.input':      FakePayload('')
+            'wsgi.input': FakePayload('')
         }
         r.update(extra)
 
@@ -311,11 +320,11 @@ class Client(object):
         parsed = urlparse(path)
         r = {
             'CONTENT_LENGTH': len(post_data),
-            'CONTENT_TYPE':   content_type,
-            'PATH_INFO':      urllib.unquote(parsed[2]),
-            'QUERY_STRING':   parsed[4],
+            'CONTENT_TYPE': content_type,
+            'PATH_INFO': urllib.unquote(parsed[2]),
+            'QUERY_STRING': parsed[4],
             'REQUEST_METHOD': 'POST',
-            'wsgi.input':     FakePayload(post_data),
+            'wsgi.input': FakePayload(post_data),
         }
         r.update(extra)
 
@@ -330,11 +339,11 @@ class Client(object):
         """
         parsed = urlparse(path)
         r = {
-            'CONTENT_TYPE':    'text/html; charset=utf-8',
-            'PATH_INFO':       urllib.unquote(parsed[2]),
-            'QUERY_STRING':    urlencode(data, doseq=True) or parsed[4],
+            'CONTENT_TYPE': 'text/html; charset=utf-8',
+            'PATH_INFO': urllib.unquote(parsed[2]),
+            'QUERY_STRING': urlencode(data, doseq=True) or parsed[4],
             'REQUEST_METHOD': 'HEAD',
-            'wsgi.input':      FakePayload('')
+            'wsgi.input': FakePayload('')
         }
         r.update(extra)
 
@@ -349,10 +358,10 @@ class Client(object):
         """
         parsed = urlparse(path)
         r = {
-            'PATH_INFO':       urllib.unquote(parsed[2]),
-            'QUERY_STRING':    urlencode(data, doseq=True) or parsed[4],
+            'PATH_INFO': urllib.unquote(parsed[2]),
+            'QUERY_STRING': urlencode(data, doseq=True) or parsed[4],
             'REQUEST_METHOD': 'OPTIONS',
-            'wsgi.input':      FakePayload('')
+            'wsgi.input': FakePayload('')
         }
         r.update(extra)
 
@@ -380,11 +389,11 @@ class Client(object):
         parsed = urlparse(path)
         r = {
             'CONTENT_LENGTH': len(post_data),
-            'CONTENT_TYPE':   content_type,
-            'PATH_INFO':      urllib.unquote(parsed[2]),
-            'QUERY_STRING':   query_string or parsed[4],
+            'CONTENT_TYPE': content_type,
+            'PATH_INFO': urllib.unquote(parsed[2]),
+            'QUERY_STRING': query_string or parsed[4],
             'REQUEST_METHOD': 'PUT',
-            'wsgi.input':     FakePayload(post_data),
+            'wsgi.input': FakePayload(post_data),
         }
         r.update(extra)
 
@@ -399,10 +408,10 @@ class Client(object):
         """
         parsed = urlparse(path)
         r = {
-            'PATH_INFO':       urllib.unquote(parsed[2]),
-            'QUERY_STRING':    urlencode(data, doseq=True) or parsed[4],
+            'PATH_INFO': urllib.unquote(parsed[2]),
+            'QUERY_STRING': urlencode(data, doseq=True) or parsed[4],
             'REQUEST_METHOD': 'DELETE',
-            'wsgi.input':      FakePayload('')
+            'wsgi.input': FakePayload('')
         }
         r.update(extra)
 
@@ -421,7 +430,7 @@ class Client(object):
         """
         user = authenticate(**credentials)
         if user and user.is_active \
-                and 'django.contrib.sessions' in settings.INSTALLED_APPS:
+            and 'django.contrib.sessions' in settings.INSTALLED_APPS:
             engine = import_module(settings.SESSION_ENGINE)
 
             # Create a fake request to store login details.

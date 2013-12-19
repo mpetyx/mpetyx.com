@@ -7,10 +7,11 @@ circular import difficulties.
 """
 
 import weakref
-from django.utils.copycompat import deepcopy
 
 from django.utils import tree
 from django.utils.datastructures import SortedDict
+
+from django.utils.copycompat import deepcopy
 
 
 class CyclicDependency(Exception):
@@ -19,6 +20,7 @@ class CyclicDependency(Exception):
     dependency, i.e. when deleting multiple objects.
     """
     pass
+
 
 class InvalidQuery(Exception):
     """
@@ -128,16 +130,19 @@ class CollectedObjects(object):
         """
         return self.data.keys()
 
+
 class QueryWrapper(object):
     """
     A type that indicates the contents are an SQL fragment and the associate
     parameters. Can be used to pass opaque data to a where-clause, for example.
     """
+
     def __init__(self, sql, params):
         self.data = sql, params
 
     def as_sql(self, qn=None, connection=None):
         return self.data
+
 
 class Q(tree.Node):
     """
@@ -172,11 +177,13 @@ class Q(tree.Node):
         obj.negate()
         return obj
 
+
 class DeferredAttribute(object):
     """
     A wrapper for a deferred-loading field. When the value is read from this
     object the first time, the query is executed.
     """
+
     def __init__(self, field_name, model):
         self.field_name = field_name
         self.model_ref = weakref.ref(model)
@@ -200,8 +207,8 @@ class DeferredAttribute(object):
                 name = self.field_name
             except FieldDoesNotExist:
                 name = [f.name for f in cls._meta.fields
-                    if f.attname == self.field_name][0]
-            # We use only() instead of values() here because we want the
+                        if f.attname == self.field_name][0]
+                # We use only() instead of values() here because we want the
             # various data coersion methods (to_python(), etc.) to be called
             # here.
             val = getattr(
@@ -218,6 +225,7 @@ class DeferredAttribute(object):
         never be a database lookup involved.
         """
         instance.__dict__[self.field_name] = value
+
 
 def select_related_descend(field, restricted, requested, reverse=False):
     """
@@ -255,8 +263,10 @@ def deferred_class_factory(model, attrs):
     being replaced with DeferredAttribute objects. The "pk_value" ties the
     deferred attributes to a particular instance of the model.
     """
+
     class Meta:
         pass
+
     setattr(Meta, "proxy", True)
     setattr(Meta, "app_label", model._meta.app_label)
 
@@ -267,7 +277,7 @@ def deferred_class_factory(model, attrs):
     name = "%s_Deferred_%s" % (model.__name__, '_'.join(sorted(list(attrs))))
 
     overrides = dict([(attr, DeferredAttribute(attr, model))
-            for attr in attrs])
+                      for attr in attrs])
     overrides["Meta"] = Meta
     overrides["__module__"] = model.__module__
     overrides["_deferred"] = True

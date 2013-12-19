@@ -1,5 +1,7 @@
-from django.template import loader, RequestContext
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponseGone
+
+from django.template import loader, RequestContext
+
 
 def direct_to_template(request, template, extra_context=None, mimetype=None, **kwargs):
     """
@@ -16,6 +18,7 @@ def direct_to_template(request, template, extra_context=None, mimetype=None, **k
     c = RequestContext(request, dictionary)
     t = loader.get_template(template)
     return HttpResponse(t.render(c), mimetype=mimetype)
+
 
 def redirect_to(request, url, permanent=True, **kwargs):
     """

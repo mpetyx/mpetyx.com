@@ -11,6 +11,7 @@ from django.core.serializers.python import Deserializer as PythonDeserializer
 from django.utils import datetime_safe
 from django.utils import simplejson
 
+
 class Serializer(PythonSerializer):
     """
     Convert a queryset to JSON.
@@ -27,6 +28,7 @@ class Serializer(PythonSerializer):
         if callable(getattr(self.stream, 'getvalue', None)):
             return self.stream.getvalue()
 
+
 def Deserializer(stream_or_string, **options):
     """
     Deserialize a stream or string of JSON data.
@@ -37,6 +39,7 @@ def Deserializer(stream_or_string, **options):
         stream = stream_or_string
     for obj in PythonDeserializer(simplejson.load(stream), **options):
         yield obj
+
 
 class DjangoJSONEncoder(simplejson.JSONEncoder):
     """

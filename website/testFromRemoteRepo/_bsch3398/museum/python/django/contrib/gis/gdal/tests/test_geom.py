@@ -4,6 +4,7 @@ from django.contrib.gis.gdal import OGRGeometry, OGRGeomType, \
     gdal_version
 from django.contrib.gis.tests.geometries import *
 
+
 class OGRGeomTest(unittest.TestCase):
     "This tests the OGR Geometry."
 
@@ -88,6 +89,7 @@ class OGRGeomTest(unittest.TestCase):
     def test01d_wkb(self):
         "Testing WKB input/output."
         from binascii import b2a_hex
+
         for g in hex_wkt:
             geom1 = OGRGeometry(g.wkt)
             wkb = geom1.wkb
@@ -99,6 +101,7 @@ class OGRGeomTest(unittest.TestCase):
     def test01e_json(self):
         "Testing GeoJSON input/output."
         from django.contrib.gis.gdal.prototypes.geom import GEOJSON
+
         if not GEOJSON: return
         for g in json_geoms:
             geom = OGRGeometry(g.wkt)
@@ -190,8 +193,8 @@ class OGRGeomTest(unittest.TestCase):
         "Testing Polygon objects."
 
         # Testing `from_bbox` class method
-        bbox =  (-180,-90,180,90)
-        p = OGRGeometry.from_bbox( bbox )
+        bbox = (-180, -90, 180, 90)
+        p = OGRGeometry.from_bbox(bbox)
         self.assertEqual(bbox, p.extent)
 
         prev = OGRGeometry('POINT(0 0)')
@@ -450,6 +453,7 @@ class OGRGeomTest(unittest.TestCase):
     def test17_pickle(self):
         "Testing pickle support."
         import cPickle
+
         g1 = OGRGeometry('LINESTRING(1 1 1,2 2 2,3 3 3)', 'WGS84')
         g2 = cPickle.loads(cPickle.dumps(g1))
         self.assertEqual(g1, g2)
@@ -486,10 +490,12 @@ class OGRGeomTest(unittest.TestCase):
         self.assertNotEqual(None, OGRGeometry('POINT(0 0)'))
         self.assertEqual(False, OGRGeometry('LINESTRING(0 0, 1 1)') == 3)
 
+
 def suite():
     s = unittest.TestSuite()
     s.addTest(unittest.makeSuite(OGRGeomTest))
     return s
+
 
 def run(verbosity=2):
     unittest.TextTestRunner(verbosity=verbosity).run(suite())

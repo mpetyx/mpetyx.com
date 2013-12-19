@@ -11,6 +11,7 @@ try:
 except ImportError:
     import dummy_threading as threading
 
+
 class RWLock:
     """
     Classic implementation of reader-writer lock with preference to writers.
@@ -24,12 +25,13 @@ class RWLock:
         writer_enters()
         writer_leaves()
     """
+
     def __init__(self):
-        self.mutex     = threading.RLock()
-        self.can_read  = threading.Semaphore(0)
+        self.mutex = threading.RLock()
+        self.can_read = threading.Semaphore(0)
         self.can_write = threading.Semaphore(0)
-        self.active_readers  = 0
-        self.active_writers  = 0
+        self.active_readers = 0
+        self.active_writers = 0
         self.waiting_readers = 0
         self.waiting_writers = 0
 
@@ -50,7 +52,7 @@ class RWLock:
         try:
             self.active_readers -= 1
             if self.active_readers == 0 and self.waiting_writers != 0:
-                self.active_writers  += 1
+                self.active_writers += 1
                 self.waiting_writers -= 1
                 self.can_write.release()
         finally:
@@ -73,7 +75,7 @@ class RWLock:
         try:
             self.active_writers -= 1
             if self.waiting_writers != 0:
-                self.active_writers  += 1
+                self.active_writers += 1
                 self.waiting_writers -= 1
                 self.can_write.release()
             elif self.waiting_readers != 0:

@@ -11,29 +11,37 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.backends import *
 from django.db.backends.creation import BaseDatabaseCreation
 
+
 def complain(*args, **kwargs):
     raise ImproperlyConfigured("You haven't set the database ENGINE setting yet.")
+
 
 def ignore(*args, **kwargs):
     pass
 
+
 class DatabaseError(Exception):
     pass
+
 
 class IntegrityError(DatabaseError):
     pass
 
+
 class DatabaseOperations(BaseDatabaseOperations):
     quote_name = complain
 
+
 class DatabaseClient(BaseDatabaseClient):
     runshell = complain
+
 
 class DatabaseIntrospection(BaseDatabaseIntrospection):
     get_table_list = complain
     get_table_description = complain
     get_relations = complain
     get_indexes = complain
+
 
 class DatabaseWrapper(object):
     operators = {}

@@ -1,6 +1,7 @@
-import django
-import os.path
 import re
+
+import django
+
 
 def get_svn_revision(path=None):
     """
@@ -34,6 +35,7 @@ def get_svn_revision(path=None):
         # the first entries node.
         else:
             from xml.dom import minidom
+
             dom = minidom.parse(entries_path)
             rev = dom.getElementsByTagName('entry')[0].getAttribute('revision')
 

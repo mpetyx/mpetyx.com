@@ -9,6 +9,7 @@ class BoundRelatedObject(object):
     def __repr__(self):
         return repr(self.__dict__)
 
+
 class RelatedObject(object):
     def __init__(self, parent_model, model, field):
         self.parent_model = parent_model
@@ -21,7 +22,7 @@ class RelatedObject(object):
     def get_db_prep_lookup(self, lookup_type, value, connection, prepared=False):
         # Defer to the actual field definition for db prep
         return self.field.get_db_prep_lookup(lookup_type, value,
-                        connection=connection, prepared=prepared)
+                                             connection=connection, prepared=prepared)
 
     def editable_fields(self):
         "Get the fields in this class that should be edited inline."

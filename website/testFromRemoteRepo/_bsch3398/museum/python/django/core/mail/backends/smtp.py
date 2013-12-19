@@ -4,14 +4,17 @@ import smtplib
 import socket
 import threading
 
-from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail.utils import DNS_NAME
+
+from django.conf import settings
+
 
 class EmailBackend(BaseEmailBackend):
     """
     A wrapper that manages the SMTP network connection.
     """
+
     def __init__(self, host=None, port=None, username=None, password=None,
                  use_tls=None, fail_silently=False, **kwargs):
         super(EmailBackend, self).__init__(fail_silently=fail_silently)
@@ -97,8 +100,8 @@ class EmailBackend(BaseEmailBackend):
             return False
         try:
             self.connection.sendmail(email_message.from_email,
-                    email_message.recipients(),
-                    email_message.message().as_string())
+                                     email_message.recipients(),
+                                     email_message.message().as_string())
         except:
             if not self.fail_silently:
                 raise

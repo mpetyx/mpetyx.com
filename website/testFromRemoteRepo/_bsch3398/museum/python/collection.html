@@ -1,31 +1,32 @@
 <html>
-	<title>Dave, Dave &amp; Ben: Museum Database</title>
+<title>Dave, Dave &amp; Ben: Museum Database</title>
 
-	
+
 <!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/collection.html by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 10:28:27 GMT -->
 <body>
-		<h1>Dave, Dave &amp; Ben: Museum Database</h1>
-		<p><a href=serverd119.html?pagetype=menu>Main Menu</a></p>
-		<h4>Collection page for Collection: {{ collection.name }}</h2>
+<h1>Dave, Dave &amp; Ben: Museum Database</h1>
 
-		<div id="objects">
-			<ul>
-				{% for object in collection.objects %}
-				
-					<li><a href="server24d7.html?pagetype=object&amp;id={{object.id}}">
-						<b>ID:{{object.id}}:</b> {{object.title}}
-					</a></li>
+<p><a href=serverd119.html?pagetype=menu>Main Menu</a></p>
+<h4>Collection page for Collection: {{ collection.name }}</h2>
 
-				
-				{% empty %}
-					<li>There are no objects in this collection.</li>
-				{% endfor %}
-			</ul>
-			
-		</div>
+    <div id="objects">
+        <ul>
+            {% for object in collection.objects %}
+
+            <li><a href="server24d7.html?pagetype=object&amp;id={{object.id}}">
+                <b>ID:{{object.id}}:</b> {{object.title}}
+            </a></li>
 
 
-	</body>
+            {% empty %}
+            <li>There are no objects in this collection.</li>
+            {% endfor %}
+        </ul>
+
+    </div>
+
+
+</body>
 
 <!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/collection.html by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 10:28:30 GMT -->
 </html>

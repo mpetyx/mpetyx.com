@@ -3,6 +3,7 @@ Classes representing uploaded files.
 """
 
 import os
+
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -16,6 +17,7 @@ from django.utils.encoding import smart_str
 __all__ = ('UploadedFile', 'TemporaryUploadedFile', 'InMemoryUploadedFile',
            'SimpleUploadedFile')
 
+
 class UploadedFile(File):
     """
     A abstract uploaded file (``TemporaryUploadedFile`` and
@@ -24,7 +26,7 @@ class UploadedFile(File):
     An ``UploadedFile`` object behaves somewhat like a file object and
     represents some file data that the user submitted with a form.
     """
-    DEFAULT_CHUNK_SIZE = 64 * 2**10
+    DEFAULT_CHUNK_SIZE = 64 * 2 ** 10
 
     def __init__(self, file=None, name=None, content_type=None, size=None, charset=None):
         super(UploadedFile, self).__init__(file, name)
@@ -54,14 +56,16 @@ class UploadedFile(File):
 
     name = property(_get_name, _set_name)
 
+
 class TemporaryUploadedFile(UploadedFile):
     """
     A file uploaded to a temporary location (i.e. stream-to-disk).
     """
+
     def __init__(self, name, content_type, size, charset):
         if settings.FILE_UPLOAD_TEMP_DIR:
             file = tempfile.NamedTemporaryFile(suffix='.upload',
-                dir=settings.FILE_UPLOAD_TEMP_DIR)
+                                               dir=settings.FILE_UPLOAD_TEMP_DIR)
         else:
             file = tempfile.NamedTemporaryFile(suffix='.upload')
         super(TemporaryUploadedFile, self).__init__(file, name, content_type, size, charset)
@@ -82,10 +86,12 @@ class TemporaryUploadedFile(UploadedFile):
                 # calls self.file.file.close() before the exception
                 raise
 
+
 class InMemoryUploadedFile(UploadedFile):
     """
     A file uploaded into memory (i.e. stream-to-memory).
     """
+
     def __init__(self, file, field_name, name, content_type, size, charset):
         super(InMemoryUploadedFile, self).__init__(file, name, content_type, size, charset)
         self.field_name = field_name
@@ -109,6 +115,7 @@ class SimpleUploadedFile(InMemoryUploadedFile):
     """
     A simple representation of a file, which just has content, size, and a name.
     """
+
     def __init__(self, name, content, content_type='text/plain'):
         content = content or ''
         super(SimpleUploadedFile, self).__init__(StringIO(content), None, name,
@@ -125,4 +132,5 @@ class SimpleUploadedFile(InMemoryUploadedFile):
         return cls(file_dict['filename'],
                    file_dict['content'],
                    file_dict.get('content-type', 'text/plain'))
+
     from_dict = classmethod(from_dict)

@@ -15,7 +15,7 @@ Example Usage::
     >>> f.close()
 """
 
-__all__ = ('LOCK_EX','LOCK_SH','LOCK_NB','lock','unlock')
+__all__ = ('LOCK_EX', 'LOCK_SH', 'LOCK_NB', 'lock', 'unlock')
 
 system_type = None
 
@@ -23,6 +23,7 @@ try:
     import win32con
     import win32file
     import pywintypes
+
     LOCK_EX = win32con.LOCKFILE_EXCLUSIVE_LOCK
     LOCK_SH = 0
     LOCK_NB = win32con.LOCKFILE_FAIL_IMMEDIATELY
@@ -33,6 +34,7 @@ except (ImportError, AttributeError):
 
 try:
     import fcntl
+
     LOCK_EX = fcntl.LOCK_EX
     LOCK_SH = fcntl.LOCK_SH
     LOCK_NB = fcntl.LOCK_NB
@@ -40,9 +42,11 @@ try:
 except (ImportError, AttributeError):
     pass
 
+
 def fd(f):
     """Get a filedescriptor from something which could be a file or an fd."""
     return hasattr(f, 'fileno') and f.fileno() or f
+
 
 if system_type == 'nt':
     def lock(file, flags):

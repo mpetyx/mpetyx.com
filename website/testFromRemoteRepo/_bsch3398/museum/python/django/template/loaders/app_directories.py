@@ -6,12 +6,14 @@ packages.
 import os
 import sys
 
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.template import TemplateDoesNotExist
 from django.template.loader import BaseLoader
 from django.utils._os import safe_join
 from django.utils.importlib import import_module
+
+from django.conf import settings
+from django.template import TemplateDoesNotExist
+
 
 # At compile time, cache the directories to search.
 fs_encoding = sys.getfilesystemencoding() or sys.getdefaultencoding()
@@ -27,6 +29,7 @@ for app in settings.INSTALLED_APPS:
 
 # It won't change, so convert it to a tuple to save memory.
 app_template_dirs = tuple(app_template_dirs)
+
 
 class Loader(BaseLoader):
     is_usable = True
@@ -61,14 +64,19 @@ class Loader(BaseLoader):
                 pass
         raise TemplateDoesNotExist(template_name)
 
+
 _loader = Loader()
+
 
 def load_template_source(template_name, template_dirs=None):
     # For backwards compatibility
     import warnings
+
     warnings.warn(
         "'django.template.loaders.app_directories.load_template_source' is deprecated; use 'django.template.loaders.app_directories.Loader' instead.",
         PendingDeprecationWarning
     )
     return _loader.load_template_source(template_name, template_dirs)
+
+
 load_template_source.is_usable = True

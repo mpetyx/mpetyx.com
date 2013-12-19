@@ -17,6 +17,7 @@ def user_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIE
     """
     if not login_url:
         from django.conf import settings
+
         login_url = settings.LOGIN_URL
 
     def decorator(view_func):
@@ -26,7 +27,9 @@ def user_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIE
             path = urlquote(request.get_full_path())
             tup = login_url, redirect_field_name, path
             return HttpResponseRedirect('%s?%s=%s' % tup)
+
         return wraps(view_func, assigned=available_attrs(view_func))(_wrapped_view)
+
     return decorator
 
 

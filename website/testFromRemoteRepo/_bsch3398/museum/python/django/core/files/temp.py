@@ -21,10 +21,11 @@ if os.name == 'nt':
         Temporary file object constructor that works in Windows and supports
         reopening of the temporary file in windows.
         """
+
         def __init__(self, mode='w+b', bufsize=-1, suffix='', prefix='',
-                dir=None):
+                     dir=None):
             fd, name = tempfile.mkstemp(suffix=suffix, prefix=prefix,
-                                          dir=dir)
+                                        dir=dir)
             self.name = name
             self.file = os.fdopen(fd, mode, bufsize)
             self.close_called = False

@@ -3,6 +3,7 @@ from optparse import make_option
 from django.core.management.base import LabelCommand
 from django.db import connections, transaction, models, DEFAULT_DB_ALIAS
 
+
 class Command(LabelCommand):
     help = "Creates the table needed to use the SQL cache backend."
     args = "<tablename>"
@@ -10,9 +11,9 @@ class Command(LabelCommand):
 
     option_list = LabelCommand.option_list + (
         make_option('--database', action='store', dest='database',
-            default=DEFAULT_DB_ALIAS, help='Nominates a database onto '
-                'which the cache table will be installed. '
-                'Defaults to the "default" database.'),
+                    default=DEFAULT_DB_ALIAS, help='Nominates a database onto '
+                                                   'which the cache table will be installed. '
+                                                   'Defaults to the "default" database.'),
     )
 
     requires_model_validation = False
@@ -39,12 +40,12 @@ class Command(LabelCommand):
             if f.db_index:
                 unique = f.unique and "UNIQUE " or ""
                 index_output.append("CREATE %sINDEX %s ON %s (%s);" % \
-                    (unique, qn('%s_%s' % (tablename, f.name)), qn(tablename),
-                    qn(f.name)))
+                                    (unique, qn('%s_%s' % (tablename, f.name)), qn(tablename),
+                                     qn(f.name)))
             table_output.append(" ".join(field_output))
         full_statement = ["CREATE TABLE %s (" % qn(tablename)]
         for i, line in enumerate(table_output):
-            full_statement.append('    %s%s' % (line, i < len(table_output)-1 and ',' or ''))
+            full_statement.append('    %s%s' % (line, i < len(table_output) - 1 and ',' or ''))
         full_statement.append(');')
         curs = connection.cursor()
         curs.execute("\n".join(full_statement))

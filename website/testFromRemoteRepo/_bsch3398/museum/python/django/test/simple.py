@@ -2,19 +2,21 @@ import sys
 import signal
 import unittest
 
-from django.conf import settings
 from django.db.models import get_app, get_apps
 from django.test import _doctest as doctest
 from django.test.utils import setup_test_environment, teardown_test_environment
 from django.test.testcases import OutputChecker, DocTestRunner, TestCase
+
+from django.conf import settings
+
 
 # The module name for tests outside models.py
 TEST_MODULE = 'tests'
 
 doctestOutputChecker = OutputChecker()
 
-class DjangoTestRunner(unittest.TextTestRunner):
 
+class DjangoTestRunner(unittest.TextTestRunner):
     def __init__(self, verbosity=0, failfast=False, **kwargs):
         super(DjangoTestRunner, self).__init__(verbosity=verbosity, **kwargs)
         self.failfast = failfast
@@ -26,7 +28,7 @@ class DjangoTestRunner(unittest.TextTestRunner):
         that triggers a graceful exit when Ctrl-C is pressed.
         """
         self._default_keyboard_interrupt_handler = signal.signal(signal.SIGINT,
-            self._keyboard_interrupt_handler)
+                                                                 self._keyboard_interrupt_handler)
         try:
             result = super(DjangoTestRunner, self).run(*args, **kwargs)
         finally:
@@ -53,13 +55,15 @@ class DjangoTestRunner(unittest.TextTestRunner):
                 # If we were set to failfast and the unit test failed,
                 # or if the user has typed Ctrl-C, report and quit
                 if (failfast and not result.wasSuccessful()) or \
-                    self._keyboard_interrupt_intercepted:
+                        self._keyboard_interrupt_intercepted:
                     result.stop()
                 func(test)
+
             return stoptest
 
         setattr(result, 'stopTest', stoptest_override(result.stopTest))
         return result
+
 
 def get_tests(app_module):
     try:
@@ -70,6 +74,7 @@ def get_tests(app_module):
         # due to an import error in a tests.py that actually exists?
         import os.path
         from imp import find_module
+
         try:
             mod = find_module(TEST_MODULE, [os.path.dirname(app_module.__file__)])
         except ImportError:
@@ -85,6 +90,7 @@ def get_tests(app_module):
                 mod[0].close()
             raise
     return test_module
+
 
 def build_suite(app_module):
     "Create a complete Django test suite for the provided application module"
@@ -122,6 +128,7 @@ def build_suite(app_module):
                 # No doc tests in tests.py
                 pass
     return suite
+
 
 def build_test(label):
     """Construct a test case with the specified label. Label should be of the
@@ -185,6 +192,7 @@ def build_test(label):
     # Construct a suite out of the tests that matched.
     return unittest.TestSuite(tests)
 
+
 def partition_suite(suite, classes, bins):
     """
     Partitions a test suite by test type.
@@ -206,6 +214,7 @@ def partition_suite(suite, classes, bins):
             else:
                 bins[-1].addTest(test)
 
+
 def reorder_suite(suite, classes):
     """
     Reorders a test suite by test type.
@@ -216,10 +225,10 @@ def reorder_suite(suite, classes):
     Tests with no match in classes are placed last.
     """
     class_count = len(classes)
-    bins = [unittest.TestSuite() for i in range(class_count+1)]
+    bins = [unittest.TestSuite() for i in range(class_count + 1)]
     partition_suite(suite, classes, bins)
     for i in range(class_count):
-        bins[0].addTests(bins[i+1])
+        bins[0].addTests(bins[i + 1])
     return bins[0]
 
 
@@ -255,6 +264,7 @@ class DjangoTestSuiteRunner(object):
 
     def setup_databases(self, **kwargs):
         from django.db import connections
+
         old_names = []
         mirrors = []
         for alias in connections:
@@ -275,11 +285,12 @@ class DjangoTestSuiteRunner(object):
 
     def teardown_databases(self, old_config, **kwargs):
         from django.db import connections
+
         old_names, mirrors = old_config
         # Point all the mirrors back to the originals
         for alias, connection in mirrors:
             connections._connections[alias] = connection
-        # Destroy all the non-mirror databases
+            # Destroy all the non-mirror databases
         for connection, old_name in old_names:
             connection.creation.destroy_test_db(old_name, self.verbosity)
 
@@ -316,8 +327,10 @@ class DjangoTestSuiteRunner(object):
         self.teardown_test_environment()
         return self.suite_result(suite, result)
 
+
 def run_tests(test_labels, verbosity=1, interactive=True, failfast=False, extra_tests=None):
     import warnings
+
     warnings.warn(
         'The run_tests() test runner has been deprecated in favor of DjangoTestSuiteRunner.',
         PendingDeprecationWarning

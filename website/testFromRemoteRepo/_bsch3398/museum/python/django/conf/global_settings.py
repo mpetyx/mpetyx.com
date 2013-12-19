@@ -182,7 +182,7 @@ TEMPLATE_DIRS = ()
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 # List of processors used by RequestContext to populate the context.
@@ -193,7 +193,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
-#    'django.core.context_processors.request',
+    #    'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
 )
 
@@ -327,9 +327,9 @@ SHORT_DATETIME_FORMAT = 'm/d/Y P'
 # * Note that these format strings are different from the ones to display dates
 DATE_INPUT_FORMATS = (
     '%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y', # '2006-10-25', '10/25/2006', '10/25/06'
-    '%b %d %Y', '%b %d, %Y',            # 'Oct 25 2006', 'Oct 25, 2006'
-    '%d %b %Y', '%d %b, %Y',            # '25 Oct 2006', '25 Oct, 2006'
-    '%B %d %Y', '%B %d, %Y',            # 'October 25 2006', 'October 25, 2006'
+    '%b %d %Y', '%b %d, %Y', # 'Oct 25 2006', 'Oct 25, 2006'
+    '%d %b %Y', '%d %b, %Y', # '25 Oct 2006', '25 Oct, 2006'
+    '%B %d %Y', '%B %d, %Y', # 'October 25 2006', 'October 25, 2006'
     '%d %B %Y', '%d %B, %Y',            # '25 October 2006', '25 October, 2006'
 )
 
@@ -338,7 +338,7 @@ DATE_INPUT_FORMATS = (
 # http://docs.python.org/library/datetime.html#strftime-behavior
 # * Note that these format strings are different from the ones to display dates
 TIME_INPUT_FORMATS = (
-    '%H:%M:%S',     # '14:30:59'
+    '%H:%M:%S', # '14:30:59'
     '%H:%M',        # '14:30'
 )
 
@@ -348,14 +348,14 @@ TIME_INPUT_FORMATS = (
 # http://docs.python.org/library/datetime.html#strftime-behavior
 # * Note that these format strings are different from the ones to display dates
 DATETIME_INPUT_FORMATS = (
-    '%Y-%m-%d %H:%M:%S',     # '2006-10-25 14:30:59'
-    '%Y-%m-%d %H:%M',        # '2006-10-25 14:30'
-    '%Y-%m-%d',              # '2006-10-25'
-    '%m/%d/%Y %H:%M:%S',     # '10/25/2006 14:30:59'
-    '%m/%d/%Y %H:%M',        # '10/25/2006 14:30'
-    '%m/%d/%Y',              # '10/25/2006'
-    '%m/%d/%y %H:%M:%S',     # '10/25/06 14:30:59'
-    '%m/%d/%y %H:%M',        # '10/25/06 14:30'
+    '%Y-%m-%d %H:%M:%S', # '2006-10-25 14:30:59'
+    '%Y-%m-%d %H:%M', # '2006-10-25 14:30'
+    '%Y-%m-%d', # '2006-10-25'
+    '%m/%d/%Y %H:%M:%S', # '10/25/2006 14:30:59'
+    '%m/%d/%Y %H:%M', # '10/25/2006 14:30'
+    '%m/%d/%Y', # '10/25/2006'
+    '%m/%d/%y %H:%M:%S', # '10/25/06 14:30:59'
+    '%m/%d/%y %H:%M', # '10/25/06 14:30'
     '%m/%d/%y',              # '10/25/06'
 )
 
@@ -383,6 +383,7 @@ TRANSACTIONS_MANAGED = False
 # The User-Agent string to use when checking for URL validity through the
 # isExistingURL validator.
 from django import get_version
+
 URL_VALIDATOR_USER_AGENT = "Django/%s (http://www.djangoproject.com)" % get_version()
 
 # The tablespaces to use for each model when not specified otherwise.
@@ -402,8 +403,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-#     'django.middleware.http.ConditionalGetMiddleware',
-#     'django.middleware.gzip.GZipMiddleware',
+    #     'django.middleware.http.ConditionalGetMiddleware',
+    #     'django.middleware.gzip.GZipMiddleware',
 )
 
 ############

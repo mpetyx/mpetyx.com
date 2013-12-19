@@ -109,9 +109,11 @@ try:
     # The system-installed version has priority providing it is either not an
     # earlier version or it contains the C speedups.
     import simplejson
+
     if (simplejson.__version__.split('.') >= __version__.split('.') or
             hasattr(simplejson, '_speedups')):
         from simplejson import *
+
         use_system_version = True
 except ImportError:
     pass
@@ -151,8 +153,8 @@ if not use_system_version:
     )
 
     def dump(obj, fp, skipkeys=False, ensure_ascii=True, check_circular=True,
-            allow_nan=True, cls=None, indent=None, separators=None,
-            encoding='utf-8', default=None, **kw):
+             allow_nan=True, cls=None, indent=None, separators=None,
+             encoding='utf-8', default=None, **kw):
         """Serialize ``obj`` as a JSON formatted stream to ``fp`` (a
         ``.write()``-supporting file-like object).
 
@@ -195,26 +197,26 @@ if not use_system_version:
         """
         # cached encoder
         if (skipkeys is False and ensure_ascii is True and
-            check_circular is True and allow_nan is True and
-            cls is None and indent is None and separators is None and
-            encoding == 'utf-8' and default is None and not kw):
+                    check_circular is True and allow_nan is True and
+                    cls is None and indent is None and separators is None and
+                    encoding == 'utf-8' and default is None and not kw):
             iterable = _default_encoder.iterencode(obj)
         else:
             if cls is None:
                 cls = JSONEncoder
             iterable = cls(skipkeys=skipkeys, ensure_ascii=ensure_ascii,
-                check_circular=check_circular, allow_nan=allow_nan, indent=indent,
-                separators=separators, encoding=encoding,
-                default=default, **kw).iterencode(obj)
-        # could accelerate with writelines in some versions of Python, at
+                           check_circular=check_circular, allow_nan=allow_nan, indent=indent,
+                           separators=separators, encoding=encoding,
+                           default=default, **kw).iterencode(obj)
+            # could accelerate with writelines in some versions of Python, at
         # a debuggability cost
         for chunk in iterable:
             fp.write(chunk)
 
 
     def dumps(obj, skipkeys=False, ensure_ascii=True, check_circular=True,
-            allow_nan=True, cls=None, indent=None, separators=None,
-            encoding='utf-8', default=None, **kw):
+              allow_nan=True, cls=None, indent=None, separators=None,
+              encoding='utf-8', default=None, **kw):
         """Serialize ``obj`` to a JSON formatted ``str``.
 
         If ``skipkeys`` is ``True`` then ``dict`` keys that are not basic types
@@ -255,9 +257,9 @@ if not use_system_version:
         """
         # cached encoder
         if (skipkeys is False and ensure_ascii is True and
-            check_circular is True and allow_nan is True and
-            cls is None and indent is None and separators is None and
-            encoding == 'utf-8' and default is None and not kw):
+                    check_circular is True and allow_nan is True and
+                    cls is None and indent is None and separators is None and
+                    encoding == 'utf-8' and default is None and not kw):
             return _default_encoder.encode(obj)
         if cls is None:
             cls = JSONEncoder
@@ -272,7 +274,7 @@ if not use_system_version:
 
 
     def load(fp, encoding=None, cls=None, object_hook=None, parse_float=None,
-            parse_int=None, parse_constant=None, **kw):
+             parse_int=None, parse_constant=None, **kw):
         """Deserialize ``fp`` (a ``.read()``-supporting file-like object containing
         a JSON document) to a Python object.
 
@@ -293,13 +295,13 @@ if not use_system_version:
 
         """
         return loads(fp.read(),
-            encoding=encoding, cls=cls, object_hook=object_hook,
-            parse_float=parse_float, parse_int=parse_int,
-            parse_constant=parse_constant, **kw)
+                     encoding=encoding, cls=cls, object_hook=object_hook,
+                     parse_float=parse_float, parse_int=parse_int,
+                     parse_constant=parse_constant, **kw)
 
 
     def loads(s, encoding=None, cls=None, object_hook=None, parse_float=None,
-            parse_int=None, parse_constant=None, **kw):
+              parse_int=None, parse_constant=None, **kw):
         """Deserialize ``s`` (a ``str`` or ``unicode`` instance containing a JSON
         document) to a Python object.
 
@@ -333,8 +335,8 @@ if not use_system_version:
 
         """
         if (cls is None and encoding is None and object_hook is None and
-                parse_int is None and parse_float is None and
-                parse_constant is None and not kw):
+                    parse_int is None and parse_float is None and
+                    parse_constant is None and not kw):
             return _default_decoder.decode(s)
         if cls is None:
             cls = JSONDecoder

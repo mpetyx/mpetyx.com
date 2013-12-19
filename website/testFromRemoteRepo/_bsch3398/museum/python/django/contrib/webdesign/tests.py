@@ -17,4 +17,5 @@ from django.contrib.webdesign.lorem_ipsum import *
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()

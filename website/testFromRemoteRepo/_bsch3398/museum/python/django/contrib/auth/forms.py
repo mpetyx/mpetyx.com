@@ -2,21 +2,24 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import Site
-from django.template import Context, loader
-from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.utils.http import int_to_base36
+
+from django.template import Context, loader
+from django import forms
+
 
 class UserCreationForm(forms.ModelForm):
     """
     A form that creates a user, with no privileges, from the given username and password.
     """
     username = forms.RegexField(label=_("Username"), max_length=30, regex=r'^[\w.@+-]+$',
-        help_text = _("Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only."),
-        error_messages = {'invalid': _("This value may contain only letters, numbers and @/./+/-/_ characters.")})
+                                help_text=_("Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only."),
+                                error_messages={
+                                'invalid': _("This value may contain only letters, numbers and @/./+/-/_ characters.")})
     password1 = forms.CharField(label=_("Password"), widget=forms.PasswordInput)
     password2 = forms.CharField(label=_("Password confirmation"), widget=forms.PasswordInput,
-        help_text = _("Enter the same password as above, for verification."))
+                                help_text=_("Enter the same password as above, for verification."))
 
     class Meta:
         model = User
@@ -44,13 +47,16 @@ class UserCreationForm(forms.ModelForm):
             user.save()
         return user
 
+
 class UserChangeForm(forms.ModelForm):
     username = forms.RegexField(label=_("Username"), max_length=30, regex=r'^[\w.@+-]+$',
-        help_text = _("Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only."),
-        error_messages = {'invalid': _("This value may contain only letters, numbers and @/./+/-/_ characters.")})
+                                help_text=_("Required. 30 characters or fewer. Letters, digits and @/./+/-/_ only."),
+                                error_messages={
+                                'invalid': _("This value may contain only letters, numbers and @/./+/-/_ characters.")})
 
     class Meta:
         model = User
+
 
 class AuthenticationForm(forms.Form):
     """
@@ -78,14 +84,16 @@ class AuthenticationForm(forms.Form):
         if username and password:
             self.user_cache = authenticate(username=username, password=password)
             if self.user_cache is None:
-                raise forms.ValidationError(_("Please enter a correct username and password. Note that both fields are case-sensitive."))
+                raise forms.ValidationError(
+                    _("Please enter a correct username and password. Note that both fields are case-sensitive."))
             elif not self.user_cache.is_active:
                 raise forms.ValidationError(_("This account is inactive."))
 
         # TODO: determine whether this should move to its own method.
         if self.request:
             if not self.request.session.test_cookie_worked():
-                raise forms.ValidationError(_("Your Web browser doesn't appear to have cookies enabled. Cookies are required for logging in."))
+                raise forms.ValidationError(
+                    _("Your Web browser doesn't appear to have cookies enabled. Cookies are required for logging in."))
 
         return self.cleaned_data
 
@@ -97,6 +105,7 @@ class AuthenticationForm(forms.Form):
     def get_user(self):
         return self.user_cache
 
+
 class PasswordResetForm(forms.Form):
     email = forms.EmailField(label=_("E-mail"), max_length=75)
 
@@ -107,7 +116,8 @@ class PasswordResetForm(forms.Form):
         email = self.cleaned_data["email"]
         self.users_cache = User.objects.filter(email__iexact=email)
         if len(self.users_cache) == 0:
-            raise forms.ValidationError(_("That e-mail address doesn't have an associated user account. Are you sure you've registered?"))
+            raise forms.ValidationError(
+                _("That e-mail address doesn't have an associated user account. Are you sure you've registered?"))
         return email
 
     def save(self, domain_override=None, email_template_name='registration/password_reset_email.html',
@@ -116,6 +126,7 @@ class PasswordResetForm(forms.Form):
         Generates a one-use only link for resetting password and sends to the user
         """
         from django.core.mail import send_mail
+
         for user in self.users_cache:
             if not domain_override:
                 current_site = Site.objects.get_current()
@@ -134,7 +145,8 @@ class PasswordResetForm(forms.Form):
                 'protocol': use_https and 'https' or 'http',
             }
             send_mail(_("Password reset on %s") % site_name,
-                t.render(Context(c)), None, [user.email])
+                      t.render(Context(c)), None, [user.email])
+
 
 class SetPasswordForm(forms.Form):
     """
@@ -162,6 +174,7 @@ class SetPasswordForm(forms.Form):
             self.user.save()
         return self.user
 
+
 class PasswordChangeForm(SetPasswordForm):
     """
     A form that lets a user change his/her password by entering
@@ -177,7 +190,10 @@ class PasswordChangeForm(SetPasswordForm):
         if not self.user.check_password(old_password):
             raise forms.ValidationError(_("Your old password was entered incorrectly. Please enter it again."))
         return old_password
+
+
 PasswordChangeForm.base_fields.keyOrder = ['old_password', 'new_password1', 'new_password2']
+
 
 class AdminPasswordChangeForm(forms.Form):
     """

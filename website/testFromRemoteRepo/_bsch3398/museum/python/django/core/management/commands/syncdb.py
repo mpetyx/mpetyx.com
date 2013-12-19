@@ -1,7 +1,6 @@
 from optparse import make_option
 import sys
 
-from django.conf import settings
 from django.core.management.base import NoArgsCommand
 from django.core.management.color import no_style
 from django.core.management.sql import custom_sql_for_model, emit_post_sync_signal
@@ -9,14 +8,16 @@ from django.db import connections, router, transaction, models, DEFAULT_DB_ALIAS
 from django.utils.datastructures import SortedDict
 from django.utils.importlib import import_module
 
+from django.conf import settings
+
 
 class Command(NoArgsCommand):
     option_list = NoArgsCommand.option_list + (
         make_option('--noinput', action='store_false', dest='interactive', default=True,
-            help='Tells Django to NOT prompt the user for input of any kind.'),
+                    help='Tells Django to NOT prompt the user for input of any kind.'),
         make_option('--database', action='store', dest='database',
-            default=DEFAULT_DB_ALIAS, help='Nominates a database to synchronize. '
-                'Defaults to the "default" database.'),
+                    default=DEFAULT_DB_ALIAS, help='Nominates a database to synchronize. '
+                                                   'Defaults to the "default" database.'),
     )
     help = "Create the database tables for all apps in INSTALLED_APPS whose tables haven't already been created."
 
@@ -60,15 +61,16 @@ class Command(NoArgsCommand):
         # Build the manifest of apps and models that are to be synchronized
         all_models = [
             (app.__name__.split('.')[-2],
-                [m for m in models.get_models(app, include_auto_created=True)
-                if router.allow_syncdb(db, m)])
+             [m for m in models.get_models(app, include_auto_created=True)
+              if router.allow_syncdb(db, m)])
             for app in models.get_apps()
         ]
+
         def model_installed(model):
             opts = model._meta
             converter = connection.introspection.table_name_converter
             return not ((converter(opts.db_table) in tables) or
-                (opts.auto_created and converter(opts.auto_created._meta.db_table) in tables))
+                        (opts.auto_created and converter(opts.auto_created._meta.db_table) in tables))
 
         manifest = SortedDict(
             (app_name, filter(model_installed, model_list))
@@ -87,14 +89,14 @@ class Command(NoArgsCommand):
                 for refto, refs in references.items():
                     pending_references.setdefault(refto, []).extend(refs)
                     if refto in seen_models:
-                        sql.extend(connection.creation.sql_for_pending_references(refto, self.style, pending_references))
+                        sql.extend(
+                            connection.creation.sql_for_pending_references(refto, self.style, pending_references))
                 sql.extend(connection.creation.sql_for_pending_references(model, self.style, pending_references))
                 if verbosity >= 1 and sql:
                     print "Creating table %s" % model._meta.db_table
                 for statement in sql:
                     cursor.execute(statement)
                 tables.append(connection.introspection.table_name_converter(model._meta.db_table))
-
 
         transaction.commit_unless_managed(using=db)
 
@@ -119,9 +121,10 @@ class Command(NoArgsCommand):
                                 cursor.execute(sql)
                         except Exception, e:
                             sys.stderr.write("Failed to install custom SQL for %s.%s model: %s\n" % \
-                                                (app_name, model._meta.object_name, e))
+                                             (app_name, model._meta.object_name, e))
                             if show_traceback:
                                 import traceback
+
                                 traceback.print_exc()
                             transaction.rollback_unless_managed(using=db)
                         else:
@@ -143,10 +146,11 @@ class Command(NoArgsCommand):
                                 cursor.execute(sql)
                         except Exception, e:
                             sys.stderr.write("Failed to install index for %s.%s model: %s\n" % \
-                                                (app_name, model._meta.object_name, e))
+                                             (app_name, model._meta.object_name, e))
                             transaction.rollback_unless_managed(using=db)
                         else:
                             transaction.commit_unless_managed(using=db)
 
         from django.core.management import call_command
+
         call_command('loaddata', 'initial_data', verbosity=verbosity, database=db)

@@ -1,6 +1,7 @@
 from django.contrib.gis.gdal import OGRGeomType
 from django.db.backends.sqlite3.introspection import DatabaseIntrospection, FlexibleFieldLookupDict
 
+
 class GeoFlexibleFieldLookupDict(FlexibleFieldLookupDict):
     """
     Sublcass that includes updates the `base_data_types_reverse` dict
@@ -8,14 +9,15 @@ class GeoFlexibleFieldLookupDict(FlexibleFieldLookupDict):
     """
     base_data_types_reverse = FlexibleFieldLookupDict.base_data_types_reverse.copy()
     base_data_types_reverse.update(
-        {'point' : 'GeometryField',
-         'linestring' : 'GeometryField',
-         'polygon' : 'GeometryField',
-         'multipoint' : 'GeometryField',
-         'multilinestring' : 'GeometryField',
-         'multipolygon' : 'GeometryField',
-         'geometrycollection' : 'GeometryField',
-         })
+        {'point': 'GeometryField',
+         'linestring': 'GeometryField',
+         'polygon': 'GeometryField',
+         'multipoint': 'GeometryField',
+         'multilinestring': 'GeometryField',
+         'multipolygon': 'GeometryField',
+         'geometrycollection': 'GeometryField',
+        })
+
 
 class SpatiaLiteIntrospection(DatabaseIntrospection):
     data_types_reverse = GeoFlexibleFieldLookupDict()

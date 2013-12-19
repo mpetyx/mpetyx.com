@@ -4,10 +4,12 @@ and from basic Python data types (lists, dicts, strings, etc.). Useful as a basi
 other serializers.
 """
 
-from django.conf import settings
 from django.core.serializers import base
 from django.db import models, DEFAULT_DB_ALIAS
 from django.utils.encoding import smart_unicode, is_protected_type
+
+from django.conf import settings
+
 
 class Serializer(base.Serializer):
     """
@@ -28,9 +30,9 @@ class Serializer(base.Serializer):
 
     def end_object(self, obj):
         self.objects.append({
-            "model"  : smart_unicode(obj._meta),
-            "pk"     : smart_unicode(obj._get_pk_val(), strings_only=True),
-            "fields" : self._current
+            "model": smart_unicode(obj._meta),
+            "pk": smart_unicode(obj._get_pk_val(), strings_only=True),
+            "fields": self._current
         })
         self._current = None
 
@@ -65,10 +67,11 @@ class Serializer(base.Serializer):
             else:
                 m2m_value = lambda value: smart_unicode(value._get_pk_val(), strings_only=True)
             self._current[field.name] = [m2m_value(related)
-                               for related in getattr(obj, field.name).iterator()]
+                                         for related in getattr(obj, field.name).iterator()]
 
     def getvalue(self):
         return self.objects
+
 
 def Deserializer(object_list, **options):
     """
@@ -82,13 +85,14 @@ def Deserializer(object_list, **options):
     for d in object_list:
         # Look up the model and starting build a dict of data for it.
         Model = _get_model(d["model"])
-        data = {Model._meta.pk.attname : Model._meta.pk.to_python(d["pk"])}
+        data = {Model._meta.pk.attname: Model._meta.pk.to_python(d["pk"])}
         m2m_data = {}
 
         # Handle each field
         for (field_name, field_value) in d["fields"].iteritems():
             if isinstance(field_value, str):
-                field_value = smart_unicode(field_value, options.get("encoding", settings.DEFAULT_CHARSET), strings_only=True)
+                field_value = smart_unicode(field_value, options.get("encoding", settings.DEFAULT_CHARSET),
+                                            strings_only=True)
 
             field = Model._meta.get_field(field_name)
 
@@ -128,6 +132,7 @@ def Deserializer(object_list, **options):
                 data[field.name] = field.to_python(field_value)
 
         yield base.DeserializedObject(Model(**data), m2m_data)
+
 
 def _get_model(model_identifier):
     """

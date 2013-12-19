@@ -1,11 +1,15 @@
 "Misc. utility functions/classes for admin documentation generator."
 
 import re
-from email.Parser import HeaderParser
-from email.Errors import HeaderParseError
+
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django.utils.encoding import smart_str
+
+from email.Parser import HeaderParser
+from email.Errors import HeaderParseError
+
+
 try:
     import docutils.core
     import docutils.nodes
@@ -15,6 +19,7 @@ except ImportError:
 else:
     docutils_is_available = True
 
+
 def trim_docstring(docstring):
     """
     Uniformly trims leading/trailing whitespace from docstrings.
@@ -23,11 +28,12 @@ def trim_docstring(docstring):
     """
     if not docstring or not docstring.strip():
         return ''
-    # Convert tabs to spaces and split into lines
+        # Convert tabs to spaces and split into lines
     lines = docstring.expandtabs().splitlines()
     indent = min([len(line) - len(line.lstrip()) for line in lines if line.lstrip()])
     trimmed = [lines[0].lstrip()] + [line[indent:].rstrip() for line in lines[1:]]
     return "\n".join(trimmed).strip()
+
 
 def parse_docstring(docstring):
     """
@@ -54,48 +60,57 @@ def parse_docstring(docstring):
                 body = "\n\n".join(parts[1:])
     return title, body, metadata
 
+
 def parse_rst(text, default_reference_context, thing_being_parsed=None):
     """
     Convert the string from reST to an XHTML fragment.
     """
     overrides = {
-        'doctitle_xform' : True,
-        'inital_header_level' : 3,
-        "default_reference_context" : default_reference_context,
-        "link_base" : reverse('django-admindocs-docroot').rstrip('/')
+        'doctitle_xform': True,
+        'inital_header_level': 3,
+        "default_reference_context": default_reference_context,
+        "link_base": reverse('django-admindocs-docroot').rstrip('/')
     }
     if thing_being_parsed:
         thing_being_parsed = smart_str("<%s>" % thing_being_parsed)
     parts = docutils.core.publish_parts(text, source_path=thing_being_parsed,
-                destination_path=None, writer_name='html',
-                settings_overrides=overrides)
+                                        destination_path=None, writer_name='html',
+                                        settings_overrides=overrides)
     return mark_safe(parts['fragment'])
 
 #
 # reST roles
 #
 ROLES = {
-    'model'    : '%s/models/%s/',
-    'view'     : '%s/views/%s/',
-    'template' : '%s/templates/%s/',
-    'filter'   : '%s/filters/#%s',
-    'tag'      : '%s/tags/#%s',
+    'model': '%s/models/%s/',
+    'view': '%s/views/%s/',
+    'template': '%s/templates/%s/',
+    'filter': '%s/filters/#%s',
+    'tag': '%s/tags/#%s',
 }
+
 
 def create_reference_role(rolename, urlbase):
     def _role(name, rawtext, text, lineno, inliner, options=None, content=None):
         if options is None: options = {}
         if content is None: content = []
-        node = docutils.nodes.reference(rawtext, text, refuri=(urlbase % (inliner.document.settings.link_base, text.lower())), **options)
+        node = docutils.nodes.reference(rawtext, text,
+                                        refuri=(urlbase % (inliner.document.settings.link_base, text.lower())),
+                                        **options)
         return [node], []
+
     docutils.parsers.rst.roles.register_canonical_role(rolename, _role)
+
 
 def default_reference_role(name, rawtext, text, lineno, inliner, options=None, content=None):
     if options is None: options = {}
     if content is None: content = []
     context = inliner.document.settings.default_reference_context
-    node = docutils.nodes.reference(rawtext, text, refuri=(ROLES[context] % (inliner.document.settings.link_base, text.lower())), **options)
+    node = docutils.nodes.reference(rawtext, text,
+                                    refuri=(ROLES[context] % (inliner.document.settings.link_base, text.lower())),
+                                    **options)
     return [node], []
+
 
 if docutils_is_available:
     docutils.parsers.rst.roles.register_canonical_role('cmsreference', default_reference_role)
