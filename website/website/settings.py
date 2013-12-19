@@ -68,8 +68,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'museum',
-        'USER': '',
-        'PASSWORD': '',
+
+        'USER': 'dev',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
         'PORT': '',
     }
