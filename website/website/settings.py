@@ -140,6 +140,11 @@ MEDIA_URL = 'media/'
 
 LANGUAGE_CODE = 'en-us'
 
+LANGUAGES = (
+    ('en', 'English'),
+    ('fr', 'French'),
+)
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
