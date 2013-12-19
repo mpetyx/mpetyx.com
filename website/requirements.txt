@@ -1,8 +1,13 @@
 -e git://github.com/makinacorpus/django-paperclip#egg=paperclip
 -e git+https://github.com/makinacorpus/django-mapentity.git@develop#egg=django-mapentity
+-e git+https://github.com/tkrajina/gpxpy.git@master#egg=gpxpy
 Django-Compressor
 django-leaflet
 django-geojson
 django_filter
-gxpy
 gdal
+django
+psycopg2
+beautifulsoup4
+requests
+django-appypod
