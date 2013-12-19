@@ -112,15 +112,15 @@ TEMPLATE_CONTEXT_PROCESSORS += (
 
 )
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-#     },
-#     # The fat backend is used to store big chunk of data (>1 Mo)
-#     'fat': {
-#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-#     }
-# }
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    },
+    # The fat backend is used to store big chunk of data (>1 Mo)
+    'fat': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
 
 # BLOG_SETTINGS = {
 #     'defaults': { # change the defaults of models and some constats for views
