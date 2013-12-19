@@ -1,6 +1,5 @@
 *.pyc
-website/src/paperclip/
 
-website/src/django-mapentity/
+website/src/*
 
 .idea/workspace.xml
