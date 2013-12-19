@@ -1,0 +1,71 @@
+
+<!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/server.cgi?pagetype=collection&method=menu by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 11:14:40 GMT -->
+<body bgcolor="#f0f0f8"><font color="#f0f0f8" size="-5"> -->
+<body bgcolor="#f0f0f8"><font color="#f0f0f8" size="-5"> --> -->
+</font> </font> </font> </script> </object> </blockquote> </pre>
+</table> </table> </table> </table> </table> </font> </font> </font><body bgcolor="#f0f0f8">
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#6622aa">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>&lt;type 'exceptions.IndexError'&gt;</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial">Python 2.5: /usr/local/bin/python2.5<br>Thu Dec 19 22:14:39 2013</font></td></tr></table>
+    
+<p>A problem occurred in a Python script.  Here is the sequence of
+function calls leading up to the error, in the order they occurred.</p>
+<table width="100%" cellspacing=0 cellpadding=0 border=0>
+<tr><td bgcolor="#d8bbff"><big>&nbsp;</big><a href="file:///usr/cs1/bsch3398/lib/html/museum/python/server2.cgi">/usr/cs1/bsch3398/lib/html/museum/python/server2.cgi</a> in <strong><module></strong>()</td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;129</small>&nbsp;<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;130</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elif&nbsp;pagetype&nbsp;==&nbsp;'collection':<br>
+</tt></font></td></tr>
+<tr><td bgcolor="#ffccee"><tt><small>&nbsp;&nbsp;131</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;collection.run(fields,cookie)<br>
+</tt></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;132</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#icont&nbsp;=&nbsp;{&nbsp;'username':'Uwe',<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;133</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'collection':<br>
+</tt></font></td></tr>
+<tr><td><small><font color="#909090"><strong>collection</strong>&nbsp;= &lt;module 'collection' from '/.automount/net/ufile...1/bsch3398/lib/html/museum/python/collection.py'&gt;, collection.<strong>run</strong>&nbsp;= &lt;function run at 0x40581064&gt;, <strong>fields</strong>&nbsp;= FieldStorage(None, None, [MiniFieldStorage('page...ollection'), MiniFieldStorage('method', 'menu')]), <strong>cookie</strong>&nbsp;= &lt;SimpleCookie: &gt;</font></small></td></tr></table>
+<table width="100%" cellspacing=0 cellpadding=0 border=0>
+<tr><td bgcolor="#d8bbff"><big>&nbsp;</big><a href="file:///.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/collection.py">/.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/collection.py</a> in <strong>run</strong>(fields=FieldStorage(None, None, [MiniFieldStorage('page...ollection'), MiniFieldStorage('method', 'menu')]), cookie=&lt;SimpleCookie: &gt;)</td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;94</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;update(fields,&nbsp;cookie)<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;95</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elif&nbsp;method&nbsp;==&nbsp;"menu":<br>
+</tt></font></td></tr>
+<tr><td bgcolor="#ffccee"><tt><small>&nbsp;&nbsp;&nbsp;96</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;menu(fields,&nbsp;cookie)<br>
+</tt></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;97</small>&nbsp;<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;98</small>&nbsp;if&nbsp;__name__&nbsp;==&nbsp;"__main__":<br>
+</tt></font></td></tr>
+<tr><td><small><font color="#909090"><em>global</em> <strong>menu</strong>&nbsp;= &lt;function menu at 0x4057ef44&gt;, <strong>fields</strong>&nbsp;= FieldStorage(None, None, [MiniFieldStorage('page...ollection'), MiniFieldStorage('method', 'menu')]), <strong>cookie</strong>&nbsp;= &lt;SimpleCookie: &gt;</font></small></td></tr></table>
+<table width="100%" cellspacing=0 cellpadding=0 border=0>
+<tr><td bgcolor="#d8bbff"><big>&nbsp;</big><a href="file:///.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/collection.py">/.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/collection.py</a> in <strong>menu</strong>(fields=FieldStorage(None, None, [MiniFieldStorage('page...ollection'), MiniFieldStorage('method', 'menu')]), cookie=&lt;SimpleCookie: &gt;)</td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;54</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;con.read('sessions',{'id':int(cookie['id'].value)})<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;55</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;con.read('sessions',{'id':int('1')})&nbsp;#&nbsp;TODO&nbsp;user&nbsp;from&nbsp;session&nbsp;1<br>
+</tt></font></td></tr>
+<tr><td bgcolor="#ffccee"><tt><small>&nbsp;&nbsp;&nbsp;56</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;user&nbsp;=&nbsp;con.getrecords()[0]['USERID']<br>
+</tt></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;57</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;con.clear()<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;58</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#con.read('usercollections',{'userid':user})<br>
+</tt></font></td></tr>
+<tr><td><small><font color="#909090">user <em>undefined</em>, <strong>con</strong>&nbsp;= &lt;connect.connect instance at 0x405821ec&gt;, con.<strong>getrecords</strong>&nbsp;= &lt;bound method connect.getrecords of &lt;connect.connect instance at 0x405821ec&gt;&gt;</font></small></td></tr></table><p><strong>&lt;type 'exceptions.IndexError'&gt;</strong>: list index out of range
+
+
+<!-- The above is a description of an error in a Python program, formatted
+     for a Web browser because the 'cgitb' module was enabled.  In case you
+     are not reading this in a Web browser, here is the original traceback:
+
+Traceback (most recent call last):
+  File "/usr/cs1/bsch3398/lib/html/museum/python/server2.cgi", line 131, in <module>
+    collection.run(fields,cookie)
+  File "/.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/collection.py", line 96, in run
+    menu(fields, cookie)
+  File "/.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/collection.py", line 56, in menu
+    user = con.getrecords()[0]['USERID']
+IndexError: list index out of range
+
+-->
+

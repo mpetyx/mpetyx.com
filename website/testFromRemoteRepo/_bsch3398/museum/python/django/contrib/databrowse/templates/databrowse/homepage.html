@@ -1,0 +1,21 @@
+{% extends "databrowse/base_site.html" %}
+
+{% block title %}Databrowse{% endblock %}
+
+{% block bodyid %}homepage{% endblock %}
+
+{% block content %}
+
+{% for model in model_list %}
+  <div class="modelgroup {% cycle 'even' 'odd' %}">
+	  <h2><a href="%7b%7b%20model.html">{{ model.verbose_name_plural|capfirst }}</a></h2>
+		<p>
+		{% for object in model.sample_objects %}
+			<a href="%7b%7b%20object.html">{{ object }}</a>, 
+		{% endfor %}
+			<a class="more" href="%7b%7b%20model.html">More &rarr;</a>
+		</p>
+  </div>
+{% endfor %}
+
+{% endblock %}

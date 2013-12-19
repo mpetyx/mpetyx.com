@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" {{ gmap.xmlns }}>
+
+<!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/django/contrib/gis/templates/gis/google/google-map.html by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 11:14:09 GMT -->
+<head>
+  <title>{% block title %}Google Maps via GeoDjango{% endblock %}</title>
+  {{ gmap.style }}
+  {{ gmap.scripts }}
+</head>
+<body {{ gmap.onload }} {{ gmap.onunload }}>
+{% if gmap.dom_ids %}{% for dom_id in gmap.dom_ids %}<div id="{{ dom_id }}" style="width:600px;height:400px;"></div>{% endfor %}
+{% else %}<div id="{{ gmap.dom_id }}" style="width:600px;height:400px;"></div>{% endif %}
+</body>
+
+<!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/django/contrib/gis/templates/gis/google/google-map.html by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 11:14:09 GMT -->
+</html>

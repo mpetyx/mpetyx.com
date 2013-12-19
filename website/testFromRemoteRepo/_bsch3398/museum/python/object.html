@@ -1,0 +1,49 @@
+<html>
+	<title>Dave, Dave &amp; Ben: Museum Database</title>
+
+	
+<!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/object.html by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 10:46:22 GMT -->
+<body>
+		<h1>Dave, Dave &amp; Ben: Museum Database</h1>
+		<p><a href=serverd119.html?pagetype=menu>Main Menu</a></p>
+		<p> You are currently logged in as {{username}}. <a href="serverf00a.html?pagetype=user&amp;method=logout">Logout</a> </p>
+						
+		
+
+		<h4>Collection page for Collection: {{ collection.name }}</h2>
+
+		<div id="objects">
+			{% for object in objects %}
+				<div>
+					<p><b> ID:{{object.id}}: {{object.title}}</b></p>
+					<p> {{object.registration}}</p>
+					<p> {{object.description}}</p>
+					<p> {{object.marks}}</p>
+					<p>Production Date: {{object.productiondate}}</p>
+					<p>URL: {{object.url}}</p>
+					<p>Height: {{object.height}}</p>
+					<p>Width: {{object.width}}</p>
+					<p>Depth: {{object.depth}}</p>
+					<p>Diameter: {{object.diameter}}</p>
+					<p>Weight: {{object.weight}}</p>
+					<p>Production Provenance: list goes here</p>
+					<p>Historic Provenance: list goes here</p>
+					<p>Location: {{object.location}}</p>
+					<p>License Info: {{object.licenseinfo}}</p>
+					
+
+
+					<p>{{collection.description}}</p>
+				</div>
+			{% empty %}
+				<p>You have not been assigned any collections.</p>
+			{% endfor %}
+			
+		</div>
+
+
+	</body>
+
+<!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/object.html by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 10:46:22 GMT -->
+</html>
+

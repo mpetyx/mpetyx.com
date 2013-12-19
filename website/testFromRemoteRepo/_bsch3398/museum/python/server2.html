@@ -1,0 +1,73 @@
+
+<!-- Mirrored from www.ug.it.usyd.edu.au/~bsch3398/museum/python/server2.cgi by HTTrack Website Copier/3.x [XR&CO'2013], Thu, 19 Dec 2013 10:46:22 GMT -->
+<body bgcolor="#f0f0f8"><font color="#f0f0f8" size="-5"> -->
+<body bgcolor="#f0f0f8"><font color="#f0f0f8" size="-5"> --> -->
+</font> </font> </font> </script> </object> </blockquote> </pre>
+</table> </table> </table> </table> </table> </font> </font> </font><body bgcolor="#f0f0f8">
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#6622aa">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>ImportError</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial">Python 2.4.4: /usr/local/bin/python<br>Thu Dec 19 21:28:19 2013</font></td></tr></table>
+    
+<p>A problem occurred in a Python script.  Here is the sequence of
+function calls leading up to the error, in the order they occurred.</p>
+<table width="100%" cellspacing=0 cellpadding=0 border=0>
+<tr><td bgcolor="#d8bbff"><big>&nbsp;</big><a href="file:///usr/cs1/bsch3398/lib/html/museum/python/server2.cgi">/usr/cs1/bsch3398/lib/html/museum/python/server2.cgi</a> </td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;21</small>&nbsp;<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;22</small>&nbsp;###&nbsp;our&nbsp;libraries&nbsp;###<br>
+</tt></font></td></tr>
+<tr><td bgcolor="#ffccee"><tt><small>&nbsp;&nbsp;&nbsp;23</small>&nbsp;import&nbsp;user<br>
+</tt></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;24</small>&nbsp;import&nbsp;collection<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;25</small>&nbsp;import&nbsp;search<br>
+</tt></font></td></tr>
+<tr><td><small><font color="#909090">user <em>undefined</em></font></small></td></tr></table>
+<table width="100%" cellspacing=0 cellpadding=0 border=0>
+<tr><td bgcolor="#d8bbff"><big>&nbsp;</big><a href="file:///.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/user.py">/.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/user.py</a> </td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;2</small>&nbsp;<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;3</small>&nbsp;from&nbsp;util&nbsp;import&nbsp;*<br>
+</tt></font></td></tr>
+<tr><td bgcolor="#ffccee"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;4</small>&nbsp;import&nbsp;connect&nbsp;<br>
+</tt></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;5</small>&nbsp;import&nbsp;sessions<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;6</small>&nbsp;<br>
+</tt></font></td></tr>
+<tr><td><small><font color="#909090">connect <em>undefined</em></font></small></td></tr></table>
+<table width="100%" cellspacing=0 cellpadding=0 border=0>
+<tr><td bgcolor="#d8bbff"><big>&nbsp;</big><a href="file:///.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/connect.py">/.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/connect.py</a> </td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;2</small>&nbsp;from&nbsp;getpass&nbsp;import&nbsp;getuser,&nbsp;getpass<br>
+</tt></font></td></tr>
+<tr><td bgcolor="#ffccee"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;3</small>&nbsp;import&nbsp;cx_Oracle&nbsp;as&nbsp;cx<br>
+</tt></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;4</small>&nbsp;import&nbsp;csv<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;5</small>&nbsp;<br>
+</tt></font></td></tr>
+<tr><td><font color="#909090"><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;6</small>&nbsp;#&nbsp;The&nbsp;details&nbsp;to&nbsp;access&nbsp;the&nbsp;Oracle&nbsp;server<br>
+</tt></font></td></tr>
+<tr><td><small><font color="#909090">cx_Oracle <em>undefined</em>, as <em>undefined</em>, cx <em>undefined</em></font></small></td></tr></table><p><strong>ImportError</strong>: No module named cx_Oracle
+<br><tt><small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</small>&nbsp;</tt>args&nbsp;=
+('No module named cx_Oracle',)
+
+
+<!-- The above is a description of an error in a Python program, formatted
+     for a Web browser because the 'cgitb' module was enabled.  In case you
+     are not reading this in a Web browser, here is the original traceback:
+
+Traceback (most recent call last):
+  File "/usr/cs1/bsch3398/lib/html/museum/python/server2.cgi", line 23, in ?
+    import user
+  File "/.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/user.py", line 4, in ?
+    import connect
+  File "/.automount/net/ufiler4/u1/cs1/bsch3398/lib/html/museum/python/connect.py", line 3, in ?
+    import cx_Oracle as cx
+ImportError: No module named cx_Oracle
+
+-->
+
